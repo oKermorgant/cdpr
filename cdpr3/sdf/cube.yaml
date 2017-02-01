@@ -1,0 +1,73 @@
+controllers:
+  config:
+    joints: {cascaded_position: false, command: cable_command, dynamic_reconfigure: true,
+      setpoint: cable_setpoint, state: cable_states}
+  linear0:
+    position: {d: 0.5, i: 0.1, p: 10}
+    velocity: {d: 0.0, i: 0.0, p: 1.0}
+  linear1:
+    position: {d: 0.5, i: 0.1, p: 10}
+    velocity: {d: 0.0, i: 0.0, p: 1.0}
+  linear2:
+    position: {d: 0.5, i: 0.1, p: 10}
+    velocity: {d: 0.0, i: 0.0, p: 1.0}
+  linear3:
+    position: {d: 0.5, i: 0.1, p: 10}
+    velocity: {d: 0.0, i: 0.0, p: 1.0}
+  linear4:
+    position: {d: 0.5, i: 0.1, p: 10}
+    velocity: {d: 0.0, i: 0.0, p: 1.0}
+  linear5:
+    position: {d: 0.5, i: 0.1, p: 10}
+    velocity: {d: 0.0, i: 0.0, p: 1.0}
+  linear6:
+    position: {d: 0.5, i: 0.1, p: 10}
+    velocity: {d: 0.0, i: 0.0, p: 1.0}
+  linear7:
+    position: {d: 0.5, i: 0.1, p: 10}
+    velocity: {d: 0.0, i: 0.0, p: 1.0}
+model:
+  cable: {mass: 0.001, radius: 0.005}
+  filepath: /home/themarkofaspur/catkin_ws/src/cdpr3/sdf/cube.yaml
+  frame:
+    color: Black
+    inertial: {xx: 50000.0, xy: 0, xz: 0, yy: 50000.0, yz: 0, zz: 50000.0}
+    lower: [-3.5, -2, 0]
+    mass: 5000.0
+    radius: 0.02
+    type: box
+    upper: [3.5, 2, 3.5]
+  global_frame:
+    position: [0, 0, 1.5]
+    rotation: [0, 0, 0]
+  joints:
+    actuated: {damping: 1, effort: 6500, min: 5, velocity: 100}
+    passive: {damping: 0.01, effort: 6500, velocity: 100}
+  platform:
+    color: Black
+    inertial: {xx: 0.1, xy: 0, xz: 0, yy: 0.1, yz: 0, zz: 0.1}
+    lower: [-0.2, -0.15, -0.125]
+    mass: 50.0
+    position:
+      rpy: [0, 0, 0]
+      xyz: [0.0, 0.0, 1.5]
+    type: box
+    upper: [0.2, 0.15, 0.125]
+    visual: box
+  points:
+  - frame: [-3.5, 2.0, 3.5]
+    platform: [0.2, 0.15, 0.125]
+  - frame: [3.5, 2.0, 3.5001]
+    platform: [-0.2, 0.15, -0.125]
+  - frame: [-3.5, 2.0, 3.5]
+    platform: [-0.2, -0.15, -0.125]
+  - frame: [3.5, 2.0, 3.5001]
+    platform: [0.2, -0.15, 0.125]
+  - frame: [-3.5, -2.0, 3.5]
+    platform: [-0.2, 0.15, 0.125]
+  - frame: [3.5, -2.0, 3.5001]
+    platform: [0.2, 0.15, -0.125]
+  - frame: [-3.5, -2.0, 3.5]
+    platform: [0.2, -0.15, -0.125]
+  - frame: [3.5, -2.0, 3.5001]
+    platform: [-0.2, -0.15, 0.125]

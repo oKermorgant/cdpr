@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>  
+    <group ns="cube">
+
+    <!-- load model config -->
+    <rosparam file="$(find cdpr3)/sdf/cube.yaml" command="load"/>
+
+
+    <!-- controller -->
+    <node name="trajectory_control2" pkg="cdpr3" type="cdprscurve" output="screen" />
+    <!-- service -->
+    <node name="QP_SOLVER" pkg="cdpr3" type="solveqp" output="screen" />
+    
+    <!-- setpoint -->
+    <!--node name="Trajectory" pkg="cdpr3" type="cdpr3_trajectory" output="screen" /-->
+  
+    
+</group>
+
+</launch>
