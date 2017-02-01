@@ -47,7 +47,6 @@ void CableDrivenParallelRobotPlugin::Load(physics::ModelPtr _model, sdf::Element
 		body_ = model_->GetLink("platform");
  		mass = body_->GetInertial()->GetMass();
 		cout << "Tried to get SDF Link. . . . .There could be problems, Using an alternative function GetLinks()"  << "we found this mass "<<mass << endl;        	    }
-
         
           // Initialize Subscriber to Trajectory error
      rosnode_.param("controllers/config/trajectory/error", trajectory_command_topic, std::string("trajectory_error")); 

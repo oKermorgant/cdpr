@@ -27,7 +27,6 @@
   <depend>geometry_msgs</depend>
   <depend>visp</depend>
    <depend>eigen</depend>  
-   <depend>ok_tools</depend>
  <depend>qpOASES</depend>   
  <depend>cgal</depend>  
    <depend>rospy</depend>

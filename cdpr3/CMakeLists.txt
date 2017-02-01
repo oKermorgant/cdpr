@@ -10,7 +10,6 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   sensor_msgs
   geometry_msgs
-ok_tools
 qpOASES
   rospy
   rqt_gui
@@ -37,7 +36,6 @@ add_service_files(
 ## System dependencies are found with CMake's conventions
 find_package(gazebo REQUIRED)
 find_package(VISP REQUIRED)
-find_package(ok_tools REQUIRED)
 find_package(qpOASES REQUIRED)
 find_package(CGAL REQUIRED COMPONENTS thread)
 find_package(Eigen3)
@@ -58,9 +56,9 @@ find_library(GMP_LIBRARY gmp /usr/lib)
 ## catkin specific configuration ##
 ###################################
 catkin_package(
-INCLUDE_DIRS include ${VISP_INCLUDE_DIRS} ${ok_tools_INCLUDE_DIRS} ${qpOASES_INCLUDE_DIRS} ${CGAL_INCLUDE_DIRS} ${GMP_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}
-LIBRARIES ${PROJECT_NAME} ${VISP_LIBRARIES} ${GAZEBO_LIBRARIES} cdpr3 ok_tools qpOASES ${CGAL_LIBRARIES} ${GMP_LIBRARIES} ${EIGEN3_LIBRARIES}
-CATKIN_DEPENDS roscpp roslib gazebo_ros sensor_msgs geometry_msgs ok_tools qpOASES 
+INCLUDE_DIRS include ${VISP_INCLUDE_DIRS}${qpOASES_INCLUDE_DIRS} ${CGAL_INCLUDE_DIRS} ${GMP_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}
+LIBRARIES ${PROJECT_NAME} ${VISP_LIBRARIES} ${GAZEBO_LIBRARIES} cdpr3 qpOASES ${CGAL_LIBRARIES} ${GMP_LIBRARIES} ${EIGEN3_LIBRARIES}
+CATKIN_DEPENDS roscpp roslib gazebo_ros sensor_msgs geometry_msgs qpOASES 
  DEPENDS cgal gmp
 )
 
@@ -77,8 +75,8 @@ CATKIN_DEPENDS roscpp roslib gazebo_ros sensor_msgs geometry_msgs ok_tools qpOAS
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # TODO: Check names of system library include directories (visp)
-link_directories(${GAZEBO_LIBRARY_DIRS}  ${ok_tools_LIBRARY_DIRS} ${qpOASES_LIBRARY_DIRS} ${CGAL_LIBRARY_DIRS} ${GMP_LIBRARY_DIRS}  )
-include_directories(include ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS} ${gazebo_ros_INCLUDE_DIRS} ${cdpr3_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${ok_tools_INCLUDE_DIRS} ${qpOASES_INCLUDE_DIRS}  ${CGAL_INCLUDE_DIRS} ${GMP_INCLUDE_DIRS} )
+link_directories(${GAZEBO_LIBRARY_DIRS}  ${qpOASES_LIBRARY_DIRS} ${CGAL_LIBRARY_DIRS} ${GMP_LIBRARY_DIRS}  )
+include_directories(include ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS} ${gazebo_ros_INCLUDE_DIRS} ${cdpr3_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}  ${qpOASES_INCLUDE_DIRS}  ${CGAL_INCLUDE_DIRS} ${GMP_INCLUDE_DIRS} )
 
 
 add_executable(cdpr3_control src/control.cpp src/trajectory.cpp)
