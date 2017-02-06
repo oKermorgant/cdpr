@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>  
+    <group ns="cube">
+
+    <!-- load model config -->
+    <rosparam file="$(find cdpr)/sdf/cube.yaml" command="load" ns="model"/>
+
+
+    <!-- controller -->
+    <node name="position_control" pkg="cdpr" type="cdpr_control" output="screen"/>
+    
+</group>
+
+</launch>

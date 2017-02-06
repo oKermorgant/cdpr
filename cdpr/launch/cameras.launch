@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+    
+<group ns="cam1">
+    <!-- spawn robot -->
+    <node name="cam_sp" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model cam1 -file $(find cdpr)/sdf/camera.sdf 
+          -x 2 -y -2. -z 0 -R 0 -P 0 -Y 0.0"/>
+    
+</group>
+
+<group ns="cam2">
+    <!-- spawn robot -->
+    <node name="cam_sp" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model cam2 -file $(find cdpr)/sdf/camera.sdf -x 2 -y 2. -z 4 -R 0 -P 1.57 -Y 0.0"/>
+</group>
+
+<group ns="cam3">
+    <!-- spawn robot -->
+    <node name="cam_sp" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model cam3 -file $(find cdpr)/sdf/camera.sdf -x 2 -y -0. -z 4 -R 0 -P 1.57 -Y 0.0"/>
+</group>
+
+</launch>

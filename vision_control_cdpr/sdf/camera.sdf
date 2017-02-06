@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.4">
+  <model name="camera_model">
+    <static>true</static>
+    <link name="camera_link">
+      <visual name="camera_visual">
+        <geometry>
+          <box>
+            <size>0.25 0.1 0.1</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/kitchen.material</uri>
+            <name>Gazebo/Blue</name>
+          </script>
+        </material>
+      </visual>
+      <sensor name="camera_sensor" type="camera">
+        <visualize>false</visualize>
+<!--        <visualize>true</visualize>-->
+        <update_rate>30</update_rate>
+        <camera>
+          <image>
+            <width>640</width>
+            <height>480</height>
+          </image>
+        </camera>
+        <plugin name="camera_plugin" filename="libgazebo_ros_camera.so">
+          <cameraName>camera</cameraName>
+          <imageTopicName>image_out</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>camera_link</frameName>
+          <updateRate>30</updateRate>
+          <alwaysOn>true</alwaysOn>
+        </plugin>
+      </sensor>
+    </link>
+  </model>
+</sdf>

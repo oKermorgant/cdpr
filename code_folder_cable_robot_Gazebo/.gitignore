@@ -1,3 +1,5 @@
+# OK general gitignore
+
 # Compiled source #
 ###################
 *.com
@@ -6,11 +8,15 @@
 *.exe
 *.o
 *.so
+*.pyc
 build/
+build-debug/
 devel/
 bin/
+install/
 *.user
 lib/
+ros_intalled/
 
 # Packages #
 ############
@@ -52,11 +58,12 @@ Thumbs.db
 *.snm
 *.toc
 .*lock*
-*.bib
+*.blg
 *.bbl
 *.run.xml
 *.vrb
 *.synctex.gz*
 *.directory
+*.tex.backup
 
 !.gitignore

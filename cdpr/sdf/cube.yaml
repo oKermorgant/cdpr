@@ -1,0 +1,53 @@
+joints:
+    passive: 
+        velocity: 10
+        effort: 100
+        damping: .01
+    actuated: 
+        velocity: 10
+        effort: 100
+        damping: 1
+        min: 5
+
+frame: 
+    type: box
+    lower: [-2., -2., 0]
+    upper: [2., 2., 4.]
+    radius: .02
+    color: Yellow
+platform:
+    type: box
+    position:
+        xyz: [0,0,2]
+        rpy: [0,0,0]
+    visual: box
+    mass: 1
+    color: Blue
+cable:
+    radius: .005
+points: 
+#    - 
+#        frame: [-2., -2., 0.]
+#        platform: [-0.2,-0.2,-0.2]
+#    - 
+#        frame: [-2., 2., 0.]
+#        platform: [-0.2,.2,-0.2]    
+#    - 
+#        frame: [2., 2., 0.]
+#        platform: [.2,.2,-0.2]
+#    - 
+#        frame: [2., -2., 0.]
+#        platform: [.2,-0.2,-0.2]    
+    -  
+        frame: [-2., -2., 4.]
+        platform: [-0.2, -0.2, .2]
+    -
+        frame: [-2., 2., 4.]
+        platform: [-0.2, .2, .2]
+    -  
+        frame: [2., 2., 4.]
+        platform: [.2, .2, .2]
+    -  
+        frame: [2., -2., 4.]
+        platform: [.2, -0.2, .2]
+
