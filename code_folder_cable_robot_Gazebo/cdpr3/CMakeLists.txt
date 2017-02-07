@@ -18,21 +18,8 @@ std_msgs
   message_generation
 )
 
-
-
-
-
 catkin_python_setup()
 
-add_service_files(
-  FILES
-  SOLVEQP.srv
-)
-
- generate_messages(
-   DEPENDENCIES
-  std_msgs 
-)
 ## System dependencies are found with CMake's conventions
 find_package(gazebo REQUIRED)
 find_package(VISP REQUIRED)
@@ -96,12 +83,6 @@ target_link_libraries(cdprscurve ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${CGAL_LI
 
 add_library(cdpr3 src/cdpr_plugin.cpp)
 target_link_libraries(cdpr3  ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${CGAL_LIBRARIES})
-
-add_executable(solveqp  src/solveqp.cpp)
-add_dependencies(solveqp  cdpr3_gencpp)
-target_link_libraries(solveqp  ${CGAL_LIBRARY} ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES} ${GMP_LIBRARY} )
-
-
 
 #target_link_libraries(cdpr3_control ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${VISP_LIBRARIES} ${CGAL_LIBRARIES})
 #target_link_libraries(cdpr3_trajectory ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${VISP_LIBRARIES})

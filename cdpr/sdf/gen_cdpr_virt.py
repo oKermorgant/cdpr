@@ -243,7 +243,7 @@ if __name__ == '__main__':
         '''
         
     # control plugin
-    plug = etree.SubElement(model, 'plugin', name='freefloating_gazebo_control', filename='libfreefloating_gazebo_control.so')
+    plug = etree.SubElement(model, 'plugin', name='cdpr_plugin', filename='libcdpr_plugin.so')
         
     # write file
     WriteSDF(sdf, name+'.sdf')

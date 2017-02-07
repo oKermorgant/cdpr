@@ -43,7 +43,6 @@ private:
 
 private:
     // -- general data ----------------------------------------
-    std::string robot_namespace_;
     ros::NodeHandle rosnode_;
     ros::CallbackQueue callback_queue_;
     physics::ModelPtr model_;
@@ -57,7 +56,6 @@ private:
 
     // subscriber
     ros::Subscriber joint_command_subscriber_;
-    std::string joint_command_topic_;
     sensor_msgs::JointState joint_command_;
     bool joint_command_received_;
 

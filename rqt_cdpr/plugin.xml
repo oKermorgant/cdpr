@@ -1,5 +1,5 @@
 <library path="src">
-  <class name="My Plugin" type="cdpr3.my_module.MyPlugin" base_class_type="rqt_gui_py::Plugin">
+  <class name="CDPR generator" type="rqt_cdpr.GenPlugin" base_class_type="rqt_gui_py::Plugin">
     <description>
       A Python GUI plugin to create user interface for cable robot parameters.
     </description>

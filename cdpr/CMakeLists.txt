@@ -42,6 +42,10 @@ CATKIN_DEPENDS roscpp roslib gazebo_ros sensor_msgs
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
 
-# model plugin subscribes to joint efforts and applies them in Gazebo
+# small model plugin subscribes to joint efforts and applies them in Gazebo
 add_library(cdpr_plugin src/cdpr_plugin.cpp include/cdpr/cdpr_plugin.h)
 target_link_libraries(cdpr_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+
+# basic PID controller for platform control
+add_executable(pid_control src/pid_control.cpp)
+target_link_libraries(pid_control ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${VISP_LIBRARIES})

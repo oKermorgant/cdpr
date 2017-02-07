@@ -1,10 +1,12 @@
 #!/usr/bin/python
 
 '''
-Module de creation de .sdf
+Module de creation de .sdf pour CDPR a partir d'un fichier de description
+Olivier Kermorgant
 '''
 
 #from pylab import *
+
 import yaml
 import rospkg
 from lxml import etree
@@ -70,14 +72,26 @@ def CreateNested(elem, tree, value, parse=True):
     else:
         child.text = value
         
-def BuildInertial(link, mass):
-    CreateNested(link, 'inertial/inertia/ixx', .5*mass)
-    CreateNested(link, 'inertial/inertia/ixy', '0')
-    CreateNested(link, 'inertial/inertia/ixz', '0')
-    CreateNested(link, 'inertial/inertia/iyy', .5*mass)
-    CreateNested(link, 'inertial/inertia/iyz', '0')
-    CreateNested(link, 'inertial/inertia/izz', .5*mass)
-    CreateNested(link, 'inertial/mass', mass)
+def BuildInertial(link, mass, inertial = None):
+    if inertial != None:
+        CreateNested(link, 'inertial/inertia/ixx', inertial[0])
+        CreateNested(link, 'inertial/inertia/ixy', '0')
+        CreateNested(link, 'inertial/inertia/ixz', '0')
+        CreateNested(link, 'inertial/inertia/iyy', inertial[1])
+        CreateNested(link, 'inertial/inertia/iyz', '0')
+        CreateNested(link, 'inertial/inertia/izz', inertial[2])
+        CreateNested(link, 'inertial/mass', mass)
+    else:
+        CreateNested(link, 'inertial/inertia/ixx', '0')
+        CreateNested(link, 'inertial/inertia/ixy', '0')
+        CreateNested(link, 'inertial/inertia/ixz', '0')
+        CreateNested(link, 'inertial/inertia/iyy', '0')
+        CreateNested(link, 'inertial/inertia/iyz', '0')
+        CreateNested(link, 'inertial/inertia/izz', '0')
+        CreateNested(link, 'inertial/mass', mass)
+
+
+
 
 
 def CreateCaster(elem, name, x, y, z, r, grip=200, sphere = True):
@@ -113,7 +127,7 @@ def CreateCaster(elem, name, x, y, z, r, grip=200, sphere = True):
     
 
 
-def CreateVisualCollision(link, ident, value, color=None, mass=None, grip=None, pose=None, visual=True, collision=True):
+def CreateVisualCollision(link, ident, value, color=None, mass=None, grip=None, pose=None, visual=True, collision=True,inertial = None):
     subtag = ident.split('/')[0]
     tags = []
     if visual:
@@ -137,7 +151,7 @@ def CreateVisualCollision(link, ident, value, color=None, mass=None, grip=None, 
         CreateNested(link, 'collision%s/surface/friction/ode/mu2' % subtag, grip)
     # mass
     if mass != None:
-        BuildInertial(link,mass)
+        BuildInertial(link,mass,inertial)
         if pose != None:
             CreateNested(link, 'inertial/pose', pose)
 
@@ -161,6 +175,48 @@ def WriteSDF(sdf, filename):
     #sdf_content = reparsed.toprettyxml()
     with open(filename, 'w') as f:
         f.write(sdf_content)
-        print('Writing ' + filename)
+        print('Writing', filename)
 
     
+def ObjectToDict(obj, classkey=None):
+    if isinstance(obj, dict):
+        data = {}
+        for (k, v) in obj.items():
+            data[k] = ObjectToDict(v, classkey)
+        return data
+    elif hasattr(obj, "_ast"):
+        return ObjectToDict(obj._ast())
+    elif hasattr(obj, "__iter__"):
+        return [ObjectToDict(v, classkey) for v in obj]
+    elif hasattr(obj, "__dict__"):
+        data = dict([(key, ObjectToDict(value, classkey))
+            for key, value in obj.__dict__.iteritems()
+            if not callable(value) and not key.startswith('_')])
+        if classkey is not None and hasattr(obj, "__class__"):
+            data[classkey] = obj.__class__.__name__
+        return data
+    else:
+        return obj
+
+def WriteYAML(dict, filepath):
+    with open(filepath, 'w') as streamm:
+        yaml.dump(dict, streamm)
+        print('Writing YAML file to', filepath)
+
+def DictToObj(filepath):
+    class obj(object):
+        def __init__(self, d):
+            for a, b in d.items():
+                if isinstance(b, (list, tuple)):
+                    setattr(self, a, [obj(x) if isinstance(x, dict) else x for x in b])
+                else:
+                    setattr(self, a, obj(b) if isinstance(b, dict) else b)
+
+    with open(filepath, 'r') as streamm:
+        rawData = yaml.load(streamm)
+        args = rawData
+        dataObj = obj(args)
+        return dataObj
+
+
+

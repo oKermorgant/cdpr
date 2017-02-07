@@ -22,12 +22,9 @@ void CDPRPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
     // get model and name
     model_ = _model;
-    robot_namespace_ = model_->GetName();
-    controller_is_running_ = true;
 
     // register ROS node & time
-    rosnode_ = ros::NodeHandle(robot_namespace_);
-    ros::NodeHandle control_node(rosnode_, "controllers");
+    rosnode_ = ros::NodeHandle();
     t_prev_ = 0;
 
     // *** JOINT CONTROL
@@ -35,70 +32,34 @@ void CDPRPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
     if(model_->GetJointCount() != 0)
     {
-        std::string joint_command_topic, joint_state_topic;
-        control_node.param("config/joints/command", joint_command_topic, std::string("joint_command"));
-        control_node.param("config/joints/state", joint_state_topic, std::string("joint_state"));
-
         // initialize subscriber to joint commands
         ros::SubscribeOptions ops = ros::SubscribeOptions::create<sensor_msgs::JointState>(
-                    joint_command_topic, 1,
+                    "cable_command", 1,
                     boost::bind(&CDPRPlugin::JointCommandCallBack, this, _1),
                     ros::VoidPtr(), &callback_queue_);
         joint_command_subscriber_ = rosnode_.subscribe(ops);
         joint_command_received_ = false;
 
-        // write joint limits and setup joint states
+        // setup joint states
         std::vector<std::string> joint_names;
-        std::vector<double> joint_min, joint_max, vel_max;
         std::string name;
         physics::JointPtr joint;
-        bool cascaded_position = true;
-        if(control_node.hasParam("config/joints/cascaded_position"))
-            control_node.getParam("config/joints/cascaded_position", cascaded_position);
 
-
-        char param[256];
         for(unsigned int i=0;i<model_->GetJointCount();++i)
         {
             joint = model_->GetJoints()[i];
             name = joint->GetName();
 
-            if(control_node.hasParam(name))
+            if(name.find("cable") == 0) // we got a cable
             {
                 joints_.push_back(joint);
-                // set max velocity or max effort for the position PID
-                sprintf(param, "%s/position/i_clamp", name.c_str());
-                if(cascaded_position)
-                    control_node.setParam(param, joint->GetVelocityLimit(0));
-                else
-                    control_node.setParam(param, joint->GetEffortLimit(0));
-
-                // set max effort for the velocity PID
-                sprintf(param, "%s/velocity/i_clamp", name.c_str());
-                control_node.setParam(param, joint->GetEffortLimit(0));
-
-                // set antiwindup to true - why would anyone set it to false?
-                sprintf(param, "%s/position/antiwindup", name.c_str());
-                control_node.setParam(param, true);
-                sprintf(param, "%s/velocity/antiwindup", name.c_str());
-                control_node.setParam(param, true);
-
-                // save name and joint limits
-                joint_names.push_back(name);
-                joint_min.push_back(joint->GetLowerLimit(0).Radian());
-                joint_max.push_back(joint->GetUpperLimit(0).Radian());
-                vel_max.push_back(joint->GetVelocityLimit(0));
+                // save name
+                joint_names.push_back(name);                
             }
         }
 
-        // push setpoint topic, name, lower and bound
-        control_node.setParam("config/joints/name", joint_names);
-        control_node.setParam("config/joints/lower", joint_min);
-        control_node.setParam("config/joints/upper", joint_max);
-        control_node.setParam("config/joints/velocity", vel_max);
-
         // setup joint_states publisher
-        joint_state_publisher_ = rosnode_.advertise<sensor_msgs::JointState>(joint_state_topic, 1);
+        joint_state_publisher_ = rosnode_.advertise<sensor_msgs::JointState>("cable_states", 1);
         joint_states_.name = joint_names;
         joint_states_.position.resize(joints_.size());
         joint_states_.velocity.resize(joints_.size());

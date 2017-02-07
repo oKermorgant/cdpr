@@ -8,7 +8,6 @@ joints:
         effort: 100
         damping: 1
         min: 5
-
 frame: 
     type: box
     lower: [-2., -2., 0]
