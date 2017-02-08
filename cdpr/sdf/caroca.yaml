@@ -1,43 +1,37 @@
+cable: {radius: 0.005}
+frame:
+  color: Grey
+  lower: [-3.5, -2.0, 0]
+  radius: 0.02
+  type: box
+  upper: [3.5, 2.0, 3.5]
 joints:
-    passive: 
-        velocity: 10
-        effort: 100
-        damping: .01
-    actuated: 
-        velocity: 10
-        effort: 100
-        damping: 1
-        min: 5
-frame: 
-    type: box
-    lower: [-3.5, -2., 0]
-    upper: [3.5, 2., 3.5]
-    radius: .02
-    color: Grey
+  actuated: {damping: 1, effort: 1000, min: 5, velocity: 10}
+  passive: {damping: 0.01, effort: 100, velocity: 10}
 platform:
-    type: box
-    position:
-        xyz: [0,0,1.5]
-        rpy: [0,0,0]
-    visual: box
-    mass: 100
-    color: Blue
-cable:
-    radius: .005
-points: 
-    -  frame: [-3.5, -2, 3.5]
-       platform: [0.6, -0.3, -0.2]
-    -  frame: [-3.5, -2, 3.5]
-       platform: [-0.6, 0.3, 0.2]
-    -  frame: [3.5, -2, 3.5]
-       platform: [-0.6, -0.3, 0.2]
-    -  frame: [3.5, -2, 3.5]
-       platform: [0.6, 0.3, -0.2]
-    -  frame: [-3.5, 2, 3.5]
-       platform: [-0.6, -0.3, -0.2]
-    -  frame: [-3.5, 2, 3.5]
-       platform: [0.6, 0.3, 0.2]
-    -  frame: [3.5, 2, 3.5]
-       platform: [0.6, -0.3, 0.2]
-    -  frame: [3.5, 2, 3.5]
-       platform: [-0.6, 0.3, -0.2]    
+  color: Blue
+  inertia: [100, 100, 100, 0, 0, 0]
+  mass: 100
+  position:
+    rpy: [0, 0, 0]
+    xyz: [0, 0, 1.5]
+  size: [1.2, 0.6, 0.4]
+  type: box
+  visual: box
+points:
+- frame: [-3.5, -2.0, 3.5]
+  platform: [0.6, -0.3, -0.2]
+- frame: [-3.5, -2.0, 3.5]
+  platform: [-0.6, 0.3, 0.2]
+- frame: [3.5, -2.0, 3.5]
+  platform: [-0.6, -0.3, 0.2]
+- frame: [3.5, -2.0, 3.5]
+  platform: [0.6, 0.3, -0.2]
+- frame: [-3.5, 2.0, 3.5]
+  platform: [-0.6, -0.3, -0.2]
+- frame: [-3.5, 2.0, 3.5]
+  platform: [0.6, 0.3, 0.2]
+- frame: [3.5, 2.0, 3.5]
+  platform: [0.6, -0.3, 0.2]
+- frame: [3.5, 2.0, 3.5]
+  platform: [-0.6, 0.3, -0.2]

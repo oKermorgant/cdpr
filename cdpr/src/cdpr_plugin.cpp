@@ -54,7 +54,9 @@ void CDPRPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
             {
                 joints_.push_back(joint);
                 // save name
-                joint_names.push_back(name);                
+                joint_names.push_back(name);
+                // get maximum effort
+                f_max = joint->GetEffortLimit(0);
             }
         }
 
@@ -66,6 +68,21 @@ void CDPRPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         joint_states_.effort.resize(joints_.size());
     }
     // *** END JOINT CONTROL
+
+    // get frame and platform links
+    physics::LinkPtr lk;
+    for(auto &link: model_->GetLinks())
+    {
+        if(link->GetName() == "frame")
+            frame_link_ = link;
+        else if(link->GetName() == "platform")
+            platform_link_ = link;
+    }
+
+    // setup platform state publisher
+    pf_publisher_ = rosnode_.advertise<gazebo_msgs::LinkState>("pf_state",1);
+    pf_state_.link_name = "platform";
+    pf_state_.reference_frame = "frame";
 
     // store update rate
     if(_sdf->HasElement("updateRate"))
@@ -85,20 +102,19 @@ void CDPRPlugin::Update()
     // activate callbacks
     callback_queue_.callAvailable();
 
-    if(controller_is_running_)
+    // deal with joint control
+    if(joint_command_received_)
     {
-        // deal with joint control
-        if(joint_command_received_)
+        physics::JointPtr joint;
+        unsigned int idx;
+        for(unsigned int i=0;i<joint_command_.name.size();++i)
         {
-            physics::JointPtr joint;
-            unsigned int idx;
-            for(unsigned int i=0;i<joint_command_.name.size();++i)
-            {
-                // find corresponding model joint
-                idx = std::distance(joint_states_.name.begin(), std::find(joint_states_.name.begin(), joint_states_.name.end(), joint_command_.name[i]));
-                joint = joints_[idx];
-                joint->SetForce(0,joint_command_.effort[i]);
-            }
+            // find corresponding model joint
+            idx = std::distance(joint_states_.name.begin(), std::find(joint_states_.name.begin(), joint_states_.name.end(), joint_command_.name[i]));
+            joint = joints_[idx];
+            // only apply positive tensions
+            //if(joint_command_.effort[i] > 0)
+                joint->SetForce(0,std::min(joint_command_.effort[i], f_max));
         }
     }
 
@@ -117,6 +133,25 @@ void CDPRPlugin::Update()
         }
         joint_state_publisher_.publish(joint_states_);
     }
+
+    // publish pf state
+    math::Pose pf_pose = platform_link_->GetWorldPose() - frame_link_->GetWorldPose();
+    pf_state_.pose.position.x = pf_pose.pos.x;
+    pf_state_.pose.position.y = pf_pose.pos.y;
+    pf_state_.pose.position.z = pf_pose.pos.z;
+    pf_state_.pose.orientation.x = pf_pose.rot.x;
+    pf_state_.pose.orientation.y = pf_pose.rot.y;
+    pf_state_.pose.orientation.z = pf_pose.rot.z;
+    pf_state_.pose.orientation.w = pf_pose.rot.w;
+    math::Vector3 vel = pf_pose.rot.RotateVector(platform_link_->GetRelativeLinearVel());
+    pf_state_.twist.linear.x = vel.x;
+    pf_state_.twist.linear.y = vel.y;
+    pf_state_.twist.linear.z = vel.z;
+    vel = pf_pose.rot.RotateVector(platform_link_->GetRelativeAngularVel());
+    pf_state_.twist.angular.x = vel.x;
+    pf_state_.twist.angular.y = vel.y;
+    pf_state_.twist.angular.z = vel.z;
+    pf_publisher_.publish(pf_state_);
 }
 
 

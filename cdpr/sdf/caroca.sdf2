@@ -6,12 +6,12 @@
       <pose>0 0 0 0 0 0</pose>
       <inertial>
         <inertia>
-          <ixx>100000</ixx>
-          <iyy>100000</iyy>
-          <izz>100000</izz>
+          <ixx>50000.0</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>50000.0</iyy>
           <iyz>0</iyz>
+          <izz>50000.0</izz>
         </inertia>
         <mass>100000</mass>
       </inertial>
@@ -318,12 +318,12 @@
       </collision>
       <inertial>
         <inertia>
-          <ixx>100</ixx>
-          <iyy>100</iyy>
-          <izz>100</izz>
+          <ixx>50.0</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>50.0</iyy>
           <iyz>0</iyz>
+          <izz>50.0</izz>
         </inertia>
         <mass>100</mass>
       </inertial>
@@ -346,12 +346,12 @@
       </visual>
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -359,12 +359,12 @@
     <link name="virt_X0">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -388,12 +388,12 @@
     <link name="virt_Y0">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -421,8 +421,8 @@
       <axis>
         <xyz>-0.827650 -0.343172 0.444105</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
           <effort>10</effort>
           <velocity>10</velocity>
         </limit>
@@ -434,12 +434,12 @@
     <link name="virt_Xpf0">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -463,12 +463,12 @@
     <link name="virt_Ypf0">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -522,12 +522,12 @@
       </visual>
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -535,12 +535,12 @@
     <link name="virt_X1">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -564,12 +564,12 @@
     <link name="virt_Y1">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -597,8 +597,8 @@
       <axis>
         <xyz>-0.704598 -0.558819 0.437337</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
           <effort>10</effort>
           <velocity>10</velocity>
         </limit>
@@ -610,12 +610,12 @@
     <link name="virt_Xpf1">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -639,12 +639,12 @@
     <link name="virt_Ypf1">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -698,12 +698,12 @@
       </visual>
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -711,12 +711,12 @@
     <link name="virt_X2">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -740,12 +740,12 @@
     <link name="virt_Y2">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -773,8 +773,8 @@
       <axis>
         <xyz>0.856026 -0.354938 0.375816</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
           <effort>10</effort>
           <velocity>10</velocity>
         </limit>
@@ -786,12 +786,12 @@
     <link name="virt_Xpf2">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -815,12 +815,12 @@
     <link name="virt_Ypf2">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -874,12 +874,12 @@
       </visual>
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -887,12 +887,12 @@
     <link name="virt_X3">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -916,12 +916,12 @@
     <link name="virt_Y3">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -949,8 +949,8 @@
       <axis>
         <xyz>0.673509 -0.534162 0.510938</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
           <effort>10</effort>
           <velocity>10</velocity>
         </limit>
@@ -962,12 +962,12 @@
     <link name="virt_Xpf3">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -991,12 +991,12 @@
     <link name="virt_Ypf3">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1050,12 +1050,12 @@
       </visual>
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1063,12 +1063,12 @@
     <link name="virt_X4">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1092,12 +1092,12 @@
     <link name="virt_Y4">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1125,8 +1125,8 @@
       <axis>
         <xyz>-0.673509 0.534162 0.510938</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
           <effort>10</effort>
           <velocity>10</velocity>
         </limit>
@@ -1138,12 +1138,12 @@
     <link name="virt_Xpf4">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1167,12 +1167,12 @@
     <link name="virt_Ypf4">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1226,12 +1226,12 @@
       </visual>
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1239,12 +1239,12 @@
     <link name="virt_X5">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1268,12 +1268,12 @@
     <link name="virt_Y5">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1301,8 +1301,8 @@
       <axis>
         <xyz>-0.856026 0.354938 0.375816</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
           <effort>10</effort>
           <velocity>10</velocity>
         </limit>
@@ -1314,12 +1314,12 @@
     <link name="virt_Xpf5">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1343,12 +1343,12 @@
     <link name="virt_Ypf5">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1402,12 +1402,12 @@
       </visual>
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1415,12 +1415,12 @@
     <link name="virt_X6">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1444,12 +1444,12 @@
     <link name="virt_Y6">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1477,8 +1477,8 @@
       <axis>
         <xyz>0.704598 0.558819 0.437337</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
           <effort>10</effort>
           <velocity>10</velocity>
         </limit>
@@ -1490,12 +1490,12 @@
     <link name="virt_Xpf6">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1519,12 +1519,12 @@
     <link name="virt_Ypf6">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1578,12 +1578,12 @@
       </visual>
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1591,12 +1591,12 @@
     <link name="virt_X7">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1620,12 +1620,12 @@
     <link name="virt_Y7">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1653,8 +1653,8 @@
       <axis>
         <xyz>0.827650 0.343172 0.444105</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
           <effort>10</effort>
           <velocity>10</velocity>
         </limit>
@@ -1666,12 +1666,12 @@
     <link name="virt_Xpf7">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>
@@ -1695,12 +1695,12 @@
     <link name="virt_Ypf7">
       <inertial>
         <inertia>
-          <ixx>0.001</ixx>
-          <iyy>0.001</iyy>
-          <izz>0.001</izz>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
+          <iyy>0.0005</iyy>
           <iyz>0</iyz>
+          <izz>0.0005</izz>
         </inertia>
         <mass>0.001</mass>
       </inertial>

@@ -12,8 +12,20 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print(' Give a yaml file' )
         sys.exit(0)
+        
+    # check point values are all doubles for C++ parser
+    d_config = yaml.load(file(sys.argv[1]))
+    for i in xrange(len(d_config['points'])):
+        for j in xrange(3):
+            d_config['points'][i]['frame'][j] = float(d_config['points'][i]['frame'][j])
+            d_config['points'][i]['platform'][j] = float(d_config['points'][i]['platform'][j])
+            
+    # re-write config
+    with open(sys.argv[1],'w') as f:
+            yaml.dump(d_config, f)
+        
     
-    config = DictsToNamespace(yaml.load(file(sys.argv[1])))
+    config = DictsToNamespace(d_config)
     config.frame.upper = [float(v) for v in config.frame.upper]
     config.frame.lower = [float(v) for v in config.frame.lower]
     name = sys.argv[1].split('.')[0]
@@ -63,18 +75,13 @@ if __name__ == '__main__':
     link = etree.SubElement(model, 'link', name= 'platform')
     CreateNested(link, 'pose', '%f %f %f %f %f %f' % tuple(config.platform.position.xyz + config.platform.position.rpy))
     if config.platform.type == 'box':
-        p1 = [min([p.platform[i] for p in config.points]) for i in xrange(3)]
-        p2 = [max([p.platform[i] for p in config.points]) for i in xrange(3)]
-        size = [p2[i] - p1[i] for  i in xrange(3)]
         pose = config.platform.position.xyz + config.platform.position.rpy
-        CreateVisualCollision(link, 'pf/geometry/box/size', '%f %f %f' % tuple(size), collision=True, color=config.platform.color, mass = config.platform.mass)
-      
-      
+        CreateVisualCollision(link, 'pf/geometry/box/size', '%f %f %f' % tuple(config.platform.size), collision=True, color=config.platform.color, mass = config.platform.mass, inertia=config.platform.inertia) 
       
     # platform translation and rotation
     pf_t = np.array(config.platform.position.xyz).reshape(3,1)
     pf_R = tr.euler_matrix(config.platform.position.rpy[0], config.platform.position.rpy[1], config.platform.position.rpy[2])[:3,:3]
-    # mximum length
+    # maximum length
     l = np.linalg.norm([config.frame.upper[i] - config.frame.lower[i] for i in xrange(3)])
     # create cables
     model.insert(2, etree.Comment('Definition of the robot cables'))
@@ -100,7 +107,6 @@ if __name__ == '__main__':
         
         CreateVisualCollision(link,'/geometry/cylinder/radius', config.cable.radius, color='Black', collision=False, mass = 0.001)
         CreateNested(link, 'visual/geometry/cylinder/length', str(l))
-        #CreateNested(link, 'collision/geometry/cylinder/length', str(l))
         
         '''
         sph_link = etree.SubElement(model, 'link', name= 'sph%i' % i)
@@ -108,21 +114,126 @@ if __name__ == '__main__':
         CreateVisualCollision(sph_link,'sph%i/geometry/sphere/radius' % i, .015, color='Blue', collision=True)
         '''
         
-         #Create Joints on the frame
-        model.insert(5, etree.Comment('Definition of the robot Ball Joints frame to cable'))
-        Joint1_element = etree.SubElement(model, 'joint', {'name': 'joint_%i_cable1' % i, 'type': 'ball'})
-        CreateJoint(Joint1_element,'frame','cable%i' % i, '%f %f %f 0 0 0' % tuple(fp), '%f %f %f' % tuple(z), [-pi, pi])
+        # virtual link around X
+        link = etree.SubElement(model, 'link', name= 'virt_X%i' % i)
+        BuildInertial(link, 0.001)
+        CreateNested(link, 'pose', '%f %f %f %f %f %f' % tuple(cbl.frame + rpy))
+        #CreateVisualCollision(link,'/geometry/cylinder/radius', .03, color='Red', collision=False)
+        #CreateNested(link, 'visual/geometry/cylinder/length', 0.3)
+        # revolute joint around X
+        joint = etree.SubElement(model, 'joint', name= 'rev_X%i' % i)
+        joint.set("type", "revolute")
+        CreateNested(joint, 'pose', '0 0 0 %f %f %f' % tuple(rpy))
+        CreateNested(joint, 'parent', 'frame')
+        CreateNested(joint, 'child', 'virt_X%i' % i)
+        CreateNested(joint, 'axis/xyz', '%f %f %f' % tuple(R[:3,0]))
+        CreateNested(joint, 'axis/limit/effort', config.joints.passive.effort)
+        CreateNested(joint, 'axis/limit/velocity', config.joints.passive.velocity)
+        CreateNested(joint, 'axis/dynamics/damping', config.joints.passive.damping)           
+           
+        # virtual link around Y
+        link = etree.SubElement(model, 'link', name= 'virt_Y%i' % i)
+        BuildInertial(link, 0.001)
+        CreateNested(link, 'pose', '%f %f %f %f %f %f' % tuple(cbl.frame + rpy))
+        #CreateVisualCollision(link,'/geometry/cylinder/radius', .05, color='Green', collision=False)
+        #CreateNested(link, 'visual/geometry/cylinder/length', 0.2)
+        
+        # revolute joint around Y
+        joint = etree.SubElement(model, 'joint', name= 'rev_Y%i' % i)
+        joint.set("type", "revolute")
+        CreateNested(joint, 'pose', '0 0 0 %f %f %f' % tuple(rpy))
+        CreateNested(joint, 'parent', 'virt_X%i' % i)
+        CreateNested(joint, 'child', 'virt_Y%i' % i)
+        CreateNested(joint, 'axis/xyz', '%f %f %f' % tuple(R[:3,1]))
+        CreateNested(joint, 'axis/limit/effort', config.joints.passive.effort)
+        CreateNested(joint, 'axis/limit/velocity', config.joints.passive.velocity)
+        CreateNested(joint, 'axis/dynamics/damping', config.joints.passive.damping)  
 
-         #Create Joints on the platform
-        model.insert(6, etree.Comment('Definition of the robot Ball Joints platform to cable'))
-        Joint2_element = etree.SubElement(model, 'joint', {'name': 'joint_%i_cable2' %i, 'type': 'ball'})
-        CreateJoint(Joint2_element,'platform', 'cable%i' % i, '%f %f %f 0 0 0' % tuple(cp), '%f %f %f' % tuple(z), [-pi, pi])
-
-        #Create Joints on the platform
-        model.insert(7, etree.Comment('Definition of the robot Prismatic Joints'))
-        Joint3_element = etree.SubElement(model, 'joint', {'name': 'joint_%i_prismatic' %i, 'type': 'prismatic'})
-        CreateJoint(Joint3_element,'frame', 'platform', '%f %f %f 0 0 0' % tuple(fp), '%f %f %f' % tuple(rpy), [0, l], str(20))
-
+        # prismatic joint
+        joint = etree.SubElement(model, 'joint', name= 'cable%i' % i)
+        joint.set("type", "prismatic")
+        #CreateNested(joint, 'pose', '0 0 0 %f %f %f' % tuple(rpy) )
+        CreateNested(joint, 'pose', '0 0 %f %f %f %f' % tuple([(a-1.)*l/2] + rpy) )
+        CreateNested(joint, 'parent', 'virt_Y%i' % i)
+        CreateNested(joint, 'child', 'cable%i' % i)
+        CreateNested(joint, 'axis/xyz', '%f %f %f' % tuple(-R[:3,2]))
+        CreateNested(joint, 'axis/limit/lower', -0.5*l)
+        CreateNested(joint, 'axis/limit/upper', 0.5*l)    
+        CreateNested(joint, 'axis/limit/effort', config.joints.actuated.velocity)
+        CreateNested(joint, 'axis/limit/velocity', config.joints.actuated.velocity)
+        CreateNested(joint, 'axis/dynamics/damping', config.joints.actuated.damping)
+                
+        # rotation cable/pf X
+        link = etree.SubElement(model, 'link', name= 'virt_Xpf%i' % i)
+        BuildInertial(link, 0.001)
+        CreateNested(link, 'pose', '%f %f %f %f %f %f' % tuple(list(pp.reshape(3)) + rpy))
+        #CreateVisualCollision(link,'/geometry/cylinder/radius', .03, color='Red', collision=False)
+        #CreateNested(link, 'visual/geometry/cylinder/length', 0.3)
+        # revolute joint around X
+        joint = etree.SubElement(model, 'joint', name= 'rev_Xpf%i' % i)
+        joint.set("type", "revolute")
+        CreateNested(joint, 'pose', '0 0 0 %f %f %f' % tuple(rpy))
+        CreateNested(joint, 'parent', 'platform')
+        CreateNested(joint, 'child', 'virt_Xpf%i' % i)
+        CreateNested(joint, 'axis/xyz', '1 0 0')
+        CreateNested(joint, 'axis/limit/effort', config.joints.passive.effort)
+        CreateNested(joint, 'axis/limit/velocity', config.joints.passive.velocity)
+        CreateNested(joint, 'axis/dynamics/damping', config.joints.passive.damping) 
+        
+        # rotation cable/pf Y
+        link = etree.SubElement(model, 'link', name= 'virt_Ypf%i' % i)
+        BuildInertial(link, 0.001)
+        CreateNested(link, 'pose', '%f %f %f %f %f %f' % tuple(list(pp.reshape(3)) + rpy))
+        #CreateVisualCollision(link,'/geometry/cylinder/radius', .03, color='Red', collision=False)
+        #CreateNested(link, 'visual/geometry/cylinder/length', 0.3)
+        # revolute joint around Y
+        joint = etree.SubElement(model, 'joint', name= 'rev_Ypf%i' % i)
+        joint.set("type", "revolute")
+        CreateNested(joint, 'pose', '0 0 0 %f %f %f' % tuple(rpy))
+        CreateNested(joint, 'parent', 'virt_Xpf%i' % i)
+        CreateNested(joint, 'child', 'virt_Ypf%i' % i)
+        CreateNested(joint, 'axis/xyz', '0 1 0')
+        CreateNested(joint, 'axis/limit/effort', config.joints.passive.effort)
+        CreateNested(joint, 'axis/limit/velocity', config.joints.passive.velocity)
+        CreateNested(joint, 'axis/dynamics/damping', config.joints.passive.damping) 
+        
+        # rotation cable/pf Z
+        # revolute joint around Z
+        joint = etree.SubElement(model, 'joint', name= 'rev_Zpf%i' % i)
+        joint.set("type", "revolute")
+        CreateNested(joint, 'pose', '0 0 0 %f %f %f' % tuple(rpy))
+        CreateNested(joint, 'child', 'virt_Ypf%i' % i)
+        CreateNested(joint, 'parent', 'cable%i' % i)
+        CreateNested(joint, 'axis/xyz', '0 0 1')
+        CreateNested(joint, 'axis/limit/effort', config.joints.passive.effort)
+        CreateNested(joint, 'axis/limit/velocity', config.joints.passive.velocity)
+        CreateNested(joint, 'axis/dynamics/damping', config.joints.passive.damping)
+    
+    
+    
+        # transmission interface
+        '''
+        tran = etree.SubElement(model, 'transmission', name= 't_cable%i' % i)
+        CreateNested(tran, 'type', 'transmission_interface/SimpleTransmission')
+        tranj = etree.SubElement(tran, 'joint', name= 'cable%i' % i)
+        CreateNested(tranj, 'hardwareInterface', 'EffortJointInterface')
+        act = etree.SubElement(tran, 'actuator', name= 'm_cable%i' % i)
+        CreateNested(act, 'hardwareInterface', 'EffortJointInterface')
+        CreateNested(act, 'mechanicalReduction', '1')
+        '''
+        
+        
+        # universal joint
+        '''
+        joint = etree.SubElement(model, 'joint', name= 'ball%i' % i)
+        joint.set("type", "ball")
+        CreateNested(joint, 'pose', '0 0 %f 0 0 0' % (l/2.))
+        CreateNested(joint, 'child', 'cable%i' % i)
+        CreateNested(joint, 'platform', 'platform')
+        '''
+        
+    # control plugin
+    plug = etree.SubElement(model, 'plugin', name='cdpr_plugin', filename='libcdpr_plugin.so')
         
     # write file
     WriteSDF(sdf, name+'.sdf')

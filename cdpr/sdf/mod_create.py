@@ -70,13 +70,12 @@ def CreateNested(elem, tree, value, parse=True):
     else:
         child.text = value
         
-def BuildInertial(link, mass):
-    CreateNested(link, 'inertial/inertia/ixx', .5*mass)
-    CreateNested(link, 'inertial/inertia/ixy', '0')
-    CreateNested(link, 'inertial/inertia/ixz', '0')
-    CreateNested(link, 'inertial/inertia/iyy', .5*mass)
-    CreateNested(link, 'inertial/inertia/iyz', '0')
-    CreateNested(link, 'inertial/inertia/izz', .5*mass)
+def BuildInertial(link, mass, inertia=None):
+    if inertia == None:
+        inertia = [mass,mass,mass,0,0,0]
+    for i,tag in enumerate(['xx','yy','zz','xy','xz','yz']):
+        CreateNested(link, 'inertial/inertia/i'+tag, inertia[i])
+        
     CreateNested(link, 'inertial/mass', mass)
 
 
@@ -113,7 +112,7 @@ def CreateCaster(elem, name, x, y, z, r, grip=200, sphere = True):
     
 
 
-def CreateVisualCollision(link, ident, value, color=None, mass=None, grip=None, pose=None, visual=True, collision=True):
+def CreateVisualCollision(link, ident, value, color=None, mass=None, grip=None, pose=None, visual=True, collision=True, inertia=None):
     subtag = ident.split('/')[0]
     tags = []
     if visual:
@@ -137,7 +136,7 @@ def CreateVisualCollision(link, ident, value, color=None, mass=None, grip=None, 
         CreateNested(link, 'collision%s/surface/friction/ode/mu2' % subtag, grip)
     # mass
     if mass != None:
-        BuildInertial(link,mass)
+        BuildInertial(link,mass,inertia)
         if pose != None:
             CreateNested(link, 'inertial/pose', pose)
 
