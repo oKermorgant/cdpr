@@ -325,7 +325,7 @@
           <ixz>0</ixz>
           <iyz>0</iyz>
         </inertia>
-        <mass>100</mass>
+        <mass>20</mass>
       </inertial>
     </link>
     <link name="cable0">
@@ -423,7 +423,7 @@
         <limit>
           <lower>-4.39459895781</lower>
           <upper>4.39459895781</upper>
-          <effort>10</effort>
+          <effort>1000</effort>
           <velocity>10</velocity>
         </limit>
         <dynamics>
@@ -599,7 +599,7 @@
         <limit>
           <lower>-4.39459895781</lower>
           <upper>4.39459895781</upper>
-          <effort>10</effort>
+          <effort>1000</effort>
           <velocity>10</velocity>
         </limit>
         <dynamics>
@@ -775,7 +775,7 @@
         <limit>
           <lower>-4.39459895781</lower>
           <upper>4.39459895781</upper>
-          <effort>10</effort>
+          <effort>1000</effort>
           <velocity>10</velocity>
         </limit>
         <dynamics>
@@ -951,7 +951,7 @@
         <limit>
           <lower>-4.39459895781</lower>
           <upper>4.39459895781</upper>
-          <effort>10</effort>
+          <effort>1000</effort>
           <velocity>10</velocity>
         </limit>
         <dynamics>
@@ -1127,7 +1127,7 @@
         <limit>
           <lower>-4.39459895781</lower>
           <upper>4.39459895781</upper>
-          <effort>10</effort>
+          <effort>1000</effort>
           <velocity>10</velocity>
         </limit>
         <dynamics>
@@ -1303,7 +1303,7 @@
         <limit>
           <lower>-4.39459895781</lower>
           <upper>4.39459895781</upper>
-          <effort>10</effort>
+          <effort>1000</effort>
           <velocity>10</velocity>
         </limit>
         <dynamics>
@@ -1479,7 +1479,7 @@
         <limit>
           <lower>-4.39459895781</lower>
           <upper>4.39459895781</upper>
-          <effort>10</effort>
+          <effort>1000</effort>
           <velocity>10</velocity>
         </limit>
         <dynamics>
@@ -1655,7 +1655,7 @@
         <limit>
           <lower>-4.39459895781</lower>
           <upper>4.39459895781</upper>
-          <effort>10</effort>
+          <effort>1000</effort>
           <velocity>10</velocity>
         </limit>
         <dynamics>

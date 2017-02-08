@@ -6,6 +6,7 @@ import sys
 import numpy as np
 from math import *
 import transformations as tr
+from os.path import exists
 
 if __name__ == '__main__':
 
@@ -13,22 +14,32 @@ if __name__ == '__main__':
         print(' Give a yaml file' )
         sys.exit(0)
         
+    model = sys.argv[1]
+    if not exists(model):
+        for ext in ['.yaml', '.yml', 'yaml','yml']:
+            if exists(model + ext):
+                model += ext
+                break
+    if not exists(model):
+        print(model + ' not found')
+        sys.exit(0)
+        
     # check point values are all doubles for C++ parser
-    d_config = yaml.load(file(sys.argv[1]))
+    d_config = yaml.load(file(model))
     for i in xrange(len(d_config['points'])):
         for j in xrange(3):
             d_config['points'][i]['frame'][j] = float(d_config['points'][i]['frame'][j])
             d_config['points'][i]['platform'][j] = float(d_config['points'][i]['platform'][j])
             
     # re-write config
-    with open(sys.argv[1],'w') as f:
+    with open(model,'w') as f:
             yaml.dump(d_config, f)
         
     
     config = DictsToNamespace(d_config)
     config.frame.upper = [float(v) for v in config.frame.upper]
     config.frame.lower = [float(v) for v in config.frame.lower]
-    name = sys.argv[1].split('.')[0]
+    name = model.split('.')[0]
 
     # SDF building
     sdf = etree.Element('sdf', version= '1.4')
@@ -159,7 +170,7 @@ if __name__ == '__main__':
         CreateNested(joint, 'axis/xyz', '%f %f %f' % tuple(-R[:3,2]))
         CreateNested(joint, 'axis/limit/lower', -0.5*l)
         CreateNested(joint, 'axis/limit/upper', 0.5*l)    
-        CreateNested(joint, 'axis/limit/effort', config.joints.actuated.velocity)
+        CreateNested(joint, 'axis/limit/effort', config.joints.actuated.effort)
         CreateNested(joint, 'axis/limit/velocity', config.joints.actuated.velocity)
         CreateNested(joint, 'axis/dynamics/damping', config.joints.actuated.damping)
                 

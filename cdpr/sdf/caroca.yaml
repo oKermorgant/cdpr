@@ -11,7 +11,7 @@ joints:
 platform:
   color: Blue
   inertia: [100, 100, 100, 0, 0, 0]
-  mass: 100
+  mass: 20
   position:
     rpy: [0, 0, 0]
     xyz: [0, 0, 1.5]

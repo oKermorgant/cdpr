@@ -70,7 +70,6 @@ void CDPRPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     // *** END JOINT CONTROL
 
     // get frame and platform links
-    physics::LinkPtr lk;
     for(auto &link: model_->GetLinks())
     {
         if(link->GetName() == "frame")
@@ -113,7 +112,7 @@ void CDPRPlugin::Update()
             idx = std::distance(joint_states_.name.begin(), std::find(joint_states_.name.begin(), joint_states_.name.end(), joint_command_.name[i]));
             joint = joints_[idx];
             // only apply positive tensions
-            //if(joint_command_.effort[i] > 0)
+            if(joint_command_.effort[i] > 0)
                 joint->SetForce(0,std::min(joint_command_.effort[i], f_max));
         }
     }
@@ -152,8 +151,7 @@ void CDPRPlugin::Update()
     pf_state_.twist.angular.y = vel.y;
     pf_state_.twist.angular.z = vel.z;
     pf_publisher_.publish(pf_state_);
+    ros::spinOnce();
 }
-
-
 
 }   // namespace gazebo

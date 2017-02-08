@@ -17,6 +17,7 @@ public:
     inline void getPose(vpHomogeneousMatrix &M) {M = M_;}
     inline void getVelocity(vpColVector &v) {v = v_;}
     inline void getDesiredPose(vpHomogeneousMatrix &M) {M = Md_;}
+    inline vpPoseVector getPoseError() {return vpPoseVector(M_.inverse()*Md_);}
 
     void sendTensions(vpColVector &f);
 

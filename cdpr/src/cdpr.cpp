@@ -29,11 +29,9 @@ CDPR::CDPR(ros::NodeHandle &_nh)
     XmlRpc::XmlRpcValue points;
     model.getParam("points", points);
     n_cable = points.size();
-    Pf, Pp;
     double x, y, z;
     for(unsigned int i=0;i<n_cable;++i)
     {
-        cout << points[i]["frame"] << endl;
         x = points[i]["frame"][0];
         y = points[i]["frame"][1];
         z = points[i]["frame"][2];
@@ -62,9 +60,6 @@ CDPR::CDPR(ros::NodeHandle &_nh)
         tensions_msg.name.push_back(std::string(cable_name));
     }
     tensions_msg.effort.resize(n_cable);
-
-
-
 }
 
 

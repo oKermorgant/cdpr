@@ -34,19 +34,20 @@ int main(int argc, char ** argv)
     const unsigned int n = robot.n_cables();
 
     vpMatrix W(6, n);   // tau = W.u + g
-    vpColVector g(6), tau, u, tau_i(6);
+    vpColVector g(6), tau(6), err, f, err_i(6), err0(6);
     g[2] = - robot.mass() * 9.81;
     vpMatrix RR(6,6);
 
     double dt = 0.01;
     ros::Rate loop(1/dt);
-    vpHomogeneousMatrix M, Md;
+    vpHomogeneousMatrix M;
     vpRotationMatrix R;
 
     // gain
-    double Kp = 0.1, Ki = 0.01;
+    double Kp = 100, Ki = 0.5, Kd = 2;  // tuned for Caroca
     Param(nh, "Kp", Kp);
     Param(nh, "Ki", Ki);
+    Param(nh, "Kd", Kd);
 
     cout << "CDPR control ready" << fixed << endl;
 
@@ -55,6 +56,7 @@ int main(int argc, char ** argv)
         cout << "------------------" << endl;
         nh.getParam("Kp", Kp);
         nh.getParam("Ki", Ki);
+        nh.getParam("Kd", Kd);
 
         if(robot.ok())  // messages have been received
         {
@@ -62,31 +64,37 @@ int main(int argc, char ** argv)
             robot.getPose(M);
             M.extract(R);
 
-            // desired position
-            robot.getDesiredPose(Md);
-
             // position error in platform frame
-            tau = vpPoseVector(M.inverse()*Md);
-            cout << "Position error in platform frame: " << tau.t() << fixed << endl;
+            err = robot.getPoseError();
+            cout << "Position error in platform frame: " << err.t() << fixed << endl;
             for(unsigned int i=0;i<3;++i)
                 for(unsigned int j=0;j<3;++j)
                     RR[i][j] = RR[i+3][j+3] = R[i][j];
 
             // position error in fixed frame
-            tau = RR * tau;
-            // PI controller to wrench in fixed frame
-            tau_i += tau * dt;
-            tau = Kp * (tau + Ki*tau_i);
+            err = RR * err;
+            // I term to wrench in fixed frame
+            for(unsigned int i=0;i<6;++i)
+                if(tau[i] < robot.mass()*9.81)
+                    err_i[i] += err[i] * dt;
+
+            tau = Kp * (err + Ki*err_i);
+
+            // D term?
+            if(err0.infinityNorm())
+               tau += Kp * Kd * (err - err0)/dt;
+            err0 = err;
             cout << "Desired wrench in platform frame: " << (RR.transpose()*(tau - g)).t() << fixed << endl;
 
             // build W matrix depending on current attach points
             robot.computeW(W);
 
-            u = W.pseudoInverse() * RR.transpose()* (tau - g);
-            cout << "Checking W.u+g in platform frame: " << (W*u).t() << fixed << endl;
+            f = W.pseudoInverse() * RR.transpose()* (tau - g);
+            cout << "Checking W.f+g in platform frame: " << (W*f).t() << fixed << endl;
+            cout << "sending tensions: " << f.t() << endl;
 
             // send tensions
-            robot.sendTensions(u);
+            robot.sendTensions(f);
         }
 
         ros::spinOnce();
