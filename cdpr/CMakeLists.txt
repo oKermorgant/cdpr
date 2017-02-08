@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
 )
 
+find_package(VISP REQUIRED)
+
 ## System dependencies are found with CMake's conventions
 find_package(gazebo REQUIRED)
 find_package(Eigen3)
