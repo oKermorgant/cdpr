@@ -21,24 +21,33 @@ CDPR::CDPR(ros::NodeHandle &_nh)
     ros::NodeHandle model(_nh, "model");
     model.getParam("platform/mass", mass_);
 
+    // inertia matrix
+    XmlRpc::XmlRpcValue element;
+    model.getParam("platform/inertia", element);
+    inertia_.resize(3,3);
+    for(unsigned int i=0;i<3;++i)
+        inertia_[i][i] = element[i];
+    inertia_[0][1] = inertia_[1][0] = element[3];
+    inertia_[0][2] = inertia_[2][0] = element[4];
+    inertia_[2][1] = inertia_[1][2] = element[5];
+
     // cable min / max
     model.getParam("joints/actuated/effort", f_max);
     model.getParam("joints/actuated/min", f_min);
 
-    // cable attach points
-    XmlRpc::XmlRpcValue points;
-    model.getParam("points", points);
-    n_cable = points.size();
+    // cable attach points    
+    model.getParam("points", element);
+    n_cable = element.size();
     double x, y, z;
     for(unsigned int i=0;i<n_cable;++i)
     {
-        x = points[i]["frame"][0];
-        y = points[i]["frame"][1];
-        z = points[i]["frame"][2];
+        x = element[i]["frame"][0];
+        y = element[i]["frame"][1];
+        z = element[i]["frame"][2];
         Pf.push_back(vpTranslationVector(x, y, z));
-        x = points[i]["platform"][0];
-        y= points[i]["platform"][1];
-        z = points[i]["platform"][2];
+        x = element[i]["platform"][0];
+        y= element[i]["platform"][1];
+        z = element[i]["platform"][2];
         Pp.push_back(vpTranslationVector(x, y, z));
     }
 

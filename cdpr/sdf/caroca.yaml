@@ -10,7 +10,7 @@ joints:
   passive: {damping: 0.01, effort: 100, velocity: 10}
 platform:
   color: Blue
-  inertia: [100, 100, 100, 0, 0, 0]
+  inertia: [100.0, 100.0, 100.0, 0.0, 0.0, 0.0]
   mass: 20
   position:
     rpy: [0, 0, 0]

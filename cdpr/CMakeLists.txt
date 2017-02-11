@@ -21,9 +21,10 @@ find_package(gazebo REQUIRED)
 ## catkin specific configuration ##
 ###################################
 catkin_package(
-INCLUDE_DIRS include
+INCLUDE_DIRS include ${VISP_INCLUDE_DIRS}
 LIBRARIES ${PROJECT_NAME}
 CATKIN_DEPENDS roscpp roslib gazebo_ros sensor_msgs geometry_msgs
+DEPENDS ${VISP_LIBRARIES}
 )
 
 ###########
@@ -34,16 +35,12 @@ CATKIN_DEPENDS roscpp roslib gazebo_ros sensor_msgs geometry_msgs
 ## Your package locations should be listed before other locations
 # TODO: Check names of system library include directories (visp)
 link_directories(${GAZEBO_LIBRARY_DIRS})
-include_directories(include ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS})
 
 # small model plugin subscribes to joint efforts and applies them in Gazebo
 add_library(cdpr_plugin src/cdpr_plugin.cpp include/cdpr/cdpr_plugin.h)
 target_link_libraries(cdpr_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 # CDPR class to interface with Gazebo
-add_library(cdpr_class src/cdpr.cpp include/cdpr/cdpr.h)
-target_link_libraries(cdpr_class ${catkin_LIBRARIES} ${VISP_LIBRARIES})
-
-# basic PID controller for platform control to give an example
-add_executable(pid_control src/pid_control.cpp)
-target_link_libraries(pid_control cdpr_class)
+add_library(cdpr src/cdpr.cpp include/cdpr/cdpr.h)
+target_link_libraries(cdpr ${catkin_LIBRARIES} ${VISP_LIBRARIES})

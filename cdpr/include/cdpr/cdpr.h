@@ -2,6 +2,8 @@
 #define CDPR_H
 
 #include <ros/ros.h>
+#include <ros/publisher.h>
+#include <ros/subscriber.h>
 #include <sensor_msgs/JointState.h>
 #include <gazebo_msgs/LinkState.h>
 #include <geometry_msgs/Pose.h>
@@ -29,8 +31,6 @@ public:
 
     // structure matrix
     void computeW(vpMatrix &W);
-
-
 
 protected:
     // subscriber to gazebo data

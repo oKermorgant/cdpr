@@ -23,13 +23,17 @@ if __name__ == '__main__':
     if not exists(model):
         print(model + ' not found')
         sys.exit(0)
-        
-    # check point values are all doubles for C++ parser
+            
     d_config = yaml.load(file(model))
+    
+    # check point values are all doubles for C++ parser
     for i in xrange(len(d_config['points'])):
         for j in xrange(3):
             d_config['points'][i]['frame'][j] = float(d_config['points'][i]['frame'][j])
             d_config['points'][i]['platform'][j] = float(d_config['points'][i]['platform'][j])
+    # same check for inertia matrix
+    for i in xrange(6):
+        d_config['platform']['inertia'][i] = float(d_config['platform']['inertia'][i])
             
     # re-write config
     with open(model,'w') as f:
