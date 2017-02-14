@@ -216,8 +216,6 @@ int main(int argc, char ** argv)
         y = points[i]["frame"][1];
         z = points[i]["frame"][2];
         frame_p.push_back(vpTranslationVector(x, y, z));
-     
-
     }
      
 

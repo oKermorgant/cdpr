@@ -318,12 +318,12 @@
       </collision>
       <inertial>
         <inertia>
-          <ixx>100</ixx>
-          <iyy>100</iyy>
-          <izz>100</izz>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyz>0</iyz>
+          <ixx>100.0</ixx>
+          <iyy>100.0</iyy>
+          <izz>100.0</izz>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
         </inertia>
         <mass>20</mass>
       </inertial>

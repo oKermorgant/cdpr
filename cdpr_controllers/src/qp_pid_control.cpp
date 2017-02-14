@@ -1,5 +1,6 @@
 
 #include <cdpr/cdpr.h>
+#include <cdpr_controllers/qp.h>
 
 using namespace std;
 
@@ -49,6 +50,25 @@ int main(int argc, char ** argv)
     Param(nh, "Ki", Ki);
     Param(nh, "Kd", Kd);
 
+    // QP variables
+    double fmin, fmax;    robot.tensionMinMax(fmin, fmax);
+    vpMatrix C;
+    vpColVector r, d;
+
+    // constraints = fmin < f < fmax
+    C.resize(2*n, n);
+    d.resize(2*n);
+    for(unsigned int i=0;i<n;++i)
+    {
+        // f < fmax
+        C[i][i] = 1;
+        d[i] = fmax;
+
+        // -f < -fmin
+        C[i+n][i] = -1;
+        d[i+n] = -fmin;
+    }
+
     cout << "CDPR control ready" << fixed << endl;
 
     while(ros::ok())
@@ -89,7 +109,12 @@ int main(int argc, char ** argv)
             // build W matrix depending on current attach points
             robot.computeW(W);
 
-            f = W.pseudoInverse() * RR.transpose()* (tau - g);
+            // solve with QP
+            // min ||W.f + g - tau||
+            // st fmin < f < fmax
+           solve_qp::solveQPi(W, RR.t()*(tau-g), C, d, f);
+
+            //f = W.pseudoInverse() * RR.transpose()* (tau - g);
             cout << "Checking W.f+g in platform frame: " << (W*f).t() << fixed << endl;
             cout << "sending tensions: " << f.t() << endl;
 
