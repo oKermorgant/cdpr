@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-  <node name="pseudo_feature_extractor" pkg="vision_control_cdpr" type="pseudo_feature_extractor" respawn="false" output="screen">
-    <remap from="/pseudo_feature_extractor/link_states" to="/gazebo/link_states" />
-    <remap from="/pseudo_feature_extractor/image_in" to="/cam1/camera/image_out" />
-  </node>
-</launch>

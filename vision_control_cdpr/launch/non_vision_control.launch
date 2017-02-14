@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-  <node name="non_vision_control" pkg="vision_control_cdpr" type="non_vision_control" respawn="false" output="screen">
-    <remap from="/non_vision_control/link_states" to="/gazebo/link_states" />
-  </node>
-</launch>
