@@ -13,7 +13,7 @@
     <node name="robot_sp" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model $(arg model) -file $(find cdpr)/sdf/$(arg model).sdf -x 0 -y -0. -z 0 -R 0 -P 0 -Y 0.0"/>    
     
     <!-- load model description -->
-    <rosparam file="$(find cdpr)/sdf/$(arg model).yaml" command="load" ns="model"/>
+    <rosparam file="$(find cdpr)/sdf/$(arg model).yaml" command="load" ns="model"/>    
 
     <node pkg="cdpr_controllers" type="pid_control" name="pid_control" output="screen">
     </node>
