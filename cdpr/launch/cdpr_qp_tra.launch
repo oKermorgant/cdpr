@@ -17,10 +17,10 @@
     <rosparam file="$(find cdpr)/sdf/$(arg model).yaml" command="load" ns="model"/>
 
     
-<!-- 
+
     <node pkg="cdpr_controllers" type="qp_test" name="qp_test" output="screen">
     </node>
--->
+
 
     <!-- generate trajectory -->
     <node pkg="trajectory_generator" type="trajectory" name="trajectory_generator" output="screen">
