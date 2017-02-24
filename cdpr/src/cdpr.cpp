@@ -1,4 +1,4 @@
-#include <cdpr/cdpr.h>
+ #include <cdpr/cdpr.h>
 
 using std::endl;
 using std::cout;
@@ -12,6 +12,11 @@ CDPR::CDPR(ros::NodeHandle &_nh)
 
     // init listener to pose setpoint
     setpoint_sub = _nh.subscribe("pf_setpoint", 1, &CDPR::Setpoint_cb, this);
+
+    desiredVel_sub = _nh.subscribe("desired_vel", 1, &CDPR::DesiredVel_cb, this);
+    trajectory_ok=false;
+
+    desiredAcc_sub = _nh.subscribe("desired_acc", 1, &CDPR::DesiredAcc_cb, this);
 
     // init listener to cable states
     cables_sub = _nh.subscribe("cable_states", 1, &CDPR::Cables_cb, this);
@@ -74,25 +79,28 @@ CDPR::CDPR(ros::NodeHandle &_nh)
 
 void CDPR::computeW(vpMatrix &W)
 {
+    
     // build W matrix depending on current attach points
     vpTranslationVector T;  M_.extract(T);
     vpRotationMatrix R;     M_.extract(R);
 
     vpTranslationVector f;
-    vpColVector w;
-    for(unsigned int i=0;i<n_cable;++i)
-    {
-        // vector between platform point and frame point in platform frame
-        f = R.t() * (Pf[i] - T) + Pp[i];
-        f /= f.euclideanNorm();
-        // corresponding force in platform frame
-        w = Pp[i].skew() * f;
-        for(unsigned int k=0;k<3;++k)
+    vpColVector w;  
+        for(unsigned int i=0;i<n_cable;++i)
         {
-            W[k][i] = f[k];
-            W[k+3][i] = w[k];
+            // vector between platform point and frame point in platform frame
+            f = R.t() * (Pf[i] - T) + Pp[i];
+            f /= f.euclideanNorm();
+            // corresponding force in platform frame
+            w = Pp[i].skew() * f;
+            for(unsigned int k=0;k<3;++k)
+            {
+                 W[k][i] = f[k];
+                 W[k+3][i] = w[k];
+            }
         }
-    }
+   
+   
 }
 
 

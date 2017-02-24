@@ -39,3 +39,17 @@ target_link_libraries(pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES})
 # basic PID controller + QP for platform control to give an example
 add_executable(qp_pid_control src/qp_pid_control.cpp include/cdpr_controllers/qp.h)
 target_link_libraries(qp_pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES})
+
+# Feekback linearization controller for platform control to give an example
+add_executable(qp_ctc_control
+ 	 	src/qp_ctc_control.cpp
+	 	include/cdpr_controllers/qp.h	
+		)   
+target_link_libraries(qp_ctc_control ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+
+add_executable(qp_test
+ 	 	src/qp_test.cpp
+	 	include/cdpr_controllers/qp.h	
+		)   
+target_link_libraries(qp_test ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+ 
