@@ -48,3 +48,9 @@ add_executable(qp_test
 		)   
 target_link_libraries(qp_test ${catkin_LIBRARIES} ${VISP_LIBRARIES})
  
+# Closed form control method 
+ add_executable(closed_form
+ 	 	src/closed_form.cpp
+	 	include/cdpr_controllers/qp.h	
+		)   
+target_link_libraries(closed_form ${catkin_LIBRARIES} ${VISP_LIBRARIES})

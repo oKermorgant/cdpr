@@ -62,9 +62,16 @@ int main(int argc, char ** argv)
       Acc=tra.getacceleration(t,A);
       tra.sendDesiredpara(P.t(), Vel.t(), Acc.t());
     }
+   else
+   {
+     tra.sendDesiredpara(P.t(), Vel.t(), Acc.t());
+   }
+
+
+   cout << " Desired velocity" << P <<endl;
    // cout << " The trajectory has been tracked" << endl;
-    cout << " Desired velocity" << Vel <<endl;
-    cout << " Desired acceleration" << Acc <<endl;
+   // cout << " Desired velocity" << Vel <<endl;
+    //cout << " Desired acceleration" << Acc <<endl;
     inter++;
     cout << " interation number" << inter <<endl;
     ros::spinOnce();
