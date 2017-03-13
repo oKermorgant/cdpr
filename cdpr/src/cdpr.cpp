@@ -1,4 +1,5 @@
  #include <cdpr/cdpr.h>
+#include <cmath>
 
 using std::endl;
 using std::cout;
@@ -99,8 +100,38 @@ void CDPR::computeW(vpMatrix &W)
                  W[k+3][i] = w[k];
             }
         }
-   
-   
+}
+
+void CDPR::computeLength(vpColVector &L)
+{
+       // build W matrix depending on current attach points
+    vpTranslationVector T;  M_.extract(T);
+    vpRotationMatrix R;     M_.extract(R);
+
+    vpTranslationVector f;
+    for(unsigned int i=0;i<n_cable;++i)
+        {
+            // vector between platform point and frame point in platform frame
+            f = R.t() * (Pf[i] - T) + Pp[i];
+            f= R *f;
+            L[i]= sqrt(f.sumSquare());       
+        }
+}
+
+void CDPR::computeDesiredLength(vpColVector &Ld)
+{
+       // build W matrix depending on current attach points
+    vpTranslationVector Td;  Md_.extract(Td);
+    vpRotationMatrix Rd;     Md_.extract(Rd);
+
+    vpTranslationVector fd;
+    for(unsigned int i=0;i<n_cable;++i)
+        {
+            // vector between platform point and frame point in platform frame
+            fd = Rd.t() * (Pf[i] - Td) + Pp[i];
+            fd = Rd *fd;
+            Ld[i]= sqrt(fd.sumSquare());       
+        }
 }
 
 
@@ -113,7 +144,6 @@ void CDPR::sendTensions(vpColVector &f)
 
     tensions_pub.publish(tensions_msg);
 }
-
 
 
 

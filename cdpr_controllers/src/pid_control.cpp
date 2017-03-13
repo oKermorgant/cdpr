@@ -45,7 +45,7 @@ int main(int argc, char ** argv)
     vpRotationMatrix R;
 
     // gain
-    double Kp = 100, Ki = 0.5, Kd = 2;  // tuned for Caroca
+    double Kp = 1000, Ki = 5, Kd = 20;  // tuned for Caroca
     Param(nh, "Kp", Kp);
     Param(nh, "Ki", Ki);
     Param(nh, "Kd", Kd);

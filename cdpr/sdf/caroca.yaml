@@ -11,10 +11,10 @@ joints:
 platform:
   color: Blue
   inertia: [100.0, 100.0, 100.0, 0.0, 0.0, 0.0]
-  mass: 20
+  mass: 150
   position:
     rpy: [0, 0, 0]
-    xyz: [0, 0, 1.5]
+    xyz: [1.5, 1.5, 0.5]
   size: [1.2, 0.6, 0.4]
   type: box
   visual: box

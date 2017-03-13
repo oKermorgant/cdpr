@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="paused" default="true"/>
-    <arg name="model" default="cube"/>
+    <arg name="model" default="caroca"/>
     <arg name="model_tra" default="trajectory"/>
     
     <!-- Launch Gazebo with empty world-->
@@ -15,17 +15,17 @@
     
     <!-- load model description -->
     <rosparam file="$(find cdpr)/sdf/$(arg model).yaml" command="load" ns="model"/>
+    <rosparam file="$(find trajectory_generator)/sdf/$(arg model_tra).yaml" command="load" ns="Tra"/>
 
     <node pkg="cdpr_controllers" type="pid_control" name="pid_control" output="screen">
     </node>
-
+   
 
 
     <!-- generate trajectory -->
-
+<!--
     <node pkg="trajectory_generator" type="trajectory" name="trajectory_generator" output="screen">
-    <rosparam file="$(find trajectory_generator)/sdf/$(arg model_tra).yaml" command="load" ns="Tra"/>
     </node>
 
-
+-->
 </launch>

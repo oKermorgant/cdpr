@@ -36,6 +36,8 @@ public:
     // structure matrix
     //void computeW(vpMatrix &W);
     void computeW(vpMatrix &W);
+    void computeLength(vpColVector &L);
+    void computeDesiredLength(vpColVector &Ld);
 
 protected:
     // subscriber to gazebo data

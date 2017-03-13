@@ -33,20 +33,31 @@ include_directories(
 )
 
 # basic PID controller for platform control to give an example
-add_executable(pid_control src/pid_control.cpp)
+add_executable(	pid_control 
+		src/pid_control.cpp)
 target_link_libraries(pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES})
 
 # basic PID controller + QP for platform control to give an example
-add_executable(qp_pid_control src/qp_pid_control.cpp include/cdpr_controllers/qp.h)
+add_executable(	qp_pid_control 
+	       	src/qp_pid_control.cpp 
+		include/cdpr_controllers/qp.h)
 target_link_libraries(qp_pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES})
 
 # Feekback linearization controller for platform control to give an example
 
-add_executable(qp_test
- 	 	src/qp_test.cpp
+add_executable( CTC_qp_taskspace
+ 	 	src/CTC_qp_taskspace.cpp
 	 	include/cdpr_controllers/qp.h	
 		)   
-target_link_libraries(qp_test ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+target_link_libraries( CTC_qp_taskspace ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+
+# Feekback linearization controller for platform control to give an example
+
+add_executable( CTC_qp_jointspace
+ 	 	src/CTC_qp_jointspace.cpp
+	 	include/cdpr_controllers/qp.h	
+		)   
+target_link_libraries( CTC_qp_jointspace ${catkin_LIBRARIES} ${VISP_LIBRARIES})
  
 # Closed form control method 
  add_executable(closed_form

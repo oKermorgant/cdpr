@@ -34,8 +34,9 @@ int main(int argc, char ** argv)
     CDPR robot(nh);
     const unsigned int n = robot.n_cables();
 
-    vpMatrix W(6, n);   // tau = W.T+ g
-    vpColVector g(6), tau(6), err(6), T, err_d(6), err0(6),err_p(6), err_a(6),err_i(6);
+    vpMatrix W(6, n), J(n,6);   // tau = W.T+ g
+    vpColVector g(6), err(6), T(n), err_d(6), err0(6),err_p(6), err_a(6),err_i(6);
+    vpColVector L(n), tau(n), Ld_e(n), Ld(n), L_e(n), L_p(n),L_d(n);
     g[2] = - robot.mass() * 9.81;
     vpMatrix RR(6,6),RR_p(6,6);
 
@@ -45,7 +46,7 @@ int main(int argc, char ** argv)
     vpRotationMatrix R,R_p,R_pp;
 
     // gain
-    double Kp = 15, Kd = 15;  // tuned for Caroca
+    double Kp = 15, Kd = 15 ;  // tuned for Caroca
 
     Param(nh, "Kp", Kp);
     Param(nh, "Kd", Kd);
@@ -92,6 +93,9 @@ int main(int argc, char ** argv)
     }
 
     M_inertia[0][0]=M_inertia[1][1]=M_inertia[2][2]=robot.mass();
+    // initiallize the length of the length of cables
+    robot.computeLength(L);
+    L_p=L;
 
     cout << "CDPR control ready" << fixed << endl; 
     while(ros::ok())
@@ -126,12 +130,31 @@ int main(int argc, char ** argv)
             M_inertia.insert(robot.inertia(),3,3);
 
             // equality  constraint 
-            b=M_inertia*(a_d+Kp*err+Kd*(v_d-v))-g;
-            cout << "Desired wrench in platform frame: " << (RR.transpose()*(b-g)).t() << fixed << endl;
-            
+            b=M_inertia*a_d-g;
+            //cout << "Desired wrench in platform frame: " << (RR.transpose()*(b-g)).t() << fixed << endl;
+            cout << " Velocity error: " << (v_d-v).t()<< endl;
+            cout << " d: " << d.t()<< endl;
             // build W matrix depending on current attach points
             robot.computeW(W);
-            
+
+            W= RR*W;
+            J=-W.t();
+
+            robot.computeLength(L);
+            robot.computeDesiredLength(Ld);
+            L_d= (L-L_p)/dt;
+            //  previous length  of the robot
+            L_p=L;
+
+             // the error of the L velocity 
+            Ld_e= J*v_d-L_d;
+            L_e= Ld-L;
+
+             tau=Kp*L_e+Kd*Ld_e;
+             b=  J.pseudoInverse() * tau+b;
+
+
+
             // solve with QP
             // min ||QT-r||
             // st: C.T<=d  (fmin < f < fmax)
@@ -148,7 +171,7 @@ int main(int argc, char ** argv)
             //T=W.pseudoInverse()*RR.transpose()*b;
             //cout << "Desired wrench in platform frame: " << (RR.transpose()*(tau - g)).t() << fixed << endl;
 
-            cout << "Checking W.f+g in platform frame: " << (W*T).t() << fixed << endl;
+            //cout << "Checking W.f+g in platform frame: " << (W*T).t() << fixed << endl;
             cout << "sending tensions: " << T.t() << endl;
 
             // send tensions
