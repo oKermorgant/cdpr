@@ -36,17 +36,17 @@ int main(int argc, char ** argv)
 
     vpMatrix W(6, n), J(n,6);   // tau = W.T+ g
     vpColVector g(6), err(6), T(n), err_d(6), err0(6),err_p(6), err_a(6),err_i(6);
-    vpColVector L(n), tau(n), Ld_e(n), Ld(n), L_e(n), L_p(n),L_d(n);
+    vpColVector L(n), tau(n), Le_d(n), Ld(n), Le(n), L_p(n), L_d(n), Ld_p(n), Ld_d(n);
     g[2] = - robot.mass() * 9.81;
-    vpMatrix RR(6,6),RR_p(6,6);
+    vpMatrix RR(6,6),RR_d(6,6), Wd(6,n);
 
     double dt = 0.01;
     ros::Rate loop(1/dt);
     vpHomogeneousMatrix M, Md, Md_p,Md_pp;
-    vpRotationMatrix R,R_p,R_pp;
+    vpRotationMatrix R,Rd;
 
     // gain
-    double Kp = 15, Kd = 15 ;  // tuned for Caroca
+    double Kp = 1000, Kd = 1000 ;  // tuned for Caroca
 
     Param(nh, "Kp", Kp);
     Param(nh, "Kd", Kd);
@@ -55,21 +55,25 @@ int main(int argc, char ** argv)
     double fmin, fmax;    robot.tensionMinMax(fmin, fmax);
     vpMatrix C,M_inertia(6,6),Q;
 
-    // desired parameter
+    // definition of the closed form parameter
+     vpColVector f_v, f_mM;
+     double f_m;
+     f_m= (fmax+fmin)/2;
+     f_v.resize(n);
+     f_mM.resize(n);
+
+    for (unsigned int i = 0; i < robot.n_cables(); ++i)
+            {
+               f_mM[i]=f_m;
+            }
+
+    // desired parameter for qp solver
     vpColVector a_d, v_d, v;
     v_d.resize(6);
     a_d.resize(6);
     v.resize(6);
-   /* // closed-form
-    vpColVector f_v,f_mM;
-    double f_m;
-    int num_setpoints=1;
 
-    f_m= (fmax+fmin)/2;
-
-    f_v.resize(n);
-    f_mM.resize(n);*/
-
+    // initialize the constraint condition for the qudratic  programming 
     vpColVector b(6),r,d;
     r.resize(n);
     Q.resize(n,n);
@@ -93,9 +97,6 @@ int main(int argc, char ** argv)
     }
 
     M_inertia[0][0]=M_inertia[1][1]=M_inertia[2][2]=robot.mass();
-    // initiallize the length of the length of cables
-    robot.computeLength(L);
-    L_p=L;
 
     cout << "CDPR control ready" << fixed << endl; 
     while(ros::ok())
@@ -110,7 +111,8 @@ int main(int argc, char ** argv)
             // current position
             robot.getPose(M);
             M.extract(R);
-
+             robot.getDesiredPose(Md);
+             Md.extract(Rd);
             // position error in platform frame
             err = robot.getPoseError();
             cout << "Position error in platform frame: " << err.t() << fixed << endl;
@@ -118,40 +120,54 @@ int main(int argc, char ** argv)
                 for(unsigned int j=0;j<3;++j)
                     RR[i][j] = RR[i+3][j+3] = R[i][j];
 
+            for(unsigned int i=0;i<3;++i)
+                for(unsigned int j=0;j<3;++j)
+                    RR_d[i][j] = RR_d[i+3][j+3] = Rd[i][j];
+
             err = RR * err;
 
+            // obtain the velocity and the acceleration
             robot.getVelocity(v);
             robot.getDesiredVelocity(v_d);
             robot.getDesiredAcceleration(a_d);
 
              cout << "Desired acc: " << a_d.t() << fixed << endl;
-            /*for(unsigned int i=0;i<6;++i)
-                    err_a[i] = err_p[i] / (dt * dt);*/
-            M_inertia.insert(robot.inertia(),3,3);
+
+             M_inertia.insert(robot.inertia(),3,3);
+             //M_inertia.insert((R*robot.inertia()*R.t()),3,3); 
 
             // equality  constraint 
             b=M_inertia*a_d-g;
             //cout << "Desired wrench in platform frame: " << (RR.transpose()*(b-g)).t() << fixed << endl;
-            cout << " Velocity error: " << (v_d-v).t()<< endl;
-            cout << " d: " << d.t()<< endl;
+          
+            
             // build W matrix depending on current attach points
             robot.computeW(W);
 
             W= RR*W;
-            J=-W.t();
-
+            J=  -W.t();
+            // computation of cables length
             robot.computeLength(L);
             robot.computeDesiredLength(Ld);
-            L_d= (L-L_p)/dt;
-            //  previous length  of the robot
-            L_p=L;
 
-             // the error of the L velocity 
-            Ld_e= J*v_d-L_d;
-            L_e= Ld-L;
+            //  the desired structure matrix
+            robot.computeDesiredW(Wd);
 
-             tau=Kp*L_e+Kd*Ld_e;
-             b=  J.pseudoInverse() * tau+b;
+            Wd=RR_d*Wd;
+
+            robot.sendError(err);
+     
+
+            Le_d=  -Wd.t() *v_d- J*v;
+
+            Le= Ld-L;
+            robot.sendLengthError(Le);
+            cout << "length error:" << Le.t() << endl;
+
+           
+             tau=Kp*Le+Kd*Le_d;
+             b += - Wd* tau;
+             cout << " b: " << b.t()<< endl;
 
 
 
@@ -159,19 +175,24 @@ int main(int argc, char ** argv)
             // min ||QT-r||
             // st: C.T<=d  (fmin < f < fmax)
             // st: W.T=M.xdd-g
-            solve_qp::solveQP(Q,r,RR*W,b,C,d,T);
+            //solve_qp::solveQP(Q,r,RR*W,b,C,d,T);
            
           
             // solve with QP
             // min ||W.T + g - tau||->||W.T-b||
             // st:st: C.T<=d  (fmin < f< fmax)
-            //solve_qp::solveQPi(W, RR.t()*b, C, d, T);
+            //solve_qp::solveQPi(W, b, C, d, T);
 
             // Pseudoinverse method
             //T=W.pseudoInverse()*RR.transpose()*b;
+            // T=W.pseudoInverse()*b;
             //cout << "Desired wrench in platform frame: " << (RR.transpose()*(tau - g)).t() << fixed << endl;
 
-            //cout << "Checking W.f+g in platform frame: " << (W*T).t() << fixed << endl;
+             // solve with closed form
+             f_v= W.pseudoInverse()*(b - (W*f_mM));
+             T=f_mM+f_v;
+
+            cout << "Checking W.T-g in platform frame: " << (W*T).t() << fixed << endl;
             cout << "sending tensions: " << T.t() << endl;
 
             // send tensions

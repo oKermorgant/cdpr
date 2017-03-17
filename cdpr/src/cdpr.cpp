@@ -68,13 +68,22 @@ CDPR::CDPR(ros::NodeHandle &_nh)
 
     // publisher to cable tensions
     tensions_pub = _nh.advertise<sensor_msgs::JointState>("cable_command", 1);
+
+    // publishe the poses error
+    error_pub = _nh.advertise<geometry_msgs::Twist>("error",1);
+
+       // publishe the length error
+    errorL_pub = _nh.advertise<sensor_msgs::JointState>("errorL",1);
+
     char cable_name[256];
     for(unsigned int i=0;i<n_cable;++i)
     {
         sprintf(cable_name, "cable%i", i);
         tensions_msg.name.push_back(std::string(cable_name));
+         length_e.name.push_back(std::string(cable_name));
     }
     tensions_msg.effort.resize(n_cable);
+    length_e.effort.resize(n_cable);
 }
 
 
@@ -90,7 +99,7 @@ void CDPR::computeW(vpMatrix &W)
         for(unsigned int i=0;i<n_cable;++i)
         {
             // vector between platform point and frame point in platform frame
-            f = R.t() * (Pf[i] - T) + Pp[i];
+            f = R.t() * (Pf[i] - T) - Pp[i];
             f /= f.euclideanNorm();
             // corresponding force in platform frame
             w = Pp[i].skew() * f;
@@ -102,6 +111,31 @@ void CDPR::computeW(vpMatrix &W)
         }
 }
 
+void CDPR::computeDesiredW(vpMatrix &Wd)
+{
+    
+    // build W matrix depending on current attach points
+    vpTranslationVector Td;  Md_.extract(Td);
+    vpRotationMatrix Rd;     Md_.extract(Rd);
+
+    vpTranslationVector fd, P_p;
+    vpColVector wd;  
+        for(unsigned int i=0;i<n_cable;++i)
+        {
+            // vector between platform point and frame point in platform frame
+            fd= Rd.t() * (Pf[i] - Td) - Pp[i];
+            fd /= fd.euclideanNorm();
+            //fd=Rd*fd;
+            //P_p = Rd*Pp[i];
+            // corresponding force in platform frame
+            wd = Pp[i].skew() * fd;
+            for(unsigned int k=0;k<3;++k)
+            {
+                 Wd[k][i] = fd[k];
+                 Wd[k+3][i] = wd[k];
+            }
+        }
+}
 void CDPR::computeLength(vpColVector &L)
 {
        // build W matrix depending on current attach points
@@ -112,10 +146,12 @@ void CDPR::computeLength(vpColVector &L)
     for(unsigned int i=0;i<n_cable;++i)
         {
             // vector between platform point and frame point in platform frame
-            f = R.t() * (Pf[i] - T) + Pp[i];
-            f= R *f;
-            L[i]= sqrt(f.sumSquare());       
+            f = R.t() * (Pf[i] - T) - Pp[i];
+            f=R*f;
+            //L[i]= sqrt(f.sumSquare());   
+            L[i]=sqrt(f[0]*f[0]+f[1]*f[1]+f[2]*f[2]) ;   
         }
+          cout << "the current length " << L.t() << endl;
 }
 
 void CDPR::computeDesiredLength(vpColVector &Ld)
@@ -128,10 +164,13 @@ void CDPR::computeDesiredLength(vpColVector &Ld)
     for(unsigned int i=0;i<n_cable;++i)
         {
             // vector between platform point and frame point in platform frame
-            fd = Rd.t() * (Pf[i] - Td) + Pp[i];
-            fd = Rd *fd;
-            Ld[i]= sqrt(fd.sumSquare());       
+            fd = Rd.t() * (Pf[i] - Td) - Pp[i];
+            fd = Rd*fd;
+            //Ld[i]= sqrt(fd.sumSquare());       
+            Ld[i]=sqrt(fd[0]*fd[0]+fd[1]*fd[1]+fd[2]*fd[2]);
         }
+
+        cout << "the desired length " << Ld.t() << endl;
 }
 
 
@@ -143,6 +182,22 @@ void CDPR::sendTensions(vpColVector &f)
     tensions_msg.header.stamp = ros::Time::now();
 
     tensions_pub.publish(tensions_msg);
+}
+
+void CDPR::sendError(vpColVector &e)
+{
+    
+    control_error.linear.x = e[0]; control_error.linear.y = e[1]; control_error.linear.z = e[2];
+    control_error.angular.x=e[3]; control_error.angular.y=e[4]; control_error.angular.z=e[5]; 
+    error_pub.publish(control_error);
+}
+
+void CDPR::sendLengthError(vpColVector &e_l)
+{
+    for (unsigned int i = 0; i < n_cable; ++i)
+        length_e.effort[i]=e_l[i];
+    length_e.header.stamp = ros::Time::now();
+    errorL_pub.publish(length_e);
 }
 
 

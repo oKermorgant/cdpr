@@ -18,13 +18,14 @@
     <rosparam file="$(find trajectory_generator)/sdf/$(arg model_tra).yaml" command="load" ns="Tra"/>
    
 
-
+<!--
     <node pkg="cdpr_controllers" type="CTC_qp_taskspace" name="CTC_qp_taskspace" output="screen">
     </node>
-<!--
+
+-->
     <node pkg="cdpr_controllers" type="CTC_qp_jointspace" name="CTC_qp_jointspace" output="screen">
     </node>
--->
+
 
 
     <!-- generate trajectory -->

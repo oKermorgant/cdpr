@@ -19,7 +19,16 @@ public:
     inline void getPose(vpHomogeneousMatrix &M) {M = M_;}
     inline void getVelocity(vpColVector &v) {v = v_;}
     inline void getDesiredPose(vpHomogeneousMatrix &M) {M = Md_;}
-    inline vpPoseVector getPoseError() {return vpPoseVector(M_.inverse()*Md_);}
+    inline vpColVector getPoseError() {
+         /*vpPoseVector p_c,p_d;
+         vpColVector e;
+         e.resize(6);
+         p_c=vpPoseVector(M_); p_d=vpPoseVector(Md_);
+         for (int i = 0; i < 6; ++i)
+         {
+             e[i]=p_d[i]-p_c[i];
+         }*/
+        return vpPoseVector(M_.inverse()*Md_);}
     inline vpPoseVector getDesiredPoseError(vpHomogeneousMatrix &M_p, vpHomogeneousMatrix &M_c) {return vpPoseVector(M_c.inverse()*M_p);}
 
     inline void getDesiredVelocity(vpColVector &v) {v = v_d;}
@@ -36,14 +45,23 @@ public:
     // structure matrix
     //void computeW(vpMatrix &W);
     void computeW(vpMatrix &W);
+    void computeDesiredW(vpMatrix &Wd);
     void computeLength(vpColVector &L);
     void computeDesiredLength(vpColVector &Ld);
-
+    void sendError(vpColVector &e);
+    void sendLengthError(vpColVector &e_l);
 protected:
     // subscriber to gazebo data
     ros::Subscriber cables_sub, platform_sub;
     bool cables_ok, platform_ok, trajectory_ok;
     sensor_msgs::JointState cable_states;
+
+    // 
+    ros::Publisher error_pub;
+    geometry_msgs::Twist control_error;
+
+    ros::Publisher errorL_pub;
+    sensor_msgs::JointState length_e;
 
     // subscriber to desired pose
     ros::Subscriber setpoint_sub, desiredVel_sub, desiredAcc_sub;
@@ -57,10 +75,6 @@ protected:
     vpHomogeneousMatrix M_, Md_;
     vpColVector v_, v_d, a_d;
 
-/*    v_.resize(6);
-    v_d.resize(6);
-    a_d.resize(6);
-*/
     // model data
     double mass_, f_min, f_max;
     vpMatrix inertia_;
@@ -76,8 +90,8 @@ protected:
         M_.insert(vpTranslationVector(_msg->pose.position.x, _msg->pose.position.y, _msg->pose.position.z));
         M_.insert(vpQuaternionVector(_msg->pose.orientation.x, _msg->pose.orientation.y, _msg->pose.orientation.z,_msg->pose.orientation.w));
         v_.resize(6);
-        v_[0]=_msg->twist.linear.x; v_[1]=_msg->twist.linear.y; v_[2]=_msg->twist.linear.z;
-        //v_[3]=_msg->twist.angular.x; v_[4]=_msg->twist.angular.y; v_[5]=_msg->twist.angular.z;
+        v_[0]=_msg->twist.linear.x; v_[1]=_msg->twist.linear.y; v_[2]=_msg->twist.linear.z; 
+        v_[3]=_msg->twist.angular.x;  v_[4]=_msg->twist.angular.y; v_[5]=_msg->twist.angular.z;
     }
 
     // callback for pose setpoint

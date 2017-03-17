@@ -13,7 +13,6 @@ using namespace std;
  *
  */
 
-
 void Param(ros::NodeHandle &nh, const string &key, double &val)
 {
     if(nh.hasParam(key))
@@ -35,21 +34,22 @@ int main(int argc, char ** argv)
     const unsigned int n = robot.n_cables();
 
     vpMatrix W(6, n);   // tau = W.T+ g
-    vpColVector g(6), tau(6), err(6), T, err_d(6), err0(6),err_p(6), err_a(6),err_i(6);
+    vpColVector g(6), tau(6), err(6), T,  err0(6);
     g[2] = - robot.mass() * 9.81;
-    vpMatrix RR(6,6),RR_p(6,6);
+    vpMatrix RR(6,6);
 
+    
     double dt = 0.01;
     ros::Rate loop(1/dt);
     vpHomogeneousMatrix M, Md, Md_p,Md_pp;
     vpRotationMatrix R,R_p,R_pp;
 
     // gain
-    double Kp = 1500, Kd = 1500 ;  // tuned for Caroca
+    double Kp = 15, Kd = 15 ;  // tuned for Caroca
 
     Param(nh, "Kp", Kp);
     Param(nh, "Kd", Kd);
-
+    
     // QP variables
     double fmin, fmax;    robot.tensionMinMax(fmin, fmax);
     vpMatrix C,M_inertia(6,6),Q;
@@ -59,15 +59,7 @@ int main(int argc, char ** argv)
     v_d.resize(6);
     a_d.resize(6);
     v.resize(6);
-   /* // closed-form
-    vpColVector f_v,f_mM;
-    double f_m;
-    int num_setpoints=1;
 
-    f_m= (fmax+fmin)/2;
-
-    f_v.resize(n);
-    f_mM.resize(n);*/
 
     vpColVector b(6),r,d;
     r.resize(n);
@@ -114,23 +106,25 @@ int main(int argc, char ** argv)
                 for(unsigned int j=0;j<3;++j)
                     RR[i][j] = RR[i+3][j+3] = R[i][j];
 
-            err = RR * err;
 
+            //err = RR* err;
             robot.getVelocity(v);
             robot.getDesiredVelocity(v_d);
             robot.getDesiredAcceleration(a_d);
 
              cout << "Desired acc: " << a_d.t() << fixed << endl;
-            /*for(unsigned int i=0;i<6;++i)
-                    err_a[i] = err_p[i] / (dt * dt);*/
 
+             M_inertia.insert(robot.inertia(),3,3);
+             // M_inertia.insert((R*robot.inertia()*R.t()),3,3); 
 
+              b= M_inertia*(a_d+Kp*err+Kd*(v_d-v))-g;
 
-            M_inertia.insert((R*robot.inertia()*R.t()),3,3);
-
-            // equality  constraint 
-            b=M_inertia*(a_d+Kp*err+Kd*(v_d-v))-g;
             //cout << "Desired wrench in platform frame: " << (RR.transpose()*(b-g)).t() << fixed << endl;
+            err=Kp*err;
+            //v=v_d-v;
+             v=(err - err0)/dt;
+            robot.sendError(err);
+    
             cout << " Velocity error: " << (v_d-v).t()<< endl;
             cout << " Inertia matrix: " <<M_inertia<< endl;
             cout << " b: " << b.t()<< endl;

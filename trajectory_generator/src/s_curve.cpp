@@ -98,7 +98,7 @@ int main(int argc, char ** argv)
       Vel[0]= w*path.getvelocity(t,A5); Vel[1]=l*path.getvelocity(t,A5); Vel[2]= -(h_c-h_b)*path.getvelocity(t,A3);
       Acc[0]=w*path.getacceleration(t,A5);  Acc[1]=l*path.getacceleration(t,A5); Acc[2]= -(h_c-h_b)*path.getacceleration(t,A3);
    }
-   else if (inter>= t_3/dt && inter< t_4/dt)
+   else if (inter>= t_3/dt && inter<= t_4/dt)
    {
       P[0]= x_f[0]; P[1]= x_f[1]; P[2]= -h_b*path.getposition(t,A4)+h_b+x_i[2];
       Vel[0]=0;  Vel[1]=0; Vel[2]= -h_b*path.getvelocity(t,A4);

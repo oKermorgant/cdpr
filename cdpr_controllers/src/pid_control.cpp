@@ -74,6 +74,7 @@ int main(int argc, char ** argv)
 
             // position error in fixed frame
             err = RR * err;
+            robot.sendError(err);
             // I term to wrench in fixed frame
             for(unsigned int i=0;i<6;++i)
                 if(tau[i] < robot.mass()*9.81)

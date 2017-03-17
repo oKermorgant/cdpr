@@ -33,11 +33,8 @@ int main(int argc, char ** argv)
   C.resize(6,3);
 
   path.InitializeTime(t_i,t_f);
-  //t_i=0; t_f=5;
   path.InitializePose(x_i,x_f);
 
-  //x_i[0]=0; x_i[1]=0; x_i[2]= 1.5;
- // x_f[0]=2; x_f[1]=2; x_f[2]= 1;
   for (int i = 0; i < 3; ++i)
   {
     C[0][i]=x_i[i];
@@ -45,6 +42,7 @@ int main(int argc, char ** argv)
   }
    L=path.getLmatrix(t_f);
 
+  //A= L.pseudoInverse()*C;
   A= L.inverseByLU()*C;
 
 
@@ -66,7 +64,7 @@ int main(int argc, char ** argv)
     t=t_i+inter*dt;
     
     // Check the time period 
-    if (inter<=num)
+    if (inter<=(num+1))
     {
       P=path.getposition(t,A);
       Vel=path.getvelocity(t,A);
@@ -74,7 +72,7 @@ int main(int argc, char ** argv)
       path.sendDesiredpara(P.t(), Vel.t(), Acc.t());
     }
    else
-   {
+   { 
      path.sendDesiredpara(P.t(), Vel.t(), Acc.t());
    }
     pose.buildFrom(P[0], P[1],  P[2],  P[3],  P[4],  P[5]);

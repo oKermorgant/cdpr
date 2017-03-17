@@ -36,7 +36,7 @@ int main(int argc, char ** argv)
     const unsigned int n = robot.n_cables();
 
     vpMatrix W(6, n);   // tau = W.u + g
-    vpColVector g(6), tau(6), err(6), T, err_d(6), err0(6),err_p(6), err_a(6),err_i(6);
+    vpColVector g(6), err(6), T, err0(6);
     g[2] = - robot.mass() * 9.81;
     vpMatrix RR(6,6),RR_p(6,6);
 
@@ -46,14 +46,14 @@ int main(int argc, char ** argv)
     vpRotationMatrix R,R_p,R_pp;
 
     // gain
-    double Kp = 15, Kd = 15;  // tuned for Caroca
+    double Kp = 10, Kd =10;  // tuned for Caroca
 
     Param(nh, "Kp", Kp);
     Param(nh, "Kd", Kd);
 
     // QP variables
     double fmin, fmax;    robot.tensionMinMax(fmin, fmax);
-    vpMatrix C,M_inertia(6,6),Q;
+    vpMatrix C, M_inertia(6,6), Q;
 
     // desired parameter
     vpColVector a_d, v_d, v;
@@ -63,7 +63,7 @@ int main(int argc, char ** argv)
  // closed-form
     vpColVector f_v,f_mM;
     double f_m;
-    int num_setpoints=1;
+   // int num_setpoints=1;
 
     f_m= (fmax+fmin)/2;
 
@@ -90,11 +90,11 @@ int main(int argc, char ** argv)
     {
         // f < fmax
         C[i][i] = 1;
-        d[i] = (1/2*sqrt(robot.mass())+1)*f_m;
+        d[i] = fmax;
 
         // -f < -fmin
         C[i+n][i] = -1;
-        d[i+n] = -3/2*f_m;
+        d[i+n] = -fmin;
     }
 
     M_inertia[0][0]=M_inertia[1][1]=M_inertia[2][2]=robot.mass();
@@ -120,25 +120,34 @@ int main(int argc, char ** argv)
                 for(unsigned int j=0;j<3;++j)
                     RR[i][j] = RR[i+3][j+3] = R[i][j];
 
-            err = RR * err;
+            //err = RR * err;
 
             robot.getVelocity(v);
             robot.getDesiredVelocity(v_d);
             robot.getDesiredAcceleration(a_d);
 
              cout << "Desired acc: " << a_d.t() << fixed << endl;
-            /*for(unsigned int i=0;i<6;++i)
-                    err_a[i] = err_p[i] / (dt * dt);*/
-            M_inertia.insert(robot.inertia(),3,3);
+            
+            //  construct the inertia matrix
+            //M_inertia.insert(robot.inertia(),3,3);
 
+            M_inertia.insert((R*robot.inertia()*R.t()),3,3); 
             // equality  constraint 
             b=M_inertia*(a_d+Kp*err+Kd*(v_d-v))-g;
+
+
+            //cout << "Desired wrench in platform frame: " << (RR.transpose()*(b-g)).t() << fixed << endl;
+            err=Kp*err;
+            //v=v_d-v;
+            robot.sendError(err);
+
             cout << "Desired wrench in platform frame: " << (RR.transpose()*(b-g)).t() << fixed << endl;
             
             // build W matrix depending on current attach points
             robot.computeW(W);
 
             W=RR*W;
+
             //solve_qp::solveQP(Q,r,W,b,C,d,T);
 
             //T=W.pseudoInverse()*RR.transpose()*b;
@@ -153,7 +162,6 @@ int main(int argc, char ** argv)
             // st fmin < f < fmax
             //solve_qp::solveQPi(Q, (f_mM+f_v), C, d, T);
 
-            //f = W.pseudoInverse() * RR.transpose()* (tau - g);
             cout << "Checking W.f+g in platform frame: " << (W*T).t() << fixed << endl;
             cout << "sending tensions: " << T.t() << endl;
 

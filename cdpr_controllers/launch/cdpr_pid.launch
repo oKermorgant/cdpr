@@ -23,9 +23,9 @@
 
 
     <!-- generate trajectory -->
-<!--
+
     <node pkg="trajectory_generator" type="trajectory" name="trajectory_generator" output="screen">
     </node>
 
--->
+
 </launch>
