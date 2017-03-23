@@ -188,11 +188,20 @@ int main(int argc, char ** argv)
             // T=W.pseudoInverse()*b;
             //cout << "Desired wrench in platform frame: " << (RR.transpose()*(tau - g)).t() << fixed << endl;
 
-             // solve with closed form
-             f_v= W.pseudoInverse()*(b - (W*f_mM));
-             T=f_mM+f_v;
+              // construct the equality constriant
+            f_v= W.pseudoInverse()*(b - (W*f_mM));  
 
-            cout << "Checking W.T-g in platform frame: " << (W*T).t() << fixed << endl;
+            // solve with QP
+            // min ||Q.f_v -F_v||
+            // st fmin < f_v < fmax
+            //solve_qp::solveQP(Q,r,W,b,C,d,T);
+
+            solve_qp::solveQPi(Q, f_v, C, d, T);
+
+             T=f_mM+T;
+             
+            cout << "The wrench implemented by the cables: " << (W*T).t() << fixed << endl;
+            cout << "Desired external wrench in platform frame: " << (W*T+g).t()<< fixed << endl;
             cout << "sending tensions: " << T.t() << endl;
 
             // send tensions
