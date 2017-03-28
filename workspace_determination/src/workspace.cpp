@@ -2,6 +2,7 @@
 #include <cdpr/cdpr.h>
 #include <cdpr_controllers/qp.h>
 #include <math.h>
+#include <workspace_determination/workspace.h>
 
 using namespace std;
 
@@ -28,143 +29,72 @@ int main(int argc, char ** argv)
 
     cout.precision(3);
     // init ROS node
-    ros::init(argc, argv, "cdpr_control");
-    ros::NodeHandle nh;
+    ros::init(argc, argv, "workspace_determination");
+    ros::NodeHandle node_w;
+    
+    // declaration of the node
+    Workspace space(node_w);
 
-    // init CDPR class from parameter server
-    CDPR robot(nh);
-    const unsigned int n = robot.n_cables();
 
-    vpMatrix W(6, n);   // tau = W.u + g
-    vpColVector g(6), err(6), T, err0(6);
-    g[2] = - robot.mass() * 9.81;
-    vpMatrix RR(6,6),RR_p(6,6);
+    //initiallization of the parameter
+    double mass, x_b, y_b, z_b, x_s, y_s, z_s;
+    vpColVector boxsize(3), B(3);
+
+
+
+    // 
+
+    mass = node_w.mass();
+    node_w.getSize(boxsize);
+    node_w.getBoundary(B);
+    
+    x_b=abs(B[0]);
+    y_b=abs(B[1]);
+    z_b=abs(B[2]);
+    x_s=1/2*boxsize[0];
+    y_s=1/2*boxsize[1];
+    z_s=1/2*boxsize[2];
+
+    double inter, x, y, z=0;
+
+    dx=0.005;
+    dy=0.005;
+    dz=0.01;
+
+    inter_x= 2* x_b/dx;
+    inter_y= 2* y_b/dy;
+    inter_z= z_b/dz;
 
     double dt = 0.01;
     ros::Rate loop(1/dt);
-    vpHomogeneousMatrix M, Md, Md_p,Md_pp;
-    vpRotationMatrix R,R_p,R_pp;
+    std::vector<vpTranslationVector> P;
 
-    // gain
-    double Kp = 10, Kd =10;  // tuned for Caroca
-
-    Param(nh, "Kp", Kp);
-    Param(nh, "Kd", Kd);
-
-    // QP variables
-    double fmin, fmax;    robot.tensionMinMax(fmin, fmax);
-    vpMatrix C, M_inertia(6,6), Q;
-
-    // desired parameter
-    vpColVector a_d, v_d, v;
-    v_d.resize(6);
-    a_d.resize(6);
-    v.resize(6);
- // closed-form
-    vpColVector f_v,f_mM;
-    double f_m;
-   // int num_setpoints=1;
-
-    f_m= (fmax+fmin)/2;
-
-    f_v.resize(n);
-    f_mM.resize(n);
-
-    for (unsigned int i = 0; i < robot.n_cables(); ++i)
-            {
-               f_mM[i]=f_m;
-            }
-
-    vpColVector b(6),r,d;
-    r.resize(n);
-    Q.resize(n,n);
-    // constraints = fmin < f < fmax
-    C.resize(2*n, n);
-    d.resize(2*n);
-
-    for(unsigned int i=0;i<n;++i)
-        //for(unsigned int k=0;k<n;++k)
-           Q[i][i]=1;
-
-    for(unsigned int i=0;i<n;++i)
-    {
-        // f < fmax
-        C[i][i] = 1;
-        d[i] = 1/2*sqrt(robot.mass())*f_m;
-
-        // -f < -fmin
-        C[i+n][i] = -1;
-        d[i+n] = -1/2*f_m;
-    }
-
-    M_inertia[0][0]=M_inertia[1][1]=M_inertia[2][2]=robot.mass();
-
-    cout << "CDPR control ready" << fixed << endl; 
+  
+    cout << "workspace analysis ready" << fixed << endl; 
     while(ros::ok())
     {
         cout << "------------------" << endl;
-        nh.getParam("Kp", Kp);
-        //nh.getParam("Ki", Ki);
-        nh.getParam("Kd", Kd);
+        
+        if ( node_w.Para_ok())
+        {  
+            for (unsigned int i = 0; i <= inter_y; ++i)
+            {
+                y=y_b-i*dy;
 
-        if(robot.ok())  // messages have been received
-        {
-            // current position
-            robot.getPose(M);
-            M.extract(R);
+                for (unsigned int k = 0 ; k <= inter_x; ++k)
+                {
+                    x=x_b-k*dx;
+                    P.push_back(vpTranslationVector(x, y, z));
+                }
 
-            // position error in platform frame
-            err = robot.getPoseError();
-            cout << "Position error in platform frame: " << err.t() << fixed << endl;
-            for(unsigned int i=0;i<3;++i)
-                for(unsigned int j=0;j<3;++j)
-                    RR[i][j] = RR[i+3][j+3] = R[i][j];
+            }
 
-            err = RR * err;
-
-            robot.getVelocity(v);
-            robot.getDesiredVelocity(v_d);
-            robot.getDesiredAcceleration(a_d);
-
-             cout << "Desired acc: " << a_d.t() << fixed << endl;
-            
-            //  construct the inertia matrix
-            //M_inertia.insert(robot.inertia(),3,3);
-
-            M_inertia.insert((R*robot.inertia()*R.t()),3,3); 
-            // equality  constraint 
-            b=M_inertia*(a_d+Kp*err+Kd*(v_d-v))-g;
-
-
-            err=Kp*err;
-            //v=v_d-v;
-            robot.sendError(err);
-            
-            // build W matrix depending on current attach points
-            robot.computeW(W);
-
-            // transform the structure matrix into world frame
-            W=RR*W;
-            // construct the equality constriant
-            f_v= W.pseudoInverse()*(b - (W*f_mM));  
-
-            // solve with QP
-            // min ||Q.f_v -F_v||
-            // st fmin < f_v < fmax
-            //solve_qp::solveQP(Q,r,W,b,C,d,T);
-
-            //solve_qp::solveQPi(Q, f_v, C, d, T);
-
-             T=f_mM+f_v;
-
-            cout << "The wrench implemented by the cables: " << (W*T).t() << fixed << endl;
-            cout << "Desired external wrench in platform frame: " << (W*T+g).t()<< fixed << endl;
-            cout << "sending tensions: " << T.t() << endl;
-
-            // send tensions
-            robot.sendTensions(T);
         }
+        z+=dz;
 
+        
+
+        
         ros::spinOnce();
         loop.sleep();
     }

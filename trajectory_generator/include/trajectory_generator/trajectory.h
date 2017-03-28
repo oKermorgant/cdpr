@@ -52,7 +52,7 @@ public:
 
     inline void InitializeTime(double &t_i, double &t_f) {t_i = t0; t_f = t4;}
     inline void InitializePose(vpRowVector &x_i, vpRowVector &x_f) {x_i = xi; x_f = xf;}
-     inline void InitializeGain(double &t_i, double &t_f) {t_i = Kp; t_f = Kd;}
+    inline void InitializeGain(double &t_i, double &t_f) {t_i = Kp; t_f = Kd;}
 
     inline vpMatrix getLmatrix(double &t)
     {
