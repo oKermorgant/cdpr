@@ -15,8 +15,4 @@
     <!-- load model description -->
     <rosparam file="$(find cdpr)/sdf/$(arg model).yaml" command="load" ns="model"/>    
 
-    <node pkg="cdpr_controllers" type="pid_control" name="pid_control" output="screen">
-    </node>
-
-
 </launch>

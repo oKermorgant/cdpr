@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="paused" default="true"/>
+    <arg name="paused" default="false"/>
     <arg name="model" default="cube"/>
     <arg name="model_tra" default="trajectory"/>
     
@@ -15,8 +15,6 @@
     
     <!-- load model description -->
     <rosparam file="$(find cdpr)/sdf/$(arg model).yaml" command="load" ns="model"/>
-
-    
 
     <node pkg="cdpr_controllers" type="qp_test" name="qp_test" output="screen">
     </node>

@@ -21,11 +21,11 @@
 
 
 
-    <!-- generate trajectory -->
+    <!-- generate trajectory>
 
     <node pkg="trajectory_generator" type="trajectory" name="trajectory_generator" output="screen">
     <rosparam file="$(find trajectory_generator)/sdf/$(arg model_tra).yaml" command="load" ns="Tra"/>
-    </node>
+    </node -->
 
 
 </launch>

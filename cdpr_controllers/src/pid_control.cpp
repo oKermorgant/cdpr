@@ -1,6 +1,7 @@
 
 #include <ros/ros.h>
 #include <cdpr/cdpr.h>
+#include <cdpr_controllers/qp.h>
 
 using namespace std;
 
@@ -8,10 +9,15 @@ using namespace std;
 /*
  * Basic PID controller to show input/output of the CDPR class
  *
- * Does not consider positive-only cable tensions and assumes it is more or less a UPS parallel robot
- *
+ * Does not consider dynamics except for gravity
+ * Actual TDA depends on "control" parameter
  *
  */
+
+typedef enum
+{
+    minA, minW, minT, noMin
+} minType;
 
 
 void Param(ros::NodeHandle &nh, const string &key, double &val)
@@ -28,14 +34,106 @@ int main(int argc, char ** argv)
     cout.precision(3);
     // init ROS node
     ros::init(argc, argv, "cdpr_control");
-    ros::NodeHandle nh;
+    ros::NodeHandle nh, nh_priv("~");
 
     // init CDPR class from parameter server
     CDPR robot(nh);
     const unsigned int n = robot.n_cables();
 
-    vpMatrix W(6, n);   // tau = W.u + g
-    vpColVector g(6), tau(6), err, f, err_i(6), err0(6);
+    // get control type
+    minType control = noMin;
+    /* std::string control_type;
+    nh_priv.getParam("control", control_type);
+    if(control_type == "noMin")
+        control = noMin;
+    else if(control_type == "minA")
+        control = minA;
+    else if(control_type == "minT")
+        control = minT;*/
+
+    double tauMin, tauMax;
+    robot.tensionMinMax(tauMin, tauMax);
+
+    // QP variables
+    vpColVector x(n);
+    vpMatrix Q, A, C, W(6,n);
+    vpColVector r, b, d, w(6);
+
+    if(control == minT)
+    {
+        // min |tau|
+        //  st W.tau = w
+        //  st t- < tau < tau+
+
+        // min tau
+        Q.eye(n);
+        r.resize(n);
+        // equality constraint
+        A.resize(6,n);
+        b.resize(6);
+        // min/max tension constraints
+        C.resize(2*n,n);
+        d.resize(2*n);
+        for(int i=0;i<n;++i)
+        {
+            C[i][i] = 1;
+            d[i] = tauMax;
+            C[i+n][i+n] = -1;
+            d[i+n] = -tauMin;
+        }
+    }
+    else if(control == minW)
+    {
+        // min |W.tau - w|
+        //   st t- < tau < t+
+
+        Q.resize(6,n);
+        r.resize(6);
+        // no equality constraints
+        A.resize(0,n);
+        b.resize(0);
+        // min/max tension constraints
+        C.resize(2*n,n);
+        d.resize(2*n);
+        for(int i=0;i<n;++i)
+        {
+            C[i][i] = 1;
+            d[i] = tauMax;
+            C[i+n][i+n] = -1;
+            d[i+n] = -tauMin;
+        }
+    }
+    else if(control == minA)
+    {
+        // min |tau| - alpha
+        //  st W.tau = alpha.w
+        //  st 0 < alpha < 1
+        //  st t- < tau < t+
+        x.resize(n+1);
+
+        Q.eye(7);
+        r.resize(7);r[6] = 1;
+        // equality constraints
+        A.resize(6,n+1);
+        b.resize(6);
+        // min/max tension constraints
+        C.resize(2*n+2,n+1);
+        d.resize(2*n+2);
+        for(int i=0;i<n;++i)
+        {
+            C[i][i] = 1;
+            d[i] = tauMax;
+            C[i+n][i+n] = -1;
+            d[i+n] = -tauMin;
+        }
+        // constraints on alpha
+        d[2*n] = 1;
+        C[2*n][2*n] = 1;
+        C[2*n+1][2*n+1] = -1;
+    }
+    vpSubColVector tau(x, 0, n);
+
+    vpColVector g(6), err, err_i(6), err0(6);
     g[2] = - robot.mass() * 9.81;
     vpMatrix RR(6,6);
 
@@ -49,6 +147,7 @@ int main(int argc, char ** argv)
     Param(nh, "Kp", Kp);
     Param(nh, "Ki", Ki);
     Param(nh, "Kd", Kd);
+
 
     cout << "CDPR control ready" << fixed << endl;
 
@@ -76,26 +175,47 @@ int main(int argc, char ** argv)
             err = RR * err;
             // I term to wrench in fixed frame
             for(unsigned int i=0;i<6;++i)
-                if(tau[i] < robot.mass()*9.81)
+                if(w[i] < robot.mass()*9.81)
                     err_i[i] += err[i] * dt;
 
-            tau = Kp * (err + Ki*err_i);
+            w = Kp * (err + Ki*err_i);
 
             // D term?
             if(err0.infinityNorm())
-               tau += Kp * Kd * (err - err0)/dt;
+                w += Kp * Kd * (err - err0)/dt;
             err0 = err;
-            cout << "Desired wrench in platform frame: " << (RR.transpose()*(tau - g)).t() << fixed << endl;
+            // remove gravity
+            w = w-g;
+            cout << "Desired wrench in platform frame: " << (RR.transpose()*w).t() << fixed << endl;
 
             // build W matrix depending on current attach points
             robot.computeW(W);
 
-            f = W.pseudoInverse() * RR.transpose()* (tau - g);
-            cout << "Checking W.f+g in platform frame: " << (W*f).t() << fixed << endl;
-            cout << "sending tensions: " << f.t() << endl;
+
+            if(control == noMin)
+                x = W.pseudoInverse() * RR.transpose()* w;
+            else if(control == minT)
+                solve_qp::solveQP(Q, r, W, w, C, d, x);
+            else if(control == minW)
+                solve_qp::solveQPi(W, w, C, d, x);
+            else    // control = minA
+            {
+                for(int i=0;i<6;++i)
+                {
+                    for(int j=0;j<n;++j)
+                        A[i][j] = W[i][j];
+                    A[i][n+1] = -w[i];
+                }
+                solve_qp::solveQP(Q, r, A, b, C, d, x);
+            }
+
+
+
+            cout << "Checking W.tau+g in platform frame: " << (W*tau).t() << fixed << endl;
+            cout << "sending tensions: " << tau.t() << endl;
 
             // send tensions
-            robot.sendTensions(f);
+            robot.sendTensions(tau);
         }
 
         ros::spinOnce();

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="ctl" default="minA"/>
+
+    <node pkg="cdpr_controllers" type="qp_test" name="qp_test" output="screen">
+        <!--    minW = min |W.tau - w| + constraints
+                minT = min |tau| with constraints
+                minA = min |tau - a| with constraints  
+                noMin = no constraints
+        -->
+        <param name="control" value="$(arg ctl)"/>
+    </node>
+
+
+</launch>
