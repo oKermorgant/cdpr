@@ -11,5 +11,6 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>cdpr</depend>
   <depend>roscpp</depend>
+  <depend>log2plot</depend>
 
 </package>

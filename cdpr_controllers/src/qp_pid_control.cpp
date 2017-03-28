@@ -68,6 +68,7 @@ int main(int argc, char ** argv)
         C[i+n][i] = -1;
         d[i+n] = -fmin;
     }
+    std::vector<bool> active;
 
     cout << "CDPR control ready" << fixed << endl;
 
@@ -112,7 +113,7 @@ int main(int argc, char ** argv)
             // solve with QP
             // min ||W.f + g - tau||
             // st fmin < f < fmax
-           solve_qp::solveQPi(W, RR.t()*(tau-g), C, d, f);
+           solve_qp::solveQPi(W, RR.t()*(tau-g), C, d, f, active);
 
             //f = W.pseudoInverse() * RR.transpose()* (tau - g);
             cout << "Checking W.f+g in platform frame: " << (W*f).t() << fixed << endl;

@@ -8,6 +8,7 @@ add_definitions(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   cdpr
   roscpp
+  log2plot
 )
 
 find_package(VISP REQUIRED)
@@ -15,9 +16,10 @@ find_package(VISP REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES cdpr_controllers
-  CATKIN_DEPENDS cdpr roscpp
+  CATKIN_DEPENDS cdpr roscpp log2plot
 #  DEPENDS system_lib
 )
+
 
 ###########
 ## Build ##
@@ -32,9 +34,10 @@ include_directories(
   ${VISP_INCLUDE_DIRS}
 )
 
-# basic PID controller for platform control to give an example
+# PID controller to try TDA's (Olivier's code)
 add_executable(	pid_control 
-		src/pid_control.cpp)
+                src/pid_control.cpp
+                include/cdpr_controllers/butterworth.h)
 target_link_libraries(pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES})
 
 # basic PID controller + QP for platform control to give an example

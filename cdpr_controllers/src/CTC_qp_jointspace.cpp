@@ -97,6 +97,7 @@ int main(int argc, char ** argv)
     }
 
     M_inertia[0][0]=M_inertia[1][1]=M_inertia[2][2]=robot.mass();
+    std::vector<bool> active;
 
     cout << "CDPR control ready" << fixed << endl; 
     while(ros::ok())
@@ -196,7 +197,7 @@ int main(int argc, char ** argv)
             // st fmin < f_v < fmax
             //solve_qp::solveQP(Q,r,W,b,C,d,T);
 
-            solve_qp::solveQPi(Q, f_v, C, d, T);
+            solve_qp::solveQPi(Q, f_v, C, d, T, active);
 
              T=f_mM+T;
              

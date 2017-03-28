@@ -16,10 +16,12 @@ public:
 
     inline bool ok() {return cables_ok && platform_ok ;}
 
+    inline void setDesiredPose(double x, double y, double z, double tx, double ty, double tz)
+        {Md_ = vpHomogeneousMatrix(x,y,z,tx,ty,tz);}
     inline void getPose(vpHomogeneousMatrix &M) {M = M_;}
     inline void getVelocity(vpColVector &v) {v = v_;}
     inline void getDesiredPose(vpHomogeneousMatrix &M) {M = Md_;}
-    inline vpColVector getPoseError() {
+    inline vpPoseVector getPoseError() {
          /*vpPoseVector p_c,p_d;
          vpColVector e;
          e.resize(6);

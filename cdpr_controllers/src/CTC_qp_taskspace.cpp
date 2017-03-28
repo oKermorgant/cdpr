@@ -84,6 +84,7 @@ int main(int argc, char ** argv)
     }
 
     M_inertia[0][0]=M_inertia[1][1]=M_inertia[2][2]=robot.mass();
+    std::vector<bool> active;
 
     cout << "CDPR control ready" << fixed << endl; 
     while(ros::ok())
@@ -141,7 +142,7 @@ int main(int argc, char ** argv)
             // solve with QP
             // min ||W.T + g - tau||->||W.T-b||
             // st:st: C.T<=d  (fmin < f< fmax)
-            solve_qp::solveQPi(W, RR.t()*b, C, d, T);
+            solve_qp::solveQPi(W, RR.t()*b, C, d, T, active);
 
             // Pseudoinverse method
             //T=W.pseudoInverse()*RR.transpose()*b;
