@@ -1,5 +1,5 @@
-    #ifndef trajectory_H
-#define trajectory_H
+#ifndef trajectory_S_H
+#define trajectory_S_H
 
 #include <ros/ros.h>
 #include <ros/publisher.h>
@@ -29,7 +29,21 @@ public:
 
         // getparam the  working period
         Tra.getParam("time/t0", t0);
+        Tra.getParam("time/t1", t1);
         Tra.getParam("time/t4", t4);
+         t2=t4/2;
+         t3=t4-t1;
+
+
+
+         // getparam
+         Tra.getParam("parameter/ab", ab);
+         Tra.getParam("parameter/vb", vb);
+         Tra.getParam("parameter/h_b", h_b);
+         Tra.getParam("parameter/h_c", h_c);
+         Tra.getParam("parameter/w", w);
+         Tra.getParam("parameter/l", l);
+
 
         // getparam the PD gain
         Tra.getParam("gain/Kp", Kp );
@@ -38,7 +52,7 @@ public:
         //  initialize the parameter for s-curves 
         XmlRpc::XmlRpcValue element_A,element_E;
         Tra.getParam("position/A", element_A);
-        Tra.getParam("position/C", element_E);
+        Tra.getParam("position/E", element_E);
 
         xi.resize(3);
         xf.resize(3);
@@ -50,45 +64,69 @@ public:
 
     }
 
-    inline void InitializeTime(double &t_i, double &t_f) {t_i = t0; t_f = t4;}
-    inline void InitializePose(vpRowVector &x_i, vpRowVector &x_f) {x_i = xi; x_f = xf;}
-    inline void InitializeGain(double &t_i, double &t_f) {t_i = Kp; t_f = Kd;}
+    inline void InitializeTime(double &t_0, double &t_1, double &t_2, double &t_3, double &t_4) {t_0 = t0; t_1 = t1; t_2 = t2; t_3= t3; t_4 = t4;}
+    inline void InitializePose(vpColVector &x_i, vpColVector &x_f) {x_i = xi; x_f = xf;}
+    inline void InitializeGain(double &K_p, double &K_d) {K_p= Kp; K_d= Kd;}
+    inline void InitializeParam(double &W, double &L, double &hc, double &hb){W=w; L=l; hc=h_c; hb=h_b;}
 
-    inline vpMatrix getLmatrix(double &t)
+
+
+    inline vpMatrix getLmatrix(double &t_, double &t)
     {
         vpMatrix M;
         M.resize(6,6);
-        M[0][5]=1; M[1][4]=1; M[2][3]=2;
+        M[0][0]=t_*t_*t_*t_*t_; M[0][1]=t_*t_*t_*t_; M[0][2]=t_*t_*t_; M[0][3]=t_*t_; M[0][4]=t_; M[0][5]=1;
+        M[1][0]=5*t_*t_*t_*t_; M[1][1]=4*t_*t_*t_; M[1][2]=3*t_*t_; M[1][3]=2*t_; M[1][4]=1; 
+        M[2][0]=20*t_*t_*t_; M[2][1]=12*t_*t_; M[2][2]=6*t_; M[2][3]=2; 
+      
         M[3][0]=t*t*t*t*t; M[3][1]=t*t*t*t; M[3][2]=t*t*t; M[3][3]=t*t; M[3][4]=t; M[3][5]=1;
         M[4][0]=5*t*t*t*t; M[4][1]=4*t*t*t; M[4][2]=3*t*t; M[4][3]=2*t; M[4][4]=1; 
         M[5][0]=20*t*t*t; M[5][1]=12*t*t; M[5][2]=6*t; M[5][3]=2;  
         return M;
     }
+
+    inline  void getS( vpColVector &S1, vpColVector &S2, vpColVector &S3, vpColVector &S4, vpColVector &S5, vpColVector &S6) 
+    {
+        S1.resize(6);S2.resize(6);S3.resize(6);S4.resize(6);S5.resize(6);S6.resize(6);
+
+        S1[3]=1; S1[4]=vb/h_b; S1[5]= ab/h_b;
+   
+        S2[1]=vb/(h_c-h_b); S2[2]=ab/(h_c-h_b); S2[3]= 1;
+
+        S3[3]=1; S3[4]=vb/(h_c-h_b); S3[5]= -ab/(h_c-h_b);
+  
+        S4[1]=vb/h_b; S4[2]= -ab/h_b; S4[3]=1;
+ 
+        S5[3]=1;
+   
+        S6[3]=1;
+    }
+
     // get the desired position xyz
-    inline vpRowVector getposition(double t, vpMatrix a)
+    inline double getposition(double t, vpColVector a)
     { 
         vpRowVector l;
         l.resize(6);
         l[0]=t*t*t*t*t; l[1]=t*t*t*t; l[2]=t*t*t; l[3]=t*t; l[4]=t; l[5]=1;
-        vpRowVector position=l*a;
+        double position= l*a;
         return position;
     }
     //get the desired velocity
-    inline vpRowVector getvelocity(double t, vpMatrix a)
+    inline double getvelocity(double t, vpColVector a)
     { 
         vpRowVector l;
         l.resize(6);
          l[0]=5*t*t*t*t; l[1]=4*t*t*t; l[2]=3*t*t; l[3]=2*t; l[4]=1; 
-        vpRowVector vel=l*a;
+        double vel=l*a;
         return vel;
     }
 
-    inline vpRowVector getacceleration(double t, vpMatrix a)
+    inline double getacceleration(double t, vpColVector a)
     { 
         vpRowVector l;
         l.resize(6);
         l[0]=20*t*t*t; l[1]=12*t*t; l[2]=6*t; l[3]=2;  
-        vpRowVector acc=l*a;
+        double acc=l*a;
         return acc;
     }
 
@@ -113,9 +151,9 @@ public:
     geometry_msgs::Pose pf_d;
 
     // model parameter
-    double t0, t1,t2, t3, t4, Kp, Kd;
-    vpRowVector  xi, xf;
+    double t0, t1,t2, t3, t4, Kp, Kd, vb, ab, h_c, h_b, w, l;
+    vpColVector  xi, xf;
 
 };
 
-#endif // trajectory_H
+#endif // trajectory_S_H

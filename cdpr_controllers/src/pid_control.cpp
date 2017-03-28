@@ -143,7 +143,7 @@ int main(int argc, char ** argv)
     vpRotationMatrix R;
 
     // gain
-    double Kp = 100, Ki = 0.5, Kd = 2;  // tuned for Caroca
+    double Kp = 1000, Ki = 5, Kd = 20;  // tuned for Caroca
     Param(nh, "Kp", Kp);
     Param(nh, "Ki", Ki);
     Param(nh, "Kd", Kd);
@@ -173,6 +173,7 @@ int main(int argc, char ** argv)
 
             // position error in fixed frame
             err = RR * err;
+            robot.sendError(err);
             // I term to wrench in fixed frame
             for(unsigned int i=0;i<6;++i)
                 if(w[i] < robot.mass()*9.81)
