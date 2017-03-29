@@ -1,26 +1,20 @@
 
 #include <ros/ros.h>
 #include <cdpr/cdpr.h>
-#include <cdpr_controllers/qp.h>
 #include <log2plot/logger.h>
 #include <chrono>
 #include <cdpr_controllers/butterworth.h>
+#include <cdpr_controllers/ctd.h>
 
 using namespace std;
-
 
 /*
  * Basic PID controller to show input/output of the CDPR class
  *
  * Does not consider dynamics except for gravity
- * Actual TDA depends on "control" parameter
+ * Actual CTD depends on "control" parameter
  *
  */
-
-typedef enum
-{
-    minA, minW, minT, noMin
-} minType;
 
 
 void Param(ros::NodeHandle &nh, const string &key, double &val)
@@ -44,120 +38,42 @@ int main(int argc, char ** argv)
     const unsigned int n = robot.n_cables();
     robot.setDesiredPose(0,0,1,0,0,0);
 
-    const bool force_cont = true;
-
     // log path
-    std::string path = "/home/olivier/Results/cdpr/rel_";
-
-    if(force_cont)
-        path += "cont_";
+    std::string path = "/home/olivier/Results/cdpr/";
 
     double tauMin, tauMax;
     robot.tensionMinMax(tauMin, tauMax);
 
-    // QP variables
-    vpColVector x(n);
-    vpMatrix Q, A, C, W(6,n);
-    vpColVector r, b, d, w(6);
-    std::vector<bool> active;
 
+    // get control type    
+    std::string control_type = "minW";
+    double dTau_max = 0;
+    bool warm_start = false;
 
-    // get control type
-    minType control = minA;
-    /* std::string control_type;
+    if(nh_priv.hasParam("control"))
     nh_priv.getParam("control", control_type);
+    CTD::minType control = CTD::minA;
     if(control_type == "noMin")
-        control = noMin;
-    else if(control_type == "minA")
-        control = minA;
+        control = CTD::noMin;
     else if(control_type == "minT")
-        control = minT;
+        control = CTD::minT;
     else if(control_type == "minW")
-        control = minW;
-*/
+        control = CTD::minW;
 
-    if(control == noMin)
-        path += "noMin";
-    else if(control == minT)
-    {
-        path += "minT";
-        // min |tau|
-        //  st W.tau = w
-        //  st t- < tau < tau+
+    path += control_type;
 
-        // min tau
-        Q.eye(n);
-        r.resize(n);
-        // equality constraint
-        A.resize(6,n);
-        b.resize(6);
-        // min/max tension constraints
-        C.resize(2*n,n);
-        d.resize(2*n);
-        for(int i=0;i<n;++i)
-        {
-            C[i][i] = 1;
-            d[i] = tauMax;
-            C[i+n][i] = -1;
-            d[i+n] = -tauMin;
-        }
-    }
-    else if(control == minW)
-    {
-        path += "minW";
-        // min |W.tau - w|
-        //   st t- < tau < t+
 
-        Q.resize(6,n);
-        r.resize(6);
-        // no equality constraints
-        A.resize(0,n);
-        b.resize(0);
-        // min/max tension constraints
-        C.resize(2*n,n);
-        d.resize(2*n);
-        for(int i=0;i<n;++i)
-        {
-            C[i][i] = 1;
-            d[i] = tauMax;
-            C[i+n][i] = -1;
-            d[i+n] = -tauMin;
-        }
-    }
-    else if(control == minA)
-    {
-        path += "minA";
-        // min |tau| - alpha
-        //  st W.tau = alpha.w
-        //  st 0 < alpha < 1
-        //  st t- < tau < t+
-        x.resize(n+1);  // x = (tau, alpha)
+    if(dTau_max)
+        path += "_cont";
+    if(!warm_start)
+        path += "_nows";
 
-        Q.eye(n+1);Q *= 1./tauMax;
-        r.resize(n+1);r[n] = Q[n][n] = n*tauMax;
-        // equality constraints
-        A.resize(6,n+1);
-        b.resize(6);
-        // min/max tension constraints
-        C.resize(2*n+2,n+1);
-        d.resize(2*n+2);
-        for(int i=0;i<n;++i)
-        {
-            C[i][i] = 1;
-            d[i] = tauMax;
-            C[i+n][i] = -1;
-            d[i+n] = -tauMin;
-        }
-        // constraints on alpha
-        d[2*n] = 1;
-        C[2*n][n] = 1;
-        C[2*n+1][n+1] = -1;
-    }
-    vpSubColVector tau(x, 0, n);
 
-    vpColVector g(6), err, err_i(6), err0(6), v(6), v0(6), d_err(6);
+    vpColVector tau(n);
+
+    vpColVector g(6), err, err_i(6), err0(6), v(6), d_err(6), w(6);
     g[2] = - robot.mass() * 9.81;
-    vpMatrix RR(6,6);
+    vpMatrix RR(6,6), W(6,n);
 
     double dt = 0.01;
     ros::Rate loop(1/dt);
@@ -181,10 +97,9 @@ int main(int argc, char ** argv)
     vpColVector residual(6);
     logger.saveTimed(residual, "res", "[f_x,f_y,f_z,m_x,m_y,m_z]", "Residuals");
 
-    vpSubColVector alpha;
-    if(control == minA)
+    std::vector<double> alpha(1,0);
+    if(control == CTD::minA)
     {
-        alpha.init(x, n, 1);
         logger.saveTimed(alpha, "a", "[\\alpha]", "Alpha");
     }
 
@@ -197,11 +112,11 @@ int main(int argc, char ** argv)
 
     // filter for d_error (dim. 6)
     Butterworth_nD filter(6, 1, dt);
-    double dTau_max = 3;
+
+    CTD ctd(robot, control);
+    ctd.ForceContinuity(dTau_max);
 
     cout << "CDPR control ready" << fixed << endl;
-
-    bool update_d = false;
 
     while(ros::ok())
     {
@@ -256,37 +171,9 @@ int main(int argc, char ** argv)
             // build W matrix depending on current attach points
             robot.computeW(W);
 
-            if(update_d && control != noMin)
-            {
-                for(unsigned int i=0;i<n;++i)
-                {
-                    d[i] = std::min(tauMax, tau[i]+dTau_max);
-                    d[i+n] = -std::max(tauMin, tau[i]-dTau_max);
-                }
-                cout << "new d: " << d.t() << endl;
+            // call cable tension distribution
+            tau = ctd.ComputeDistribution(W, w)            ;
 
-            }
-
-            if(control == noMin)
-                x = W.pseudoInverse() * w;
-            else if(control == minT)
-                solve_qp::solveQP(Q, r, W, w, C, d, x, active);
-            else if(control == minW)
-                solve_qp::solveQPi(W, w, C, d, x, active);
-            else    // control = minA
-            {
-                for(int i=0;i<6;++i)
-                {
-                    for(int j=0;j<n;++j)
-                        A[i][j] = W[i][j];
-                    A[i][n] = -w[i];
-                }
-                solve_qp::solveQP(Q, r, A, b, C, d, x, active);
-          //      cout << "alpha = " << alpha[0] << endl;
-          //      cout << "checking W.tau - a.w: " << (W*tau - alpha[0]*w).t() << endl;
-            }
-
-         //   cout << "Residual: " << (W*tau - w).t() << fixed << endl;
         //    cout << "sending tensions: " << tau.t() << endl;
 
             // send tensions
@@ -300,7 +187,6 @@ int main(int argc, char ** argv)
             comp_time[0] = elapsed_seconds.count();
             residual = W*tau - w;
             logger.update();
-            update_d = force_cont;
         }
 
         ros::spinOnce();

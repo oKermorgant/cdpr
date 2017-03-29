@@ -34,11 +34,16 @@ include_directories(
   ${VISP_INCLUDE_DIRS}
 )
 
-# PID controller to try TDA's (Olivier's code)
+add_library(${PROJECT_NAME}
+    include/cdpr_controllers/butterworth.h
+    include/cdpr_controllers/ctd.h
+    src/ctd.cpp                )
+
+
+# PID controller to try CTD's (Olivier's code)
 add_executable(	pid_control 
-                src/pid_control.cpp
-                include/cdpr_controllers/butterworth.h)
-target_link_libraries(pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES})
+    src/pid_control.cpp)
+target_link_libraries(pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES} ${PROJECT_NAME})
 
 # basic PID controller + QP for platform control to give an example
 add_executable(	qp_pid_control 

@@ -6,7 +6,6 @@
 
 // this class implements a 2nd-order Butterworth low-pass filter
 
-
 class Butterworth
 {
 public:
@@ -19,6 +18,7 @@ public:
         b[1]= 2*b[0];
         b[2]= b[0];
         a = {2.0 * (ita*ita - 1.0) * b[0], -(1.0 - q*ita + ita*ita) * b[0]};
+
         x.resize(3);
         y.resize(2);
 
@@ -43,19 +43,32 @@ public:
     }
 
 
+
 protected:
     std::vector<double> a, b;
     std::vector<double> x, y;
 };
 
 
+// same but for nD-variables (std::vectors, Eigen lib vectores...)
+
 class Butterworth_nD
 {
 public:
+    // n identical filters
     Butterworth_nD(int size, double frequency, double dt)
     {
         filters.resize(size, Butterworth(frequency, dt));
     }
+
+    // deduce n from given frequencies
+    Butterworth_nD(std::vector<double> frequencies, double dt)
+    {
+        filters.clear();
+        for(auto f: frequencies)
+            filters.push_back(Butterworth(f, dt));
+    }
+
     template <class T>
     void Filter(T &var)
     {
@@ -65,9 +78,6 @@ public:
 
 protected:
     std::vector<Butterworth> filters;
-
-
-
 };
 
 

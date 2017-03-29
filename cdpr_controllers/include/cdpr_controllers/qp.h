@@ -1,3 +1,6 @@
+#ifndef QP_H
+#define QP_H
+
 #include <visp/vpSubColVector.h>
 #include <visp/vpSubMatrix.h>
 #include <algorithm>
@@ -228,3 +231,6 @@ void solveQPi ( const vpMatrix &Q, const vpColVector r, vpMatrix C, const vpColV
 }
 
 }
+
+
+#endif
