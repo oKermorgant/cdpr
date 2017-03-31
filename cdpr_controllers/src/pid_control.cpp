@@ -39,7 +39,7 @@ int main(int argc, char ** argv)
     robot.setDesiredPose(0,0,1,0,0,0);
 
     // log path
-    std::string path = "/home/olivier/Results/cdpr/";
+    std::string path = "/home/derek/Results/cdpr/";
 
     double tauMin, tauMax;
     robot.tensionMinMax(tauMin, tauMax);

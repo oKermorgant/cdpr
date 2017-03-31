@@ -15,10 +15,10 @@ int main(int argc, char ** argv)
   ros::NodeHandle node;
 
   Trajectory path(node);
-   std::string  LOG2PLOT_EXAMPLE_PATH;
+    std::string dir = "/home/derek/Results/cdpr/";;
     // plotting 3D figures
     vpPoseVector pose;
-    Logger logger(LOG2PLOT_EXAMPLE_PATH);
+    Logger logger(dir);
     // save pose as 3D plot
     // the saved variable is the world pose in camera frame, we want to plot the invert
     logger.save3Dpose(pose, "trajectory", "box pose", false);
