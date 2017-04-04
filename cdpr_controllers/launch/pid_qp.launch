@@ -2,7 +2,7 @@
 <launch>
     <arg name="ctl" default="minA"/>
 
-    <node pkg="cdpr_controllers" type="qp_test" name="qp_test" output="screen">
+    <node pkg="cdpr_controllers" type="pid_control" name="pid_control" output="screen">
         <!--    minW = min |W.tau - w| + constraints
                 minT = min |tau| with constraints
                 minA = min |tau - a| with constraints  

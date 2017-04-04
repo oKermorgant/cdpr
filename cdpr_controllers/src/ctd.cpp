@@ -12,7 +12,7 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
     robot.tensionMinMax(tauMin, tauMax);
 
     control = _control;
-    dTau_max = 0;
+    dTau_max = 1;
     update_d = false;
 
     x.resize(n);
@@ -29,6 +29,27 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
 
         // min tau
         Q.eye(n);
+        r.resize(n);
+        // equality constraint
+        A.resize(6,n);
+        b.resize(6);
+        // min/max tension constraints
+        C.resize(2*n,n);
+        d.resize(2*n);
+        for(int i=0;i<n;++i)
+        {
+            C[i][i] = 1;
+            d[i] = tauMax;
+            C[i+n][i] = -1;
+            d[i+n] = -tauMin;
+        }
+    }
+    else if (control == minTs)
+    {
+        Q.resize(n,n);
+        for(unsigned int i=0;i<n;++i)
+            for(unsigned int k=0;k<n;++k)
+                    Q[i][k]=1;
         r.resize(n);
         // equality constraint
         A.resize(6,n);
@@ -93,6 +114,33 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
         C[2*n][n] = C[2*n+2][n+2] = 1;
         C[2*n+1][n+1] = C[2*n+3][n+3] = -1;
     }
+    else if (control == minAA)
+    {
+        x.resize(n+1); // x = (tau, alpha)
+
+        Q.eye(n+1); Q *= 1./tauMax;
+        r.resize(n+1);
+        Q[n][n]=r[n]=n*tauMax;
+        // equality constraints
+        A.resize(6,n+1);
+        b.resize(6);
+        // min/max tension constraints
+        C.resize(2*(n+1), (n+1));
+        d.resize(2*(n+1));
+        for(unsigned int i=0;i<n;++i)
+            {
+                     // f < fmax
+                    C[i][i] = 1;
+                    // -f < -fmin
+                    C[i+n][i] = -1;
+                    d[i] = tauMax;
+                    d[i+n] = -tauMin;
+             }
+                    C[2*n][n]=1;
+                    C[2*n+1][n]=-1;
+                    d[2*n] = 1;
+                    d[2*n+1]= 0;
+    }
     tau.init(x, 0, n);
 }
 
@@ -117,8 +165,19 @@ vpColVector CTD::ComputeDistribution(vpMatrix &W, vpColVector &w)
         x = W.pseudoInverse() * w;
     else if(control == minT)
         solve_qp::solveQP(Q, r, W, w, C, d, x, active);
+        else if(control == minTs)
+        solve_qp::solveQP(Q, r, W, w, C, d, x, active);
     else if(control == minW)
         solve_qp::solveQPi(W, w, C, d, x, active);
+    else if(control== minAA)  // control = minAA
+    {
+        A.insert(W,0,0);
+        for(int i=0;i<6;++i)
+        {
+                A[i][n]= - w[i];
+        }
+        solve_qp::solveQP(Q, r, A, b, C, d, x, active);
+    }
     else    // control = minA
     {
         for(int i=0;i<6;++i)

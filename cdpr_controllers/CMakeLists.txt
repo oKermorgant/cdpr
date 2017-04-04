@@ -53,31 +53,16 @@ target_link_libraries(qp_pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES})
 
 # Feekback linearization controller(CTC) in Cartesian space for platform control to give an example
 
-add_executable( CTC_qp_taskspace
- 	 	src/CTC_qp_taskspace.cpp
+add_executable( CTC_QP
+ 	 	src/CTC_QP.cpp
 	 	include/cdpr_controllers/qp.h	
 		)   
-target_link_libraries( CTC_qp_taskspace ${catkin_LIBRARIES} ${VISP_LIBRARIES})
-
-# Feekback linearization controller(CTC) in joint space for platform control to give an example
-
-add_executable( CTC_qp_jointspace
- 	 	src/CTC_qp_jointspace.cpp
-	 	include/cdpr_controllers/qp.h	
-		)   
-target_link_libraries( CTC_qp_jointspace ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+target_link_libraries( CTC_QP ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${PROJECT_NAME})
  
 # CTC + Closed form for platform control to give an example
- add_executable(closed_form
+ add_executable( closed_form
  	 	src/closed_form.cpp
 	 	include/cdpr_controllers/qp.h	
 		)   
 target_link_libraries(closed_form ${catkin_LIBRARIES} ${VISP_LIBRARIES})
 
-# CTC + improved QP for platform control to give an example
-
-#add_executable( CTC_qpN_js
-#    src/CTC_qpN_js.cpp
-#   include/cdpr_controllers/qp.h 
-#   )   
-#target_link_libraries( CTC_qpN_js ${catkin_LIBRARIES} ${VISP_LIBRARIES})

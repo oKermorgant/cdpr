@@ -15,7 +15,7 @@ public:
     // how we perform the CTD
     typedef enum
     {
-        minA, minW, minT, noMin
+        minA, minW, minT, noMin, minAA, minTs, closed_form
     } minType;
 
 
@@ -29,8 +29,10 @@ public:
     // for minA
     void GetAlpha(double &a)
     {
-        if(control == minA)
+        if(control == minA || control == minAA )
             a = x[n];
+        else
+            a = 0;
     }
 
 

@@ -151,7 +151,6 @@ void CDPR::computeLength(vpColVector &L)
             //L[i]= sqrt(f.sumSquare());   
             L[i]=sqrt(f[0]*f[0]+f[1]*f[1]+f[2]*f[2]) ;   
         }
-          cout << "the current length " << L.t() << endl;
 }
 
 void CDPR::computeDesiredLength(vpColVector &Ld)
@@ -169,8 +168,6 @@ void CDPR::computeDesiredLength(vpColVector &Ld)
             //Ld[i]= sqrt(fd.sumSquare());       
             Ld[i]=sqrt(fd[0]*fd[0]+fd[1]*fd[1]+fd[2]*fd[2]);
         }
-
-        cout << "the desired length " << Ld.t() << endl;
 }
 
 
