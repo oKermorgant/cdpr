@@ -57,11 +57,6 @@ int main(int argc, char ** argv)
         cout << "trajectory------------------" <<fixed << endl;
         while (ros::ok())
         {
-              //cout << "trajectory------------------" << endl;
-              //cout << " The condition matrix" << C<<endl;
-              //cout << " The time matrix" << L<<endl;
-              //cout << " The cofficient matrix" << A<<endl;
-
               // relative time from the beginning
               t=t_i+inter*dt;
               

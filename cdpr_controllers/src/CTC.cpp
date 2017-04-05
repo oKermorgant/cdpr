@@ -67,6 +67,8 @@ int main(int argc, char ** argv)
  /*#################*/
     else if(control_type == "minW")
         control = CTD::minW;
+    else if(control_type == "closed_form")
+        control = CTD::closed_form;
 
     // get space type
     std::string space_type="Cartesian_space";
@@ -91,7 +93,7 @@ int main(int argc, char ** argv)
     // set proportional and derivative gain
     double Kp, Kd;  // tuned for Caroca
    if (space_type == "Cartesian_space")
-        Kp=Kd=15;
+        Kp=Kd=25;
     else if ( space_type == "Joint_space")
         Kp=Kd=1000;
     else 
@@ -139,7 +141,7 @@ int main(int argc, char ** argv)
         nh.getParam("Kp", Kp);
         nh.getParam("Kd", Kd);
         t = ros::Time::now().toSec();
-
+        
         if(robot.ok())  // messages have been received
         {
             // extract the current time
@@ -172,8 +174,8 @@ int main(int argc, char ** argv)
 
              //cout << "Desired acc: " << a_d.t() << fixed << endl;
 
-             M_inertia.insert(robot.inertia(),3,3);
-             // M_inertia.insert((R*robot.inertia()*R.t()),3,3); 
+             //M_inertia.insert(robot.inertia(),3,3);
+             M_inertia.insert((R*robot.inertia()*R.t()),3,3); 
             // build W matrix depending on current attach points
              robot.computeW(W);
              W=RR*W;
@@ -211,7 +213,7 @@ int main(int argc, char ** argv)
 
                 Le_d=  -Wd.t() *v_d- J*v;
                 Le= Ld-L;
-                filterL.Filter(Le);
+                //filterL.Filter(Le);
                 //robot.sendLengthError(Le);
                 cout << "length error:" << Le.t() << endl;
 

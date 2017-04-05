@@ -16,6 +16,8 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
     update_d = false;
 
     x.resize(n);
+    f_m.resize(n);
+    f_v.resize(n);
 
     reset_active = !warm_start;
     active.clear();
@@ -141,6 +143,16 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
                     d[2*n] = 1;
                     d[2*n+1]= 0;
     }
+    else if ( control == closed_form)
+    {
+             d.resize(2*n);
+            for (unsigned int i = 0; i <n; ++i)
+            {
+                f_m[i]=(tauMax+tauMin)/2;
+                d[i] = tauMax;
+                d[i+n] = -tauMin;
+            }
+    }
     tau.init(x, 0, n);
 }
 
@@ -178,7 +190,7 @@ vpColVector CTD::ComputeDistribution(vpMatrix &W, vpColVector &w)
         }
         solve_qp::solveQP(Q, r, A, b, C, d, x, active);
     }
-    else    // control = minA
+    else if(control == minA)  // control = minA
     {
         for(int i=0;i<6;++i)
         {
@@ -193,6 +205,13 @@ vpColVector CTD::ComputeDistribution(vpMatrix &W, vpColVector &w)
   //      cout << "alpha = " << alpha[0] << endl;
   //      cout << "checking W.tau - a.w: " << (W*tau - alpha[0]*w).t() << endl;
     }
+    else if( control == closed_form)
+    {
+         f_v= W.pseudoInverse()*(w - (W*f_m)); 
+         tau=f_m+f_v;
+    }
+    else
+        cout << "No appropriate TDA " << endl;
  //   cout << "Residual: " << (W*tau - w).t() << fixed << endl;
 
     cout << "check constraints :" << endl;

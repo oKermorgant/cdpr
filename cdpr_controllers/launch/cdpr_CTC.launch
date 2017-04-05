@@ -3,8 +3,8 @@
     <arg name="paused" default="true"/>
     <arg name="model" default="caroca"/>
     <arg name="model_tra" default="trajectory"/>
-    <arg name="ctl" default="minW"/>
-    <arg name="sty" default="Joint_space"/>
+    <arg name="ctl" default="minT"/>
+    <arg name="sty" default="Cartesian_space"/>
     
     <!-- Launch Gazebo with empty world-->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -20,20 +20,19 @@
     <rosparam file="$(find trajectory_generator)/sdf/$(arg model_tra).yaml" command="load" ns="Tra"/>
    
 
-    <node pkg="cdpr_controllers" type="CTC_QP" name="CTC_QP" output="screen">
+   <node pkg="cdpr_controllers" type="CTC" name="CTC" output="screen">
 	<!--	 
  		minW = min |W.tau - w| + constraints
                 minT = min |tau| with constraints
                 minA = min |tau - a| with constraints
   		minAA= min |tau - a| with single a constraints  
+		closed_form fm=(fmax+fmin)/2
                 noMin = no constraints
-        -->
-       <param name="control" value="$(arg ctl)"/>
-	<!--	 
+    		 
  		Cartesian_space : controller is implemented in task space
 		Joint_space : cotroller in joint space
         -->
-
+       <param name="control" value="$(arg ctl)"/> 
        <param name="s_type" value="$(arg sty)"/>
     </node>
 

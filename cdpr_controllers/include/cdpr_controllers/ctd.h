@@ -19,7 +19,7 @@ public:
     } minType;
 
 
-    CTD(CDPR &robot, minType _control, bool warm_start = true);
+    CTD(CDPR &robot, minType _control, bool warm_start = false);
 
     // will look for a solution in [tau +- dTau_max]
     void ForceContinuity(double _dTau_max) {dTau_max = _dTau_max;}
@@ -42,7 +42,7 @@ protected:
     double tauMin, tauMax;
 
     vpMatrix Q, A, C, W;
-    vpColVector r, b, d, x;
+    vpColVector r, b, d, x, f_m, f_v;
     vpSubColVector tau;
 
     bool update_d;
