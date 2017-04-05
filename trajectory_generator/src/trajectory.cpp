@@ -25,7 +25,7 @@ int main(int argc, char ** argv)
         Logger logger(dir);
         // save pose as 3D plot
         // the saved variable is the world pose in camera frame, we want to plot the invert
-        logger.save3Dpose(pose, "trajectory", "box pose", false);
+        logger.save3Dpose(pose, "trajectory", "box pose");
 
 
         vpRowVector x_i(3), x_f(3), v_i(3), v_f(3), a_i(3), a_f(3);
@@ -59,7 +59,7 @@ int main(int argc, char ** argv)
         {
               // relative time from the beginning
               t=t_i+inter*dt;
-              
+              cout << " interation number" << inter <<endl;
               // Check the time period 
               if (inter<=(num+1))
               {
@@ -82,10 +82,9 @@ int main(int argc, char ** argv)
                  //cout << " Desired velocity" << Vel <<endl;
                  //cout << " Desired acceleration" << Acc <<endl;
               inter++;
-              cout << " interation number" << inter <<endl;
               ros::spinOnce();
               loop.sleep();
         }
-         logger.plot("", true);
+         //logger.plot("", true);
          return 0;
 };

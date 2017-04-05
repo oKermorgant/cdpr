@@ -12,7 +12,7 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
     robot.tensionMinMax(tauMin, tauMax);
 
     control = _control;
-    dTau_max = 1;
+    //dTau_max = 1;
     update_d = false;
 
     x.resize(n);

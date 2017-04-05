@@ -3,7 +3,7 @@
     <arg name="paused" default="true"/>
     <arg name="model" default="caroca"/>
     <arg name="model_tra" default="trajectory"/>
-    <arg name="ctl" default="minT"/>
+    <arg name="ctl" default="minAA"/>
     <arg name="sty" default="Cartesian_space"/>
     
     <!-- Launch Gazebo with empty world-->
@@ -22,12 +22,12 @@
 
    <node pkg="cdpr_controllers" type="CTC" name="CTC" output="screen">
 	<!--	 
- 		minW = min |W.tau - w| + constraints
-                minT = min |tau| with constraints
-                minA = min |tau - a| with constraints
-  		minAA= min |tau - a| with single a constraints  
-		closed_form fm=(fmax+fmin)/2
-                noMin = no constraints
+ 		minW = min |W.tau - w| + constraints (never consider the feasible condtion W.tau = w)
+                minT = min |tau| with constraints (establish the effort shreshold in order to guarantee the tension continuity)
+                minA = min |tau - a| with constraints double alphas (Olivier)
+  		minAA= min |tau - a| with single a constraints single alpha (Yuchuan) relatively working better
+		closed_form fm=(fmax+fmin)/2 working well on the maximum tension 1000
+                noMin = no constraints 
     		 
  		Cartesian_space : controller is implemented in task space
 		Joint_space : cotroller in joint space

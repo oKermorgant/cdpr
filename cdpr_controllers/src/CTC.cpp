@@ -47,7 +47,7 @@ int main(int argc, char ** argv)
 
     // get control type    
     std::string control_type = "minW";
-    double dTau_max = 0;
+    double dTau_max = 0.5;
     bool warm_start = false;
 
     if(nh_priv.hasParam("control"))
@@ -93,7 +93,7 @@ int main(int argc, char ** argv)
     // set proportional and derivative gain
     double Kp, Kd;  // tuned for Caroca
    if (space_type == "Cartesian_space")
-        Kp=Kd=25;
+        Kp=Kd=15;
     else if ( space_type == "Joint_space")
         Kp=Kd=1000;
     else 
@@ -116,12 +116,18 @@ int main(int argc, char ** argv)
     double t;
     logger.setTime(t);
     vpPoseVector pose_err;
-    logger.saveTimed(pose_err, "pose_err", "[x,y,z,\\theta_x,\\theta_y,\\theta_z]", "Pose error");
+    vpThetaUVector orientation_err;
+    vpTranslationVector position_err;
+    // logger.saveTimed(pose_err, "pose_err", "[x,y,z,\\theta_x,\\theta_y,\\theta_z]", "Pose error");
+    logger.saveTimed(orientation_err, "orientation_err", "[\\theta_x,\\theta_y, \\theta_z]", "Orientation error [deg]" );
+    logger.saveTimed(position_err, "position_err", "[x, y, z]", "Position error [m]");
     logger.saveTimed(tau, "tau", "\\tau_", "Tensions");
+    if (space_type == "Joint_space" )
+        logger.saveTimed(Le, "Le", "Le_", "Length error");
 
     // chrono
     vpColVector comp_time(1);
-    logger.saveTimed(comp_time, "dt", "[\\delta t]", "Comp. time");
+    logger.saveTimed(comp_time, "dt", "[\\delta t]", "Comp. time [s]");
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsed_seconds;
 
@@ -133,6 +139,7 @@ int main(int argc, char ** argv)
     // deliver the settings to the CTD
     CTD ctd(robot, control);
     ctd.ForceContinuity(dTau_max);
+   
 
     cout << "CDPR control ready ----------------" << fixed << endl; 
     while(ros::ok())
@@ -183,7 +190,7 @@ int main(int argc, char ** argv)
              if ( space_type == "Cartesian_space")
              {             
                  v_e=v_d-v;
-                 //filterP.Filter(err);
+                 filterP.Filter(err);
 
                 // establish the external wrench 
                 w= M_inertia*(a_d+Kp*err+Kd*v_e)-g;
@@ -237,8 +244,12 @@ int main(int argc, char ** argv)
             end = std::chrono::system_clock::now();
             elapsed_seconds = end-start;
             // log
-            for (int i = 0; i < 6; ++i)
-                pose_err[i]=err[i];
+            for (int i = 0; i < 3 ; ++i)
+             {   
+                //pose_err[i]=err[i];
+                position_err[i]=err[i];
+                orientation_err[i]=(err[i+3]*(180/M_PI));
+            }
             //pose_err=err;
             //M.buildFrom(robot.getPoseError(););
             //pose_err.buildFrom(M.inverse());
