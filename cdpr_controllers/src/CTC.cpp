@@ -47,7 +47,7 @@ int main(int argc, char ** argv)
 
     // get control type    
     std::string control_type = "minW";
-    double dTau_max = 0.5;
+    double dTau_max = 0.005;
     bool warm_start = false;
 
     if(nh_priv.hasParam("control"))
@@ -93,7 +93,7 @@ int main(int argc, char ** argv)
     // set proportional and derivative gain
     double Kp, Kd;  // tuned for Caroca
    if (space_type == "Cartesian_space")
-        Kp=Kd=15;
+        {Kp=30; Kd=30;}
     else if ( space_type == "Joint_space")
         Kp=Kd=1000;
     else 
@@ -121,9 +121,9 @@ int main(int argc, char ** argv)
     // logger.saveTimed(pose_err, "pose_err", "[x,y,z,\\theta_x,\\theta_y,\\theta_z]", "Pose error");
     logger.saveTimed(orientation_err, "orientation_err", "[\\theta_x,\\theta_y, \\theta_z]", "Orientation error [deg]" );
     logger.saveTimed(position_err, "position_err", "[x, y, z]", "Position error [m]");
-    logger.saveTimed(tau, "tau", "\\tau_", "Tensions");
+    logger.saveTimed(tau, "tau", "\\tau_", "Tensions [N]");
     if (space_type == "Joint_space" )
-        logger.saveTimed(Le, "Le", "Le_", "Length error");
+        logger.saveTimed(Le, "Le", "Le_", "Length error [m]");
 
     // chrono
     vpColVector comp_time(1);
@@ -139,7 +139,20 @@ int main(int argc, char ** argv)
     // deliver the settings to the CTD
     CTD ctd(robot, control);
     ctd.ForceContinuity(dTau_max);
-   
+
+/*
+    // initialize the cables tensions
+    robot.getPose(M);
+    M.extract(R);
+    for(unsigned int i=0;i<3;++i)
+        for(unsigned int j=0;j<3;++j)
+            RR[i][j] = RR[i+3][j+3] = R[i][j];
+     robot.computeW(W);
+             W=RR*W;
+     w= -g;
+    tau= W.pseudoInverse() * w;
+    robot.sendTensions(tau);*/
+
 
     cout << "CDPR control ready ----------------" << fixed << endl; 
     while(ros::ok())
@@ -167,7 +180,7 @@ int main(int argc, char ** argv)
                 for(unsigned int j=0;j<3;++j)
                     RR[i][j] = RR[i+3][j+3] = R[i][j];
             // transform to reference frame
-            err = RR* err;
+            //err = RR* err;
 
             // create transformation matrix
             for(unsigned int i=0;i<3;++i)
@@ -181,9 +194,9 @@ int main(int argc, char ** argv)
 
              //cout << "Desired acc: " << a_d.t() << fixed << endl;
 
-             //M_inertia.insert(robot.inertia(),3,3);
-             M_inertia.insert((R*robot.inertia()*R.t()),3,3); 
-            // build W matrix depending on current attach points
+             M_inertia.insert(robot.inertia(),3,3);
+             //M_inertia.insert((R*robot.inertia()*R.t()),3,3); 
+             // build W matrix depending on current attach points
              robot.computeW(W);
              W=RR*W;
 
@@ -220,7 +233,7 @@ int main(int argc, char ** argv)
 
                 Le_d=  -Wd.t() *v_d- J*v;
                 Le= Ld-L;
-                //filterL.Filter(Le);
+                filterL.Filter(Le);
                 //robot.sendLengthError(Le);
                 cout << "length error:" << Le.t() << endl;
 
@@ -233,22 +246,25 @@ int main(int argc, char ** argv)
                 cout << " Error: Please select the controller space type" << endl;
 
             // call cable tension distribution
-            tau = ctd.ComputeDistribution(W, w)  ;
+            tau = ctd.ComputeDistribution(W, w) ;
           
             // send tensions
             robot.sendTensions(tau);
             ctd.GetAlpha(a);
-            cout << "coefficient number:" << a << endl;
+            if(control_type == "minAA")
+              cout << "coefficient number:" << a << endl;
 
             // calculate the computation period
             end = std::chrono::system_clock::now();
             elapsed_seconds = end-start;
             // log
+            M.buildFrom( robot.getPoseError());
+            pose_err.buildFrom(M.inverse());
             for (int i = 0; i < 3 ; ++i)
              {   
                 //pose_err[i]=err[i];
-                position_err[i]=err[i];
-                orientation_err[i]=(err[i+3]*(180/M_PI));
+                position_err[i]=pose_err[i];
+                orientation_err[i]=(pose_err[i+3]*(180/M_PI));
             }
             //pose_err=err;
             //M.buildFrom(robot.getPoseError(););

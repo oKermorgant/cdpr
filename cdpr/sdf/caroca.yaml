@@ -14,7 +14,7 @@ platform:
   mass: 150
   position:
     rpy: [0, 0, 0]
-    xyz: [1.5, 1.5, 0.2]
+    xyz: [0.0, 0.0, 0.2]
   size: [1.2, 0.6, 0.4]
   type: box
   visual: box

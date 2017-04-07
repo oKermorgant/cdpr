@@ -22,15 +22,12 @@ public:
     inline void getVelocity(vpColVector &v) {v = v_;}
     inline void getDesiredPose(vpHomogeneousMatrix &M) {M = Md_;}
     inline vpPoseVector getPoseError() {
-         /*vpPoseVector p_c,p_d;
-         vpColVector e;
-         e.resize(6);
+         vpPoseVector p_c,p_d, e;
          p_c=vpPoseVector(M_); p_d=vpPoseVector(Md_);
          for (int i = 0; i < 6; ++i)
-         {
              e[i]=p_d[i]-p_c[i];
-         }*/
-        return vpPoseVector(M_.inverse()*Md_);}
+        return e;}
+        //vpPoseVector(M_.inverse()*Md_);}
     inline vpPoseVector getDesiredPoseError(vpHomogeneousMatrix &M_p, vpHomogeneousMatrix &M_c) {return vpPoseVector(M_c.inverse()*M_p);}
 
     inline void getDesiredVelocity(vpColVector &v) {v = v_d;}
@@ -101,7 +98,6 @@ protected:
     {
         Md_.insert(vpTranslationVector(_msg->position.x, _msg->position.y, _msg->position.z)); 
         Md_.insert(vpQuaternionVector(_msg->orientation.x, _msg->orientation.y, _msg->orientation.z,_msg->orientation.w));
-
     }
 
     // callback for cable states
@@ -116,7 +112,7 @@ protected:
         trajectory_ok=true;
         v_d.resize(6);
         v_d[0]=_msg->linear.x; v_d[1]=_msg->linear.y; v_d[2]=_msg->linear.z;
-        //v_d[3]=_msg->angular.x; v_d[4]=_msg->angular.y; v_d[5]=_msg->angular.z;
+        v_d[3]=_msg->angular.x; v_d[4]=_msg->angular.y; v_d[5]=_msg->angular.z;
        
     }
 
@@ -124,7 +120,7 @@ protected:
     {
         a_d.resize(6);
         a_d[0]=_msg->linear.x; a_d[1]=_msg->linear.y; a_d[2]=_msg->linear.z;
-        //a_d[3]=_msg->angular.x; a_d[4]=_msg->angular.y; a_d[5]=_msg->angular.z;
+        a_d[3]=_msg->angular.x; a_d[4]=_msg->angular.y; a_d[5]=_msg->angular.z;
     }
 };
 

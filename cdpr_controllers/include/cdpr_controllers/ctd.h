@@ -43,10 +43,10 @@ protected:
 
     vpMatrix Q, A, C, W;
     vpColVector r, b, d, x, f_m, f_v;
-    vpSubColVector tau;
+    vpSubColVector tau, alpha;
 
     bool update_d;
-    double dTau_max;
+    double dTau_max, dAlpha;
 
     bool reset_active;
     std::vector<bool> active;

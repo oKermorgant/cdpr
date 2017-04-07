@@ -1,6 +1,7 @@
 
 #include <trajectory_generator/trajectory.h>
-#include <log2plot/logger.h>\
+#include <log2plot/logger.h>
+#include <chrono>
 
 /*--------------------------------------------------------------------
 *  5 order polynomial motion planning algorithm
@@ -26,11 +27,20 @@ int main(int argc, char ** argv)
         // save pose as 3D plot
         // the saved variable is the world pose in camera frame, we want to plot the invert
         logger.save3Dpose(pose, "trajectory", "box pose");
+            
+        double t;
+        logger.setTime(t);
+
+         // chrono
+        vpColVector comp_time(1);
+        logger.saveTimed(comp_time, "Tra_dt", "[\\delta t]", "Tra  comp. time [s]");
+        std::chrono::time_point<std::chrono::system_clock> start, end;
+        std::chrono::duration<double> elapsed_seconds;
 
 
         vpRowVector x_i(3), x_f(3), v_i(3), v_f(3), a_i(3), a_f(3);
         vpRowVector P, Vel, Acc;
-        double t_i,t_f, t_a, t_c,t;
+        double t_i,t_f;
         vpMatrix L, A, C;
         L.resize(6,6);
         A.resize(6,3);
@@ -58,10 +68,13 @@ int main(int argc, char ** argv)
         while (ros::ok())
         {
               // relative time from the beginning
-              t=t_i+inter*dt;
+              //t=t_i+inter*dt;
+              t = ros::Time::now().toSec();
+              // extract the current time
+             start = std::chrono::system_clock::now();
               cout << " interation number" << inter <<endl;
               // Check the time period 
-              if (inter<=(num+1))
+              if (inter<=(num))
               {
                 P=path.getposition(t,A);
                 Vel=path.getvelocity(t,A);
@@ -73,6 +86,11 @@ int main(int argc, char ** argv)
 
              // construct the pose vector
               pose.buildFrom(P[0], P[1],  P[2],  P[3],  P[4],  P[5]);
+              // calculate the computation period
+              end = std::chrono::system_clock::now();
+              elapsed_seconds = end-start;
+              //pose_err.buildFrom(M.inverse());
+             comp_time[0] = elapsed_seconds.count();
 
               // log
               logger.update();

@@ -13,6 +13,7 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
 
     control = _control;
     //dTau_max = 1;
+    dAlpha= 0.001; 
     update_d = false;
 
     x.resize(n);
@@ -154,6 +155,7 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
             }
     }
     tau.init(x, 0, n);
+    //alpha.init(x, n, 1);
 }
 
 
@@ -164,7 +166,7 @@ vpColVector CTD::ComputeDistribution(vpMatrix &W, vpColVector &w)
         for(int i=0;i<active.size();++i)
             active[i] = false;
 
-    if(update_d && control != noMin)
+    if(update_d && control != noMin && control != closed_form)
     {
         for(unsigned int i=0;i<n;++i)
         {
@@ -185,9 +187,7 @@ vpColVector CTD::ComputeDistribution(vpMatrix &W, vpColVector &w)
     {
         A.insert(W,0,0);
         for(int i=0;i<6;++i)
-        {
                 A[i][n]= - w[i];
-        }
         solve_qp::solveQP(Q, r, A, b, C, d, x, active);
     }
     else if(control == minA)  // control = minA
