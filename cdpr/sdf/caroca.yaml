@@ -1,4 +1,4 @@
-cable: {radius: 0.005}
+cable: {mass: 0.001, radius: 0.005}
 frame:
   color: Grey
   lower: [-3.5, -2.0, 0]
@@ -7,7 +7,7 @@ frame:
   upper: [3.5, 2.0, 3.5]
 joints:
   actuated: {damping: 1, effort: 10000, min: 50, velocity: 10}
-  passive: {damping: 0.01, effort: 100, velocity: 10}
+  passive: {damping: 0.01, effort: 10000, velocity: 10}
 platform:
   color: Blue
   inertia: [100.0, 100.0, 100.0, 0.0, 0.0, 0.0]

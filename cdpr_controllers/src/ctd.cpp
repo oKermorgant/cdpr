@@ -8,6 +8,9 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
     // number of cables
     n = robot.n_cables();
 
+    // mass of platform
+    m=robot.mass();
+
     // forces min / max
     robot.tensionMinMax(tauMin, tauMax);
 
@@ -17,8 +20,6 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
     update_d = false;
 
     x.resize(n);
-    f_m.resize(n);
-    f_v.resize(n);
 
     reset_active = !warm_start;
     active.clear();
@@ -119,11 +120,14 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
     }
     else if (control == minAA)
     {
+        // min |tau| - alpha
+        //  st W.tau = alpha.w
+        //  st 0 < alpha < 1
+        //  st t- < tau < t+
         x.resize(n+1); // x = (tau, alpha)
-
         Q.eye(n+1); Q *= 1./tauMax;
         r.resize(n+1);
-        Q[n][n]=r[n]=n*tauMax;
+        Q[n][n]=r[n]= 7118;
         // equality constraints
         A.resize(6,n+1);
         b.resize(6);
@@ -146,13 +150,35 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
     }
     else if ( control == closed_form)
     {
-             d.resize(2*n);
-            for (unsigned int i = 0; i <n; ++i)
-            {
-                f_m[i]=(tauMax+tauMin)/2;
-                d[i] = tauMax;
-                d[i+n] = -tauMin;
-            }
+        // tau=f_m+f_v
+        //  f_m=(tauMax+tauMin)/2
+        //  W.tau-w=0
+        // min ||f_v||2
+        //  st 1/2*f_m < f_v < 1/2* sqrt(m)*f_m
+
+        f_m.resize(n);
+        f_v.resize(n);
+        // min f_v
+        Q.eye(n);
+        r.resize(n);
+        // no equality constraints
+        d.resize(2*n);
+        d1.resize(2*n);
+        C.resize(2*n,n);
+        // equality constraints
+        A.eye(n);
+        b.resize(n);
+        for (unsigned int i = 0; i <n; ++i)
+        {
+            f_m[i]=(tauMax+tauMin)/2;
+            C[i][i] = 1;
+            d[i] =(tauMax-tauMin)/2;
+            d1[i]= -f_m[i]/2;
+            C[i+n][i] = -1;
+            d[i+n] =(tauMax-tauMin)/2;
+            d1[i+n] = sqrt(m)*f_m[i]/2;
+        }    
+        cout << "d" << d.t() << endl;
     }
     tau.init(x, 0, n);
     //alpha.init(x, n, 1);
@@ -202,22 +228,31 @@ vpColVector CTD::ComputeDistribution(vpMatrix &W, vpColVector &w)
                 A[i][n+1] = -w[i];
         }
         solve_qp::solveQP(Q, r, A, b, C, d, x, active);
-  //      cout << "alpha = " << alpha[0] << endl;
-  //      cout << "checking W.tau - a.w: " << (W*tau - alpha[0]*w).t() << endl;
+      //      cout << "alpha = " << alpha[0] << endl;
+      //      cout << "checking W.tau - a.w: " << (W*tau - alpha[0]*w).t() << endl;
     }
     else if( control == closed_form)
     {
-         f_v= W.pseudoInverse()*(w - (W*f_m)); 
+         b= W.pseudoInverse()*(w - (W*f_m)); 
+         solve_qp::solveQP(Q, r, A, b, C, d, f_v, active);
+         //solve_qp::solveQP(Q, r, A, b, C, d1, f_v, active);
          tau=f_m+f_v;
     }
     else
         cout << "No appropriate TDA " << endl;
- //   cout << "Residual: " << (W*tau - w).t() << fixed << endl;
+     //   cout << "Residual: " << (W*tau - w).t() << fixed << endl;
 
     cout << "check constraints :" << endl;
-    for(int i=0;i<n;++i)
-            cout << "   " << -d[i+n] << " < " << tau[i] << " < " << d[i] << std::endl;
-
+    if ( control != closed_form)
+    {
+        for(int i=0;i<n;++i)
+                cout << "   " << -d[i+n] << " < " << tau[i] << " < " << d[i] << std::endl;
+    }
+    else
+    {
+        for(int i=0;i<n;++i)
+                cout << "   " << -d[i+n]+f_m[i] << " < " << tau[i] << " < " << d[i]+f_m[i]<< std::endl;
+    }
     update_d = dTau_max;
 
     return tau;

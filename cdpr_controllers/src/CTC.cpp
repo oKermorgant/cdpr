@@ -47,7 +47,7 @@ int main(int argc, char ** argv)
 
     // get control type    
     std::string control_type = "minW";
-    double dTau_max = 0.005;
+    double dTau_max = 0;
     bool warm_start = false;
 
     if(nh_priv.hasParam("control"))
@@ -93,7 +93,7 @@ int main(int argc, char ** argv)
     // set proportional and derivative gain
     double Kp, Kd;  // tuned for Caroca
    if (space_type == "Cartesian_space")
-        {Kp=30; Kd=30;}
+        {Kp=15; Kd=15;}
     else if ( space_type == "Joint_space")
         Kp=Kd=1000;
     else 
@@ -180,7 +180,7 @@ int main(int argc, char ** argv)
                 for(unsigned int j=0;j<3;++j)
                     RR[i][j] = RR[i+3][j+3] = R[i][j];
             // transform to reference frame
-            //err = RR* err;
+            err = RR* err;
 
             // create transformation matrix
             for(unsigned int i=0;i<3;++i)

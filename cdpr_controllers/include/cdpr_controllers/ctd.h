@@ -3,6 +3,7 @@
 
 #include <cdpr_controllers/qp.h>
 #include <cdpr/cdpr.h>
+#include <cmath>
 
 // this class implements all candidates for CTD's
 // this way we do not have the same code in all sources
@@ -39,10 +40,10 @@ public:
 protected:
     minType control;
     int n;
-    double tauMin, tauMax;
+    double tauMin, tauMax, m;
 
     vpMatrix Q, A, C, W;
-    vpColVector r, b, d, x, f_m, f_v;
+    vpColVector r, b, d, x, f_m, f_v, d1;
     vpSubColVector tau, alpha;
 
     bool update_d;
