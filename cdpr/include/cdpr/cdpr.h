@@ -14,19 +14,14 @@ class CDPR
 public:
     CDPR(ros::NodeHandle &_nh);
 
-    inline bool ok() {return cables_ok && platform_ok ;}
+    inline bool ok() {return cables_ok && platform_ok && trajectory_ok ;}
 
     inline void setDesiredPose(double x, double y, double z, double tx, double ty, double tz)
         {Md_ = vpHomogeneousMatrix(x,y,z,tx,ty,tz);}
     inline void getPose(vpHomogeneousMatrix &M) {M = M_;}
     inline void getVelocity(vpColVector &v) {v = v_;}
     inline void getDesiredPose(vpHomogeneousMatrix &M) {M = Md_;}
-    inline vpPoseVector getPoseError() {
-/*         vpPoseVector p_c,p_d, e;
-         p_c=vpPoseVector(M_); p_d=vpPoseVector(Md_);
-         for (int i = 0; i < 6; ++i)
-             e[i]=p_d[i]-p_c[i];*/
-        return vpPoseVector(M_.inverse()*Md_);}
+    inline vpPoseVector getPoseError() { return vpPoseVector(M_.inverse()*Md_);}
     inline vpPoseVector getDesiredPoseError(vpHomogeneousMatrix &M_p, vpHomogeneousMatrix &M_c) {return vpPoseVector(M_c.inverse()*M_p);}
 
     inline void getDesiredVelocity(vpColVector &v) {v = v_d;}
@@ -111,8 +106,7 @@ protected:
         trajectory_ok=true;
         v_d.resize(6);
         v_d[0]=_msg->linear.x; v_d[1]=_msg->linear.y; v_d[2]=_msg->linear.z;
-        v_d[3]=_msg->angular.x; v_d[4]=_msg->angular.y; v_d[5]=_msg->angular.z;
-       
+        v_d[3]=_msg->angular.x; v_d[4]=_msg->angular.y; v_d[5]=_msg->angular.z;       
     }
 
     void DesiredAcc_cb(const geometry_msgs::TwistConstPtr &_msg)

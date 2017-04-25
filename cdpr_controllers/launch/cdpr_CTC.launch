@@ -3,7 +3,7 @@
     <arg name="paused" default="true"/>
     <arg name="model" default="caroca"/>
     <arg name="model_tra" default="trajectory"/>
-    <arg name="ctl" default="closed_form"/>
+    <arg name="ctl" default="minT"/>
     <arg name="sty" default="Cartesian_space"/>
     
     <!-- Launch Gazebo with empty world-->

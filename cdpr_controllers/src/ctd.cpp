@@ -127,7 +127,7 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
         x.resize(n+1); // x = (tau, alpha)
         Q.eye(n+1); Q *= 1./tauMax;
         r.resize(n+1);
-        Q[n][n]=r[n]= 7118;
+        Q[n][n]=r[n]=9000;
         // equality constraints
         A.resize(6,n+1);
         b.resize(6);
@@ -163,7 +163,6 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
         r.resize(n);
         // no equality constraints
         d.resize(2*n);
-        d1.resize(2*n);
         C.resize(2*n,n);
         // equality constraints
         A.eye(n);
@@ -172,13 +171,11 @@ CTD::CTD(CDPR &robot, minType _control, bool warm_start)
         {
             f_m[i]=(tauMax+tauMin)/2;
             C[i][i] = 1;
-            d[i] =(tauMax-tauMin)/2;
-            d1[i]= -f_m[i]/2;
+            d[i] =tauMax; //(tauMax-tauMin)/2;
             C[i+n][i] = -1;
-            d[i+n] =(tauMax-tauMin)/2;
-            d1[i+n] = sqrt(m)*f_m[i]/2;
+            d[i+n] = - tauMin; //(tauMax-tauMin)/2;
         }    
-        cout << "d" << d.t() << endl;
+        r=f_m;
     }
     tau.init(x, 0, n);
     //alpha.init(x, n, 1);
@@ -233,10 +230,11 @@ vpColVector CTD::ComputeDistribution(vpMatrix &W, vpColVector &w)
     }
     else if( control == closed_form)
     {
-         b= W.pseudoInverse()*(w - (W*f_m)); 
-         solve_qp::solveQP(Q, r, A, b, C, d, f_v, active);
+         b= f_m + W.pseudoInverse()*(w - (W*f_m)); 
+         solve_qp::solveQP(Q, r, A, b, C, d, x, active);
          //solve_qp::solveQP(Q, r, A, b, C, d1, f_v, active);
-         tau=f_m+f_v;
+         //tau=f_m+f_v;
+         cout << "The closed form is implemented"<< endl;
     }
     else
         cout << "No appropriate TDA " << endl;
@@ -251,7 +249,7 @@ vpColVector CTD::ComputeDistribution(vpMatrix &W, vpColVector &w)
     else
     {
         for(int i=0;i<n;++i)
-                cout << "   " << -d[i+n]+f_m[i] << " < " << tau[i] << " < " << d[i]+f_m[i]<< std::endl;
+                cout << "   " << -d[i+n] << " < " << tau[i] << " < " << d[i]<< std::endl;
     }
     update_d = dTau_max;
 

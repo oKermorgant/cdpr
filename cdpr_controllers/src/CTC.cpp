@@ -47,7 +47,7 @@ int main(int argc, char ** argv)
 
     // get control type    
     std::string control_type = "minW";
-    double dTau_max = 0;
+    double dTau_max = 0.5;
     bool warm_start = false;
 
     if(nh_priv.hasParam("control"))
@@ -77,7 +77,7 @@ int main(int argc, char ** argv)
     
     // initialization of parameters in CTC 
     vpMatrix W(6, n), Wd(6,n), J(n,6), RR(6,6), RR_d(6,6),  M_inertia(6,6);;  
-    vpColVector g(6), tau(n), err(6), T(n), w(6);
+    vpColVector g(6), tau(n), err(6),  w(6), tau0(n), tau_diff(n);
     vpColVector L(n), Ld(n), Le(n),  Le_d(n);
     g[2] = - robot.mass() * 9.81;
     double a;
@@ -89,6 +89,7 @@ int main(int argc, char ** argv)
     // declare the homogeneous matrix
     vpHomogeneousMatrix M, Md;
     vpRotationMatrix R, Rd;
+    vpTranslationVector T;
 
     // set proportional and derivative gain
     double Kp, Kd;  // tuned for Caroca
@@ -122,6 +123,7 @@ int main(int argc, char ** argv)
     logger.saveTimed(orientation_err, "orientation_err", "[\\theta_x,\\theta_y, \\theta_z]", "Orientation error [deg]" );
     logger.saveTimed(position_err, "position_err", "[x, y, z]", "Position error [m]");
     logger.saveTimed(tau, "tau", "\\tau_", "Tensions [N]");
+    logger.saveTimed(tau_diff, "diff", "\\tau_d", "Tensions difference [N]");
     if (space_type == "Joint_space" )
         logger.saveTimed(Le, "Le", "Le_", "Length error [m]");
 
@@ -161,9 +163,13 @@ int main(int argc, char ** argv)
         nh.getParam("Kp", Kp);
         nh.getParam("Kd", Kd);
         t = ros::Time::now().toSec();
+          robot.getPose(M);
+            M.extract(T);
+            cout << "Current position" << T.t() << endl;
         
         if(robot.ok())  // messages have been received
         {
+            cout << "messages have been received" << endl;
             // extract the current time
              start = std::chrono::system_clock::now();
             // current poses
@@ -245,9 +251,11 @@ int main(int argc, char ** argv)
             else
                 cout << " Error: Please select the controller space type" << endl;
 
+             tau0=tau;
             // call cable tension distribution
             tau = ctd.ComputeDistribution(W, w) ;
-          
+            tau_diff= tau-tau0;
+
             // send tensions
             robot.sendTensions(tau);
             ctd.GetAlpha(a);

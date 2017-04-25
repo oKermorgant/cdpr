@@ -67,10 +67,10 @@ public:
     // get the desired position xyz
     inline vpRowVector getposition(double t, vpMatrix a)
     { 
-        vpRowVector l;
+        vpRowVector position, l;
         l.resize(6);
         l[0]=t*t*t*t*t; l[1]=t*t*t*t; l[2]=t*t*t; l[3]=t*t; l[4]=t; l[5]=1;
-        vpRowVector position=l*a;
+        position=l*a;
         return position;
     }
     //get the desired velocity
@@ -94,13 +94,16 @@ public:
 
     void sendDesiredpara(vpColVector p, vpColVector v, vpColVector acc)
     {
-        // write effort to jointstate
-          
+        // write desired pose 
         pf_d.position.x=p[0],pf_d.position.y=p[1],pf_d.position.z=p[2];
-        pf_d.orientation.w=1;
+        pf_d.orientation.x=0; pf_d.orientation.y=0; pf_d.orientation.z=0; pf_d.orientation.w=1;
+        // write published velocity 
         vel_d.linear.x=v[0],vel_d.linear.y=v[1],vel_d.linear.z=v[2];
+        vel_d.angular.x=0,vel_d.angular.y=0,vel_d.angular.z=0;
+        // write desired acceleration
         acc_d.linear.x=acc[0],acc_d.linear.y=acc[1],acc_d.linear.z=acc[2];
-
+        acc_d.angular.x=0; acc_d.angular.y=0; acc_d.angular.z=0;
+        // publish the messages 
         setpointPose_pub.publish(pf_d);
         setpointVel_pub.publish(vel_d); 
         setpointAcc_pub.publish(acc_d);
@@ -115,7 +118,6 @@ public:
     // model parameter
     double t0, t1,t2, t3, t4, Kp, Kd;
     vpRowVector  xi, xf;
-
 };
 
 #endif // trajectory_H
