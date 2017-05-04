@@ -70,20 +70,20 @@ CDPR::CDPR(ros::NodeHandle &_nh)
     tensions_pub = _nh.advertise<sensor_msgs::JointState>("cable_command", 1);
 
     // publishe the poses error
-    error_pub = _nh.advertise<geometry_msgs::Twist>("error",1);
+   // error_pub = _nh.advertise<geometry_msgs::Twist>("error",1);
 
        // publishe the length error
-    errorL_pub = _nh.advertise<sensor_msgs::JointState>("errorL",1);
+   // errorL_pub = _nh.advertise<sensor_msgs::JointState>("errorL",1);
 
     char cable_name[256];
     for(unsigned int i=0;i<n_cable;++i)
     {
         sprintf(cable_name, "cable%i", i);
         tensions_msg.name.push_back(std::string(cable_name));
-         length_e.name.push_back(std::string(cable_name));
+         //length_e.name.push_back(std::string(cable_name));
     }
     tensions_msg.effort.resize(n_cable);
-    length_e.effort.resize(n_cable);
+    //length_e.effort.resize(n_cable);
 }
 
 
@@ -180,23 +180,6 @@ void CDPR::sendTensions(vpColVector &f)
 
     tensions_pub.publish(tensions_msg);
 }
-
-void CDPR::sendError(vpColVector &e)
-{
-    
-    control_error.linear.x = e[0]; control_error.linear.y = e[1]; control_error.linear.z = e[2];
-    control_error.angular.x=e[3]; control_error.angular.y=e[4]; control_error.angular.z=e[5]; 
-    error_pub.publish(control_error);
-}
-
-void CDPR::sendLengthError(vpColVector &e_l)
-{
-    for (unsigned int i = 0; i < n_cable; ++i)
-        length_e.effort[i]=e_l[i];
-    length_e.header.stamp = ros::Time::now();
-    errorL_pub.publish(length_e);
-}
-
 
 
 

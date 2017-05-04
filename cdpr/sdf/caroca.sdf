@@ -19,10 +19,10 @@
         <geometry>
           <cylinder>
             <radius>0.02</radius>
-            <length>3.5</length>
+            <length>3.48</length>
           </cylinder>
         </geometry>
-        <pose>-3.500000 -2.000000 1.750000 0.000000 0.000000 0.000000</pose>
+        <pose>-3.500000 -2.000000 1.760000 0.000000 0.000000 0.000000</pose>
         <material>
           <script>
             <uri>file://media/materials/scripts/kitchen.material</uri>
@@ -36,7 +36,7 @@
             <radius>0.02</radius>
           </cylinder>
         </geometry>
-        <pose>-3.500000 -2.000000 1.750000 0.000000 0.000000 0.000000</pose>
+        <pose>-3.500000 -2.000000 1.760000 0.000000 0.000000 0.000000</pose>
       </collision>
       <visual name="visual2">
         <geometry>
@@ -45,7 +45,7 @@
             <length>4.0</length>
           </cylinder>
         </geometry>
-        <pose>-3.500000 0.000000 0.000000 1.570796 0.000000 0.000000</pose>
+        <pose>-3.500000 0.000000 0.020000 1.570796 0.000000 0.000000</pose>
         <material>
           <script>
             <uri>file://media/materials/scripts/kitchen.material</uri>
@@ -59,7 +59,7 @@
             <radius>0.02</radius>
           </cylinder>
         </geometry>
-        <pose>-3.500000 0.000000 0.000000 1.570796 0.000000 0.000000</pose>
+        <pose>-3.500000 0.000000 0.020000 1.570796 0.000000 0.000000</pose>
       </collision>
       <visual name="visual3">
         <geometry>
@@ -68,7 +68,7 @@
             <length>7.0</length>
           </cylinder>
         </geometry>
-        <pose>0.000000 -2.000000 0.000000 0.000000 1.570796 0.000000</pose>
+        <pose>0.000000 -2.000000 0.020000 0.000000 1.570796 0.000000</pose>
         <material>
           <script>
             <uri>file://media/materials/scripts/kitchen.material</uri>
@@ -82,7 +82,7 @@
             <radius>0.02</radius>
           </cylinder>
         </geometry>
-        <pose>0.000000 -2.000000 0.000000 0.000000 1.570796 0.000000</pose>
+        <pose>0.000000 -2.000000 0.020000 0.000000 1.570796 0.000000</pose>
       </collision>
       <visual name="visual4">
         <geometry>
@@ -134,10 +134,10 @@
         <geometry>
           <cylinder>
             <radius>0.02</radius>
-            <length>3.5</length>
+            <length>3.48</length>
           </cylinder>
         </geometry>
-        <pose>-3.500000 2.000000 1.750000 0.000000 0.000000 0.000000</pose>
+        <pose>-3.500000 2.000000 1.760000 0.000000 0.000000 0.000000</pose>
         <material>
           <script>
             <uri>file://media/materials/scripts/kitchen.material</uri>
@@ -151,7 +151,7 @@
             <radius>0.02</radius>
           </cylinder>
         </geometry>
-        <pose>-3.500000 2.000000 1.750000 0.000000 0.000000 0.000000</pose>
+        <pose>-3.500000 2.000000 1.760000 0.000000 0.000000 0.000000</pose>
       </collision>
       <visual name="visual7">
         <geometry>
@@ -160,7 +160,7 @@
             <length>7.0</length>
           </cylinder>
         </geometry>
-        <pose>0.000000 2.000000 0.000000 0.000000 1.570796 0.000000</pose>
+        <pose>0.000000 2.000000 0.020000 0.000000 1.570796 0.000000</pose>
         <material>
           <script>
             <uri>file://media/materials/scripts/kitchen.material</uri>
@@ -174,7 +174,7 @@
             <radius>0.02</radius>
           </cylinder>
         </geometry>
-        <pose>0.000000 2.000000 0.000000 0.000000 1.570796 0.000000</pose>
+        <pose>0.000000 2.000000 0.020000 0.000000 1.570796 0.000000</pose>
       </collision>
       <visual name="visual8">
         <geometry>
@@ -203,10 +203,10 @@
         <geometry>
           <cylinder>
             <radius>0.02</radius>
-            <length>3.5</length>
+            <length>3.48</length>
           </cylinder>
         </geometry>
-        <pose>3.500000 -2.000000 1.750000 0.000000 0.000000 0.000000</pose>
+        <pose>3.500000 -2.000000 1.760000 0.000000 0.000000 0.000000</pose>
         <material>
           <script>
             <uri>file://media/materials/scripts/kitchen.material</uri>
@@ -220,7 +220,7 @@
             <radius>0.02</radius>
           </cylinder>
         </geometry>
-        <pose>3.500000 -2.000000 1.750000 0.000000 0.000000 0.000000</pose>
+        <pose>3.500000 -2.000000 1.760000 0.000000 0.000000 0.000000</pose>
       </collision>
       <visual name="visual10">
         <geometry>
@@ -229,7 +229,7 @@
             <length>4.0</length>
           </cylinder>
         </geometry>
-        <pose>3.500000 0.000000 0.000000 1.570796 0.000000 0.000000</pose>
+        <pose>3.500000 0.000000 0.020000 1.570796 0.000000 0.000000</pose>
         <material>
           <script>
             <uri>file://media/materials/scripts/kitchen.material</uri>
@@ -243,7 +243,7 @@
             <radius>0.02</radius>
           </cylinder>
         </geometry>
-        <pose>3.500000 0.000000 0.000000 1.570796 0.000000 0.000000</pose>
+        <pose>3.500000 0.000000 0.020000 1.570796 0.000000 0.000000</pose>
       </collision>
       <visual name="visual11">
         <geometry>
@@ -272,10 +272,10 @@
         <geometry>
           <cylinder>
             <radius>0.02</radius>
-            <length>3.5</length>
+            <length>3.48</length>
           </cylinder>
         </geometry>
-        <pose>3.500000 2.000000 1.750000 0.000000 0.000000 0.000000</pose>
+        <pose>3.500000 2.000000 1.760000 0.000000 0.000000 0.000000</pose>
         <material>
           <script>
             <uri>file://media/materials/scripts/kitchen.material</uri>
@@ -289,7 +289,7 @@
             <radius>0.02</radius>
           </cylinder>
         </geometry>
-        <pose>3.500000 2.000000 1.750000 0.000000 0.000000 0.000000</pose>
+        <pose>3.500000 2.000000 1.760000 0.000000 0.000000 0.000000</pose>
       </collision>
     </link>
     <!--Definition of the robot cables-->
@@ -329,12 +329,12 @@
       </inertial>
     </link>
     <link name="cable0">
-      <pose>-1.812177 -1.122332 2.318524 -2.502679 0.853663 -1.883915</pose>
+      <pose>-1.809183 -1.120775 2.316428 -2.502679 0.853663 -1.883915</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
             <radius>0.005</radius>
-            <length>8.78919791562</length>
+            <length>8.78125275801</length>
           </cylinder>
         </geometry>
         <material>
@@ -415,14 +415,14 @@
       </axis>
     </joint>
     <joint name="cable0" type="prismatic">
-      <pose>0 0 -1.483461 -2.502679 0.853663 -1.883915</pose>
+      <pose>0 0 -1.484749 -2.502679 0.853663 -1.883915</pose>
       <parent>virt_Y0</parent>
       <child>cable0</child>
       <axis>
         <xyz>-0.753693 -0.391920 0.527585</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-4.390626379</lower>
+          <upper>4.390626379</upper>
           <effort>10000</effort>
           <velocity>10</velocity>
         </limit>
@@ -505,12 +505,12 @@
       </axis>
     </joint>
     <link name="cable1">
-      <pose>-2.551800 -1.201516 2.726469 -2.340323 0.706181 -1.432126</pose>
+      <pose>-2.549222 -1.199345 2.724366 -2.340323 0.706181 -1.432126</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
             <radius>0.005</radius>
-            <length>8.78919791562</length>
+            <length>8.78125275801</length>
           </cylinder>
         </geometry>
         <material>
@@ -591,14 +591,14 @@
       </axis>
     </joint>
     <joint name="cable1" type="prismatic">
-      <pose>0 0 -1.096568 -2.340323 0.706181 -1.432126</pose>
+      <pose>0 0 -1.098555 -2.340323 0.706181 -1.432126</pose>
       <parent>virt_Y1</parent>
       <child>cable1</child>
       <axis>
         <xyz>-0.648933 -0.546470 0.529393</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-4.390626379</lower>
+          <upper>4.390626379</upper>
           <effort>10000</effort>
           <velocity>10</velocity>
         </limit>
@@ -681,12 +681,12 @@
       </axis>
     </joint>
     <link name="cable2">
-      <pose>3.026131 -1.614982 3.040940 -2.443690 -0.669172 1.525312</pose>
+      <pose>3.023667 -1.612980 3.038552 -2.443690 -0.669172 1.525312</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
             <radius>0.005</radius>
-            <length>8.78919791562</length>
+            <length>8.78125275801</length>
           </cylinder>
         </geometry>
         <material>
@@ -767,14 +767,14 @@
       </axis>
     </joint>
     <joint name="cable2" type="prismatic">
-      <pose>0 0 -0.650769 -2.443690 -0.669172 1.525312</pose>
+      <pose>0 0 -0.653562 -2.443690 -0.669172 1.525312</pose>
       <parent>virt_Y2</parent>
       <child>cable2</child>
       <axis>
         <xyz>0.620337 -0.504024 0.600951</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-4.390626379</lower>
+          <upper>4.390626379</upper>
           <effort>10000</effort>
           <velocity>10</velocity>
         </limit>
@@ -857,12 +857,12 @@
       </axis>
     </joint>
     <link name="cable3">
-      <pose>3.207687 -1.532299 2.988452 -2.400941 -0.399098 0.960485</pose>
+      <pose>3.206143 -1.529829 2.985751 -2.400941 -0.399098 0.960485</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
             <radius>0.005</radius>
-            <length>8.78919791562</length>
+            <length>8.78125275801</length>
           </cylinder>
         </geometry>
         <material>
@@ -943,14 +943,14 @@
       </axis>
     </joint>
     <joint name="cable3" type="prismatic">
-      <pose>0 0 -0.642299 -2.400941 -0.399098 0.960485</pose>
+      <pose>0 0 -0.645108 -2.400941 -0.399098 0.960485</pose>
       <parent>virt_Y3</parent>
       <child>cable3</child>
       <axis>
         <xyz>0.388588 -0.621740 0.680028</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-4.390626379</lower>
+          <upper>4.390626379</upper>
           <effort>10000</effort>
           <velocity>10</velocity>
         </limit>
@@ -1033,12 +1033,12 @@
       </axis>
     </joint>
     <link name="cable4">
-      <pose>-2.819899 1.749436 2.873591 2.761086 0.789412 2.275508</pose>
+      <pose>-2.817079 1.748397 2.870994 2.761086 0.789412 2.275508</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
             <radius>0.005</radius>
-            <length>8.78919791562</length>
+            <length>8.78125275801</length>
           </cylinder>
         </geometry>
         <material>
@@ -1119,14 +1119,14 @@
       </axis>
     </joint>
     <joint name="cable4" type="prismatic">
-      <pose>0 0 -0.786519 2.761086 0.789412 2.275508</pose>
+      <pose>0 0 -0.789066 2.761086 0.789412 2.275508</pose>
       <parent>virt_Y4</parent>
       <child>cable4</child>
       <axis>
         <xyz>-0.709939 0.261557 0.653892</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-4.390626379</lower>
+          <upper>4.390626379</upper>
           <effort>10000</effort>
           <velocity>10</velocity>
         </limit>
@@ -1209,12 +1209,12 @@
       </axis>
     </joint>
     <link name="cable5">
-      <pose>-2.200920 1.792147 2.694570 2.889038 1.001262 2.685588</pose>
+      <pose>-2.197574 1.791612 2.692496 2.889038 1.001262 2.685588</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
             <radius>0.005</radius>
-            <length>8.78919791562</length>
+            <length>8.78125275801</length>
           </cylinder>
         </geometry>
         <material>
@@ -1295,14 +1295,14 @@
       </axis>
     </joint>
     <joint name="cable5" type="prismatic">
-      <pose>0 0 -1.141787 2.889038 1.001262 2.685588</pose>
+      <pose>0 0 -1.143693 2.889038 1.001262 2.685588</pose>
       <parent>virt_Y5</parent>
       <child>cable5</child>
       <axis>
         <xyz>-0.842152 0.134744 0.522134</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-4.390626379</lower>
+          <upper>4.390626379</upper>
           <effort>10000</effort>
           <velocity>10</velocity>
         </limit>
@@ -1385,12 +1385,12 @@
       </axis>
     </joint>
     <link name="cable6">
-      <pose>3.727434 2.159204 3.852523 2.717398 -0.531535 -1.803043</pose>
+      <pose>3.725421 2.157795 3.849402 2.717398 -0.531535 -1.803043</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
             <radius>0.005</radius>
-            <length>8.78919791562</length>
+            <length>8.78125275801</length>
           </cylinder>
         </geometry>
         <material>
@@ -1471,14 +1471,14 @@
       </axis>
     </joint>
     <joint name="cable6" type="prismatic">
-      <pose>0 0 0.499742 2.717398 -0.531535 -1.803043</pose>
+      <pose>0 0 0.494870 2.717398 -0.531535 -1.803043</pose>
       <parent>virt_Y6</parent>
       <child>cable6</child>
       <axis>
         <xyz>0.506857 0.354800 0.785629</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-4.390626379</lower>
+          <upper>4.390626379</upper>
           <effort>10000</effort>
           <velocity>10</velocity>
         </limit>
@@ -1561,12 +1561,12 @@
       </axis>
     </joint>
     <link name="cable7">
-      <pose>3.224027 1.931007 3.198155 2.916881 -0.727987 -2.565718</pose>
+      <pose>3.221384 1.930346 3.195264 2.916881 -0.727987 -2.565718</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
             <radius>0.005</radius>
-            <length>8.78919791562</length>
+            <length>8.78125275801</length>
           </cylinder>
         </geometry>
         <material>
@@ -1647,14 +1647,14 @@
       </axis>
     </joint>
     <joint name="cable7" type="prismatic">
-      <pose>0 0 -0.378997 2.916881 -0.727987 -2.565718</pose>
+      <pose>0 0 -0.382281 2.916881 -0.727987 -2.565718</pose>
       <parent>virt_Y7</parent>
       <child>cable7</child>
       <axis>
         <xyz>0.665368 0.166342 0.727747</xyz>
         <limit>
-          <lower>-4.39459895781</lower>
-          <upper>4.39459895781</upper>
+          <lower>-4.390626379</lower>
+          <upper>4.390626379</upper>
           <effort>10000</effort>
           <velocity>10</velocity>
         </limit>

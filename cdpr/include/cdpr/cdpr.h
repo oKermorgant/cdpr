@@ -41,20 +41,11 @@ public:
     void computeDesiredW(vpMatrix &Wd);
     void computeLength(vpColVector &L);
     void computeDesiredLength(vpColVector &Ld);
-    void sendError(vpColVector &e);
-    void sendLengthError(vpColVector &e_l);
 protected:
     // subscriber to gazebo data
     ros::Subscriber cables_sub, platform_sub;
     bool cables_ok, platform_ok, trajectory_ok;
     sensor_msgs::JointState cable_states;
-
-    // 
-    ros::Publisher error_pub;
-    geometry_msgs::Twist control_error;
-
-    ros::Publisher errorL_pub;
-    sensor_msgs::JointState length_e;
 
     // subscriber to desired pose
     ros::Subscriber setpoint_sub, desiredVel_sub, desiredAcc_sub;

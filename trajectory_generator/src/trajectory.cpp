@@ -68,14 +68,14 @@ int main(int argc, char ** argv)
         while (ros::ok())
         {
               // relative time from the beginning
-              //t=t_i+inter*dt;
-              t = ros::Time::now().toSec() ;
-              cout << "timer" << t << endl;
+              t=t_i+inter*dt;
+              //t = ros::Time::now().toSec() ;
+              cout << "timer" << " "<<t << endl;
               // extract the current time
               start = std::chrono::system_clock::now();
-              cout << " interation number" << inter <<endl;
+              cout << "interation number:" <<" "<< inter <<endl;
               // Check the time period 
-              if (inter<=(num+1))
+              if (inter<=(num+2))
               {
                 P=path.getposition(t,A);
                 Vel=path.getvelocity(t,A);
@@ -95,7 +95,7 @@ int main(int argc, char ** argv)
 
               // log
               logger.update();
-              cout << " Desired position" << P <<endl;
+              cout << "Desired position:" << " "<<P <<endl;
                  // cout << " The trajectory has been tracked" << endl;
                  //cout << " Desired velocity" << Vel <<endl;
                  //cout << " Desired acceleration" << Acc <<endl;
@@ -103,6 +103,6 @@ int main(int argc, char ** argv)
               ros::spinOnce();
               loop.sleep();
         }
-         logger.plot("", true);
+        // logger.plot("", true);
          return 0;
 };

@@ -4,7 +4,7 @@
 #include <log2plot/logger.h>
 #include <chrono>
 #include <cdpr_controllers/butterworth.h>
-#include <cdpr_controllers/ctd.h>
+#include <cdpr_controllers/tda.h>
 
 using namespace std;
 
@@ -12,7 +12,7 @@ using namespace std;
  * Basic PID controller to show input/output of the CDPR class
  *
  * Does not consider dynamics except for gravity
- * Actual CTD depends on "control" parameter
+ * Actual TDA depends on "control" parameter
  *
  */
 
@@ -52,13 +52,13 @@ int main(int argc, char ** argv)
 
     if(nh_priv.hasParam("control"))
     nh_priv.getParam("control", control_type);
-    CTD::minType control = CTD::minA;
+    TDA::minType control = TDA::minA;
     if(control_type == "noMin")
-        control = CTD::noMin;
+        control = TDA::noMin;
     else if(control_type == "minT")
-        control = CTD::minT;
+        control = TDA::minT;
     else if(control_type == "minW")
-        control = CTD::minW;
+        control = TDA::minW;
 
     path += control_type;
 
@@ -98,7 +98,7 @@ int main(int argc, char ** argv)
     logger.saveTimed(residual, "res", "[f_x,f_y,f_z,m_x,m_y,m_z]", "Residuals");
 
     std::vector<double> alpha(1,0);
-    if(control == CTD::minA)
+    if(control == TDA::minA)
     {
         logger.saveTimed(alpha, "a", "[\\alpha]", "Alpha");
     }
@@ -113,8 +113,8 @@ int main(int argc, char ** argv)
     // filter for d_error (dim. 6)
     Butterworth_nD filter(6, 1, dt);
 
-    CTD ctd(robot, control);
-    ctd.ForceContinuity(dTau_max);
+    TDA tda(robot, control);
+    tda.ForceContinuity(dTau_max);
 
     cout << "CDPR control ready" << fixed << endl;
 
@@ -143,7 +143,7 @@ int main(int argc, char ** argv)
             // position error in fixed frame
             err = RR * err;
           //  cout << "Position error in world frame: " << err.t() << fixed << endl;
-            robot.sendError(err);
+            //robot.sendError(err);
             // I term to wrench in fixed frame
             for(unsigned int i=0;i<6;++i)
                 if(w[i] < robot.mass()*9.81)
@@ -172,7 +172,7 @@ int main(int argc, char ** argv)
             robot.computeW(W);
 
             // call cable tension distribution
-            tau = ctd.ComputeDistribution(W, w)            ;
+            tau = tda.ComputeDistribution(W, w)            ;
 
         //    cout << "sending tensions: " << tau.t() << endl;
 

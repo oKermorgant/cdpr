@@ -1,7 +1,7 @@
 cable: {mass: 0.001, radius: 0.005}
 frame:
   color: Grey
-  lower: [-3.5, -2.0, 0]
+  lower: [-3.5, -2.0, 0.02]
   radius: 0.02
   type: box
   upper: [3.5, 2.0, 3.5]

@@ -4,7 +4,7 @@
 #include <log2plot/logger.h>
 #include <chrono>
 #include <cdpr_controllers/butterworth.h>
-#include <cdpr_controllers/ctd.h>
+#include <cdpr_controllers/tda.h>
 
 
 using namespace std;
@@ -52,35 +52,34 @@ int main(int argc, char ** argv)
 
     if(nh_priv.hasParam("control"))
     nh_priv.getParam("control", control_type);
+    if(nh_priv.hasParam("threshold"))
+    nh_priv.getParam("threshold", dTau_max);
 
-    CTD::minType control = CTD::minA;
+
+    TDA::minType control = TDA::minA;
 
     if(control_type == "noMin")
-        control = CTD::noMin;
+        control = TDA::noMin;
     else if(control_type == "minT")
-        control = CTD::minT;
-    /*#############*/
-    else if(control_type == "minTs")
-        control = CTD::minTs;
-    else if(control_type == "minAA")
-        control = CTD::minAA;
- /*#################*/
+        control = TDA::minT;
     else if(control_type == "minW")
-        control = CTD::minW;
+        control = TDA::minW;
     else if(control_type == "closed_form")
-        control = CTD::closed_form;
-
+        control = TDA::closed_form;
+    else if(control_type == "Barycenter")
+        control = TDA::Barycenter;
+    
     // get space type
     std::string space_type="Cartesian_space";
     if (nh_priv.hasParam("s_type"))
          nh_priv.getParam("s_type", space_type);
     
     // initialization of parameters in CTC 
-    vpMatrix W(6, n), Wd(6,n), J(n,6), RR(6,6), RR_d(6,6),  M_inertia(6,6);;  
-    vpColVector g(6), tau(n), err(6),  w(6), tau0(n), tau_diff(n);
+    vpMatrix W(6, n), Wd(6,n), J(n,6), RR(6,6), RR_d(6,6),  M_inertia(6,6), Kp(6,6), Kd(6,6);
+    vpColVector g(6), tau(n), err(6),  w(6), tau0(n), tau_diff(n), pd(6);
     vpColVector L(n), Ld(n), Le(n),  Le_d(n);
     g[2] = - robot.mass() * 9.81;
-    double a;
+    //vpPoseVector Pd;
 
     // set frequency of loop
     double dt = 0.01;
@@ -92,22 +91,28 @@ int main(int argc, char ** argv)
     vpTranslationVector T;
 
     // set proportional and derivative gain
-    double Kp, Kd;  // tuned for Caroca
+    //double Kp, Kd;  // tuned for Caroca
    if (space_type == "Cartesian_space")
-        {Kp=15; Kd=15;}
+     {  for (int i = 0; i < 3; ++i)
+                {
+                    Kp[i][i]=100; Kd[i][i]=20;
+                    Kp[i+3][i+3]=16; Kd[i+3][i+3]=8;
+                }
+    }
     else if ( space_type == "Joint_space")
         Kp=Kd=1000;
     else 
         cout << "Gain error" << endl;
 
-    Param(nh, "Kp", Kp);
-    Param(nh, "Kd", Kd);
+    //Param(nh, "Kp", Kp);
+    //Param(nh, "Kd", Kd);
     
     // declare desired parameter
     vpColVector a_d, v_d, v, v_e;
     v_d.resize(6);
     a_d.resize(6);
     v.resize(6);
+    v_e.resize(6);
 
     M_inertia[0][0]=M_inertia[1][1]=M_inertia[2][2]=robot.mass();
     std::vector<bool> active;
@@ -124,12 +129,16 @@ int main(int argc, char ** argv)
     logger.saveTimed(position_err, "position_err", "[x, y, z]", "Position error [m]");
     logger.saveTimed(tau, "tau", "\\tau_", "Tensions [N]");
     logger.saveTimed(tau_diff, "diff", "\\tau_d", "Tensions difference [N]");
+    //logger.saveTimed(v_d, "Vel_e", "[v_x, v_y, v_z, \\theta_x, \\theta_y, \\theta_z]", "desired velocity");
+    //logger.saveTimed(pd, "des_p", "[xd, yd, zd, \\theta_xd, \\theta_yd, \\theta_zd]", " desired pose");
     if (space_type == "Joint_space" )
         logger.saveTimed(Le, "Le", "Le_", "Length error [m]");
 
     // chrono
-    vpColVector comp_time(1);
+    vpColVector comp_time(1), a(1), sum(1);
     logger.saveTimed(comp_time, "dt", "[\\delta t]", "Comp. time [s]");
+    logger.saveTimed(a, "alpha", "[\\alpha]", "alpha");
+    //logger.saveTimed(sum, "sum", "[sum]", "Tensions sum [N]");
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsed_seconds;
 
@@ -138,9 +147,9 @@ int main(int argc, char ** argv)
     Butterworth_nD filterL(8, 1, dt);
     vpPoseVector err_;
 
-    // deliver the settings to the CTD
-    CTD ctd(robot, control);
-    ctd.ForceContinuity(dTau_max);
+    // deliver the settings to the TDA
+    TDA tda(robot, control);
+    tda.ForceContinuity(dTau_max);
 
 /*
     // initialize the cables tensions
@@ -160,12 +169,12 @@ int main(int argc, char ** argv)
     while(ros::ok())
     {
         //cout << "------------------" << endl;
-        nh.getParam("Kp", Kp);
-        nh.getParam("Kd", Kd);
+        //nh.getParam("Kp", Kp);
+        //nh.getParam("Kd", Kd);
         t = ros::Time::now().toSec();
           robot.getPose(M);
             M.extract(T);
-            cout << "Current position" << T.t() << endl;
+            cout << "Current position:" <<"  "<<T.t() << endl;
         
         if(robot.ok())  // messages have been received
         {
@@ -178,6 +187,8 @@ int main(int argc, char ** argv)
             // desired poses
             robot.getDesiredPose(Md);
             Md.extract(Rd);
+            pd=vpPoseVector(Md);
+            //pd=Pd;
 
             // position error in platform frame
             err = robot.getPoseError();
@@ -209,12 +220,11 @@ int main(int argc, char ** argv)
              if ( space_type == "Cartesian_space")
              {             
                  v_e=v_d-v;
-                 filterP.Filter(err);
+                 //filterP.Filter(err);
 
                 // establish the external wrench 
                 w= M_inertia*(a_d+Kp*err+Kd*v_e)-g;
                 //v=v_d-v;
-                //robot.sendError(err);
                 cout << "controller in task space" << endl;
         
                 //cout << " Velocity error: " << (v_d-v).t()<< endl;
@@ -235,12 +245,12 @@ int main(int argc, char ** argv)
                 robot.computeDesiredW(Wd);
                 // transform the structure matrix to platform space
                 Wd=RR_d*Wd;
-                robot.sendError(err);
+                //robot.sendError(err);
 
                 Le_d=  -Wd.t() *v_d- J*v;
                 Le= Ld-L;
-                filterL.Filter(Le);
-                //robot.sendLengthError(Le);
+                //filterL.Filter(Le);
+
                 cout << "length error:" << Le.t() << endl;
 
                 tau=Kp*Le+Kd*Le_d;
@@ -252,15 +262,23 @@ int main(int argc, char ** argv)
                 cout << " Error: Please select the controller space type" << endl;
 
              tau0=tau;
+             tau = tda.ComputeDistribution(W, w) ;
+
+
+
+             cout << "external wrench:" << "   "<< w.t() << endl;
+
             // call cable tension distribution
-            tau = ctd.ComputeDistribution(W, w) ;
+            //tau = tda.ComputeDistribution(W, w) ;
             tau_diff= tau-tau0;
 
             // send tensions
             robot.sendTensions(tau);
-            ctd.GetAlpha(a);
-            if(control_type == "minAA")
-              cout << "coefficient number:" << a << endl;
+            //sum[0]=sqrt(tau.sumSquare());
+
+            tda.GetAlpha(a[0]);
+            if(control_type == "minA")
+              cout << "coefficient number:" << "  " <<a << endl;
 
             // calculate the computation period
             end = std::chrono::system_clock::now();
@@ -285,5 +303,5 @@ int main(int argc, char ** argv)
         ros::spinOnce();
         loop.sleep();
     }
-     logger.plot();
+    // logger.plot();
 }

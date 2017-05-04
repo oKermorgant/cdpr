@@ -36,8 +36,8 @@ include_directories(
 
 add_library(${PROJECT_NAME}
     include/cdpr_controllers/butterworth.h
-    include/cdpr_controllers/ctd.h
-    src/ctd.cpp                )
+    include/cdpr_controllers/tda.h
+    src/tda.cpp                )
 
 
 # PID controller to try CTD's (Olivier's code)
