@@ -39,11 +39,11 @@ public:
 
 protected:
     minType control;
-    int n, num, inter_n, rank, num_v;
-    double tauMin, tauMax, m, area;
+    int n;
+    double tauMin, tauMax;
 
-    vpMatrix Q, A, C, W, kerW, H, ker;
-    vpColVector r, b, d, x, f_m, f_v, lamda, F, p, sol, v_1, v_2, v_c;
+    vpMatrix Q, A, C, W;
+    vpColVector r, b, d, x;
     vpSubColVector tau, alpha;
 
     bool update_d;
@@ -52,6 +52,16 @@ protected:
     bool reset_active;
     std::vector<bool> active;
     std::vector<vpColVector> vertices;
+    // declaration of closed form
+    int num_r;
+    double range_lim, norm_2;
+    vpColVector f_m, f_v, w_, tau_;
+    vpMatrix W_;
+    // declaration of Barycenter
+    int num, inter_n, rank, num_v;
+    double m, area;
+    vpColVector  lamda, F, p, sol, v_1, v_2, v_c;
+     vpMatrix kerW, H, ker;
 
 
 };
