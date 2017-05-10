@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
               start = std::chrono::system_clock::now();
               cout << "interation number:" <<" "<< inter <<endl;
               // Check the time period 
-              if (inter<=(num+2))
+              if (inter<=(num+1))
               {
                 P=path.getposition(t,A);
                 Vel=path.getvelocity(t,A);

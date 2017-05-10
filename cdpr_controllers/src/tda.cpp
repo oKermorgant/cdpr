@@ -112,14 +112,8 @@ TDA::TDA(CDPR &robot, minType _control, bool warm_start)
         w_.resize(6);
         W_.resize(6,n);
         tau_.resize(n);
-        // min f
-        Q.eye(n);
-        r.resize(n);
         // no equality constraints
         d.resize(2*n);
-        // equality constraints
-        A.eye(n);
-        b.resize(n);
         for (unsigned int i = 0; i <n; ++i)
         {
             f_m[i]=(tauMax+tauMin)/2;
@@ -130,12 +124,13 @@ TDA::TDA(CDPR &robot, minType _control, bool warm_start)
     else if ( control == Barycenter)
     {
         H.resize(2*n , n-6);
-        sol.resize(2*n);
         d.resize(2*n);
         lamda.resize(2);
         F.resize(2);
+        // particular solution from the pseudo Inverse
         p.resize(n);
         ker.resize(n-6,n-6);
+        // the vertex of the polygon
         v_1.resize(n-6);
         v_2.resize(n-6);
         v_c.resize(n-6);
@@ -184,36 +179,64 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
 
     else if( control == closed_form)
     {
-         b= f_m + W.pseudoInverse()*(w - (W*f_m)); 
-         solve_qp::solveQPe(Q, r, A, b, x);
-         f_v= x- f_m;
+        x= f_m + W.pseudoInverse() * (w - (W*f_m)); 
+        f_v= x- f_m;
+        //compute the range limit of f_v
         norm_2 = sqrt(f_v.sumSquare());
         w_=w; W_=W ; num_r= n-6;
-        range_lim=1/2*sqrt(m)*(tauMax+tauMin)/2;
-         if ( norm_2 <= range_lim && num_r < 0)
+        //cout << "redundancy " << num_r<< endl;
+        range_lim= sqrt(m)*(tauMax+tauMin)/4;
+        //cout << "the maximal limit" << range_lim<<endl;
+         if ( norm_2 <= range_lim )
          {
              for (int i = 0; i < n; ++i)
              {
-                 if ( x[i] > tauMax)
+                 if ( x[i] > (tauMax+0.001) && num_r >=0)
                  {
-                     w_=tauMax*W_.getCol(i)+w_;
+                    cout << "previous tensions" << "  "<< i<<x.t()<<endl;
+                    cout << " i"<<"  "<< endl;
+                     // re- calculate the external wrench with maximal element 
+                     w_= -tauMax*W_.getCol(i)+w_;
                      tau_[i]=tauMax;
+                     f_m[i]=0;
+                     // drop relative column
+                     W_[0][i]=W_[1][i]=W_[2][i]=W_[3][i]=W_[4][i]=W_[5][i]=0;
+                     //compute the tensions again without unsatisfied component
+                     x = f_m + W_.pseudoInverse()*(w_- (W_*f_m)); 
+                     // reduce the redundancy order
+                     num_r--;
+                     // construct the latest TD with particular components which equal to minimum and maximum
+                     x=tau_+x;
+                     // initialize the index in order to inspect from the first electment
+                     i=0;
+                     cout << "larger tensions" << "  "<<x.t()<<endl;
                   }
-                 else if (x[i] < tauMin)
+                 else if (x[i] < (tauMin-0.001) && num_r >=0)
                  {
-                     w_=tauMin*W_.getCol(i)+w_;
-                     tau_[i]=tauMin;                 
+                    cout << "previous tensions" << "  "<<x.t()<<endl;  
+                    cout << " i"<<"  "<< i<<endl;  
+                    // re- calculate the external wrench with minimal element 
+                     w_= -tauMin*W_.getCol(i)+w_;
+                     tau_[i]=tauMin; 
+                     f_m[i]=0; 
+                     // drop relative column
+                     W_[0][i]=W_[1][i]=W_[2][i]=W_[3][i]=W_[4][i]=W_[5][i]=0;
+                     //compute the tensions again without unsatisfied component
+                     x = f_m + W_.pseudoInverse()*(w_- (W_*f_m)); 
+                     // reduce the redundancy order
+                     num_r--;
+                     // construct the latest TD with particular components which equal to minimum and maximum
+                     x=tau_+x;
+                     // initialize the index in order to inspect from the first electment
+                     i=0;  
+                    cout << "small tensions" << "  "<<x.t()<<endl;             
                  }
-                 W_[0][i]=W_[1][i]=W_[2][i]=W_[3][i]=W_[4][i]=W_[5][i]=0;
-                 x = f_m + W_.pseudoInverse()*(w_- (W_*f_m)); 
-                 x[i]=0; 
-                 num_r--;
+                 else if (num_r < - 0.09)
+                    cout << "no solution exists" << endl;
              }
-             tau = tau_+ x;
          }
          else
             cout << "no feasible tension distribution" << endl;
-
          cout << "The closed form is implemented"<< endl;
     }
    
@@ -232,7 +255,7 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
         area=0.0; 
         v_c[0]=0.0 ; v_c[1]=0.0;
         vertices.clear();
-        //cout << "vertices:" <<"  "<<vertices <<endl;
+        // cout << "vertices:" <<"  "<<vertices <<endl;
         // construct the 2x2 subsystem of linear equations in oder to gain the intersection points in preimage
         for (int i = 0; i < 2*n; ++i)
         {      
@@ -256,14 +279,14 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
                         inter_n++;                  
                     }
                     // compute the intersection point between two arbitrary lines in preimage space
-                    lamda= ker.inverseByLU()*F;
+                    lamda= ker.inverseByQR()*F;
                     //cout << "lamda in the r dimensional space:" <<"  " << lamda.t()<< endl;
-                    sol=kerW.t()*lamda;
+                    x=p+kerW.t()*lamda;
                     // check whether this intersection point satisfies all inequality equations
                     for (int j = 0; j < n; ++j)
-                        if ( sol[j] <= (tauMax-p[j]) && sol[j] >=  (tauMin-p[j]) )
+                        if ( x[j] <= tauMax && x[j]>=  tauMin )
                             num++;
-                    // suppose this point satisfies all n inquality equations, save this point
+                    // suppose this point satisfies all n inquality equations, then save this point
                     if ( num == n)
                          vertices.push_back(lamda);
                  }
@@ -275,20 +298,23 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
             cout << "the number of intersection points:"<< "  "<< inter_n << endl;
 
             // compute the barycenter v_c of polygon
-            if (num_v >= 3)
+            if ( num_v >= 3)
             {
                 for (int i = 0; i < (num_v-1); ++i)
                 {
                     v_1=vertices[i]; v_2=vertices[i+1];
+                    // compute the area of the polygon
                     area+= v_1[0]*v_2[1] - v_1[1]*v_2[0];
+                    // compute the barycenter of the polygon
                     v_c[0]+=(v_1[0]+v_2[0])*(v_1[0]*v_2[1] - v_2[0]*v_1[1]);
                     v_c[1]+=(v_1[1]+v_2[1])*(v_1[0]*v_2[1] - v_2[0]*v_1[1]); 
                 }
                 area = area/2;
                 v_c = v_c / (6*area);
             }
-            else if (num_v ==2 || num_v ==1)
-              {
+            //  only 2 or 1 point fulfill the inequality equations, take the mean of them
+            else if ( num_v ==2 || num_v ==1)
+              {     
                   for (int i = 0; i < num_v; ++i)
                         v_c +=vertices[i];
                    v_c = v_c / num_v;

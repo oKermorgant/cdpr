@@ -60,7 +60,7 @@ protected:
     // declaration of Barycenter
     int num, inter_n, rank, num_v;
     double m, area;
-    vpColVector  lamda, F, p, sol, v_1, v_2, v_c;
+    vpColVector  lamda, F, p, v_1, v_2, v_c;
      vpMatrix kerW, H, ker;
 
 

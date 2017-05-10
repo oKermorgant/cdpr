@@ -95,8 +95,8 @@ int main(int argc, char ** argv)
    if (space_type == "Cartesian_space")
      {  for (int i = 0; i < 3; ++i)
                 {
-                    Kp[i][i]=9; Kd[i][i]=6;
-                    Kp[i+3][i+3]=9; Kd[i+3][i+3]=6;
+                    Kp[i][i]=100; Kd[i][i]=20;
+                    Kp[i+3][i+3]=16; Kd[i+3][i+3]=8;
                 }
     }
     else if ( space_type == "Joint_space")
@@ -137,7 +137,8 @@ int main(int argc, char ** argv)
     // chrono
     vpColVector comp_time(1), a(1), sum(1);
     logger.saveTimed(comp_time, "dt", "[\\delta t]", "Comp. time [s]");
-    logger.saveTimed(a, "alpha", "[\\alpha]", "alpha");
+    if (control_type == "minA")
+        logger.saveTimed(a, "alpha", "[\\alpha]", "alpha");
     //logger.saveTimed(sum, "sum", "[sum]", "Tensions sum [N]");
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsed_seconds;
@@ -223,7 +224,7 @@ int main(int argc, char ** argv)
                  filterP.Filter(err);
 
                 // establish the external wrench 
-                w= M_inertia*(a_d+Kp*err+Kd*v_e)-RR*g;
+                w= M_inertia*(a_d+Kp*err+Kd*v_e)-g;
                 //v=v_d-v;
                 cout << "controller in task space" << endl;
         
@@ -239,7 +240,7 @@ int main(int argc, char ** argv)
                 robot.computeLength(L);
                 robot.computeDesiredLength(Ld);
 
-                w = M_inertia*a_d - RR*g;
+                w = M_inertia*a_d - g;
 
                 //  the desired structure matrix
                 robot.computeDesiredW(Wd);
@@ -303,5 +304,5 @@ int main(int argc, char ** argv)
         ros::spinOnce();
         loop.sleep();
     }
-     //logger.plot();
+     logger.plot();
 }
