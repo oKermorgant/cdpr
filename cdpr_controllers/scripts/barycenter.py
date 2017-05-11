@@ -49,11 +49,6 @@ if __name__ == '__main__':
     F = pl.figure()
     ax = pl.gca()    
     
-    vertices_sorted, = pl.plot([],[], 'g', linewidth=2)
-    # barycenter
-    bary, = pl.plot([],[], 'gD', linewidth=1)
-    
-    
     while not rospy.is_shutdown():
         
         if listener.msg_ok:
@@ -90,10 +85,15 @@ if __name__ == '__main__':
                 xl = pl.array([xm - 0.05*(xM-xm), xM+0.05*(xM-xm)])
                 for i in xrange(8):
                     s = - 0.05*(yM-ym) * pl.sqrt(H[i,0]**2+H[i,1]**2)/H[i,1]
+                    
                     # A = H.x
                     ya = pl.array([1./H[i,1]*(A[i,0]-H[i,0]*x) for x in xl])
+                    
+                    
                     pl.plot(xl,ya, 'b', linewidth=1)
                     ax.fill_between(xl, ya, ya+s, facecolor='red', alpha=0.5, interpolate=True)
+                    
+                    
                     # B = H.x
                     ya = pl.array([1./H[i,1]*(B[i,0]-H[i,0]*x) for x in xl])
                     pl.plot(xl,ya, 'b', linewidth=1)

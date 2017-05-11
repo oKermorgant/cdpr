@@ -46,8 +46,8 @@ int main(int argc, char ** argv)
     std::string path = "/home/" + vpIoTools::getUserName() + "/Results/cdpr/";
 
     // get control type    
-    std::string control_type = "minW";
-    double dTau_max = 0.5;
+    std::string control_type = "Barycenter";
+    double dTau_max = 0.;
     bool warm_start = false;
 
     if(nh_priv.hasParam("control"))

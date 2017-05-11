@@ -245,14 +245,19 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
 
     else if ( control == Barycenter)
     {
+        cout << "Using Barycenter" << endl;
+
         // compute the kernel of matrix W
         W.kernel(kerW);
         // obtain the particular solution of tensions
         p=W.pseudoInverse() * w;
         // lower bound
-        vpColVector A = -p + tauMax;
-        // upper bound
-        vpColVector B = -p + tauMin;
+        vpColVector A = -p, B = -p;
+        for(int i=0;i<8;++i)
+        {
+            A[i] += tauMin;
+            B[i] += tauMax;
+        }
 
         // construct the multiple kernel matrix
         H = kerW.t();
@@ -260,7 +265,8 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
         // build and publish H A B
         std_msgs::Float32MultiArray msg;
         msg.data.resize(32);
-        for(int i=0;i<8;++i)
+        for(int i=0;i<8
+            ;++i)
         {
             msg.data[4*i] = H[i][0];
             msg.data[4*i+1] = H[i][1];
@@ -298,7 +304,7 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
                             lamda = ker * F;
 
                             // check constraints
-                            if((H*lamda - A).getMinValue() >= 0 && (H*lamda - A).getMaxValue() <= 0)
+                            if((H*lamda - A).getMinValue() >= 0 && (H*lamda - B).getMaxValue() <= 0)
                                 vertices.push_back(lamda);
                         }
                     }
@@ -314,19 +320,17 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
 
         if(vertices.size())
         {
-
             // compute centroid
             for(auto &vert: vertices)
                 centroid += vert;
             centroid /= vertices.size();
 
-            // compute actual CoG if more than 1 point
-            if(vertices.size() > 1)
+            // compute actual CoG if more than 2 points
+            if(vertices.size() > 2)
             {
-
                 // re-order according to angle to centroid
-                std::sort(vertices.begin(),vertices.end(),[&centroid](vpColVector &v1, vpColVector &v2)
-                    {return atan2(v1[1]-centroid[1],v1[0]-centroid[0]) > atan2(v2[1]-centroid[1],v2[0]-centroid[0]);}); // may be the opposite
+                std::sort(vertices.begin(),vertices.end(),[&centroid](vpColVector v1, vpColVector v2)
+                    {return atan2(v1[1]-centroid[1],v1[0]-centroid[0]) < atan2(v2[1]-centroid[1],v2[0]-centroid[0]);});
 
                 // compute CoG
                 vertices.push_back(vertices[0]);
