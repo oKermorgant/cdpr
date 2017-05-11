@@ -105,7 +105,9 @@ if __name__ == '__main__':
                     
                 # sort vertices counter-clockwise
                 mid = pl.mean(vert,0)
+                
                 vert.sort(key=lambda p: pl.arctan2(p[1]-mid[1],p[0]-mid[0]))
+                
                 vert = pl.array(vert + [vert[0]])
                 pl.plot(vert[:,0],vert[:,1],'g',linewidth=2)
                 

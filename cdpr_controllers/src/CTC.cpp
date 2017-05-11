@@ -5,7 +5,7 @@
 #include <chrono>
 #include <cdpr_controllers/butterworth.h>
 #include <cdpr_controllers/tda.h>
-
+#include <visp/vpIoTools.h>
 
 using namespace std;
 
@@ -43,7 +43,7 @@ int main(int argc, char ** argv)
     const unsigned int n = robot.n_cables();
 
     // log path
-    std::string path = "/home/derek/Results/cdpr/";
+    std::string path = "/home/" + vpIoTools::getUserName() + "/Results/cdpr/";
 
     // get control type    
     std::string control_type = "minW";
@@ -149,7 +149,7 @@ int main(int argc, char ** argv)
     vpPoseVector err_;
 
     // deliver the settings to the TDA
-    TDA tda(robot, control);
+    TDA tda(robot, nh, control);
     tda.ForceContinuity(dTau_max);
 
 /*

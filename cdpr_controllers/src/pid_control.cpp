@@ -113,7 +113,7 @@ int main(int argc, char ** argv)
     // filter for d_error (dim. 6)
     Butterworth_nD filter(6, 1, dt);
 
-    TDA tda(robot, control);
+    TDA tda(robot, nh, control);
     tda.ForceContinuity(dTau_max);
 
     cout << "CDPR control ready" << fixed << endl;

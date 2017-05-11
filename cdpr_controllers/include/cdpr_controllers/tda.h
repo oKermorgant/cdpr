@@ -4,6 +4,8 @@
 #include <cdpr_controllers/qp.h>
 #include <cdpr/cdpr.h>
 #include <cmath>
+#include <std_msgs/Float32MultiArray.h>
+#include <ros/publisher.h>
 
 // this class implements all candidates for TDA's
 // this way we do not have the same code in all sources
@@ -20,7 +22,7 @@ public:
     } minType;
 
 
-    TDA(CDPR &robot, minType _control, bool warm_start = false);
+    TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start = false);
 
     // will look for a solution in [tau +- dTau_max]
     void ForceContinuity(double _dTau_max) {dTau_max = _dTau_max;}
@@ -58,10 +60,11 @@ protected:
     vpColVector f_m, f_v, w_, tau_;
     vpMatrix W_;
     // declaration of Barycenter
-    int num, inter_n, rank, num_v;
-    double m, area;
+    double m;
     vpColVector  lamda, F, p, v_1, v_2, v_c;
      vpMatrix kerW, H, ker;
+     // publisher to barycenter plot
+     ros::Publisher bary_pub;
 
 
 };
