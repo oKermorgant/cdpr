@@ -326,7 +326,7 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
 
                 // re-order according to angle to centroid
                 std::sort(vertices.begin(),vertices.end(),[&centroid](vpColVector &v1, vpColVector &v2)
-                    {return atan2(v1[1]-centroid[1],v1[0]-centroid[0]) < atan2(v2[1]-centroid[1],v2[0]-centroid[0]);}); // may be the opposite
+                    {return atan2(v1[1]-centroid[1],v1[0]-centroid[0]) > atan2(v2[1]-centroid[1],v2[0]-centroid[0]);}); // may be the opposite
 
                 // compute CoG
                 vertices.push_back(vertices[0]);
