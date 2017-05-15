@@ -93,9 +93,10 @@ int main(int argc, char ** argv)
     // set proportional and derivative gain
     //double Kp, Kd;  // tuned for Caroca
    if (space_type == "Cartesian_space")
-     {  for (int i = 0; i < 3; ++i)
+     {  
+        for (int i = 0; i < 3; ++i)
                 {
-                    Kp[i][i]=100; Kd[i][i]=20;
+                    Kp[i][i]=16; Kd[i][i]=8;
                     Kp[i+3][i+3]=16; Kd[i+3][i+3]=8;
                 }
     }
@@ -135,11 +136,14 @@ int main(int argc, char ** argv)
         logger.saveTimed(Le, "Le", "Le_", "Length error [m]");
 
     // chrono
-    vpColVector comp_time(1), a(1), sum(1);
+    vpColVector comp_time(1), alpha(1), sum(1),ver(1);
     logger.saveTimed(comp_time, "dt", "[\\delta t]", "Comp. time [s]");
     if (control_type == "minA")
-        logger.saveTimed(a, "alpha", "[\\alpha]", "alpha");
-    //logger.saveTimed(sum, "sum", "[sum]", "Tensions sum [N]");
+        logger.saveTimed(alpha, "alpha", "[\\alpha]", "alpha");
+    if (control_type == "Barycenter")
+        logger.saveTimed(ver, "vertices", "[num_ver]", "The number of vertex");
+    
+    // initialize the timekeeper 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsed_seconds;
 
@@ -180,8 +184,7 @@ int main(int argc, char ** argv)
         if(robot.ok())  // messages have been received
         {
             cout << "messages have been received" << endl;
-            // extract the current time
-             start = std::chrono::system_clock::now();
+
             // current poses
             robot.getPose(M);
             M.extract(R);
@@ -263,9 +266,11 @@ int main(int argc, char ** argv)
                 cout << " Error: Please select the controller space type" << endl;
 
              tau0=tau;
+             
+             // extract the current time
+             start = std::chrono::system_clock::now();
              tau = tda.ComputeDistribution(W, w) ;
-
-
+             end = std::chrono::system_clock::now();
 
              cout << "external wrench:" << "   "<< w.t() << endl;
 
@@ -277,25 +282,25 @@ int main(int argc, char ** argv)
             robot.sendTensions(tau);
             //sum[0]=sqrt(tau.sumSquare());
 
-            tda.GetAlpha(a[0]);
             if(control_type == "minA")
-              cout << "coefficient number:" << "  " <<a << endl;
+                {
+                    tda.GetAlpha(alpha[0]);
+                    cout << "coefficient number:" << "  " <<alpha << endl;
+                }
+            if(control_type == "Barycenter")
+                    tda.GetVertices(ver[0]);
 
             // calculate the computation period
-            end = std::chrono::system_clock::now();
             elapsed_seconds = end-start;
             // log
             M.buildFrom( robot.getPoseError());
             pose_err.buildFrom(M.inverse());
             for (int i = 0; i < 3 ; ++i)
              {   
-                //pose_err[i]=err[i];
                 position_err[i]=pose_err[i];
                 orientation_err[i]=(pose_err[i+3]*(180/M_PI));
             }
-            //pose_err=err;
-            //M.buildFrom(robot.getPoseError(););
-            //pose_err.buildFrom(M.inverse());
+            // computation time
             comp_time[0] = elapsed_seconds.count();
             //residual = W*tau - w;
             logger.update();

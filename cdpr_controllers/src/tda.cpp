@@ -128,15 +128,11 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
 
         H.resize(n , n-6);
         d.resize(2*n);
-        lamda.resize(2);
+        lambda.resize(2);
         F.resize(2);
         // particular solution from the pseudo Inverse
         p.resize(n);
         ker.resize(n-6,n-6);
-        // the vertex of the polygon
-        v_1.resize(n-6);
-        v_2.resize(n-6);
-        v_c.resize(n-6);
         for (unsigned int i = 0; i <n; ++i)
         {
             d[i] =tauMax;
@@ -181,7 +177,10 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
     }
 
     else if( control == closed_form)
-    {
+    {   
+        // declaration 
+        int num_r;
+        double range_lim, norm_2;
         x= f_m + W.pseudoInverse() * (w - (W*f_m));
         f_v= x- f_m;
         //compute the range limit of f_v
@@ -246,12 +245,12 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
     else if ( control == Barycenter)
     {
         cout << "Using Barycenter" << endl;
-
+        int inter=0;
         // compute the kernel of matrix W
         W.kernel(kerW);
         // obtain the particular solution of tensions
         p=W.pseudoInverse() * w;
-        // lower bound
+        // lower and upper bound
         vpColVector A = -p, B = -p;
         for(int i=0;i<8;++i)
         {
@@ -259,14 +258,13 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
             B[i] += tauMax;
         }
 
-        // construct the multiple kernel matrix
+        // construct the projection matrix
         H = kerW.t();
 
         // build and publish H A B
         std_msgs::Float32MultiArray msg;
         msg.data.resize(32);
-        for(int i=0;i<8
-            ;++i)
+        for(int i=0; i<8 ;++i)
         {
             msg.data[4*i] = H[i][0];
             msg.data[4*i+1] = H[i][1];
@@ -277,46 +275,44 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
 
         // we look for points such as A <= H.x <= B
 
-        // initialization of parameters
-        v_c[0]=0.0 ; v_c[1]=0.0;
+        // initialize vertices vector
         vertices.clear();
-        // cout << "vertices:" <<"  "<<vertices <<endl;
+
         // construct the 2x2 subsystem of linear equations in order to gain the intersection points in preimage
         for (int i = 0; i < n; ++i)
         {
             ker[0][0]=H[i][0];
             ker[0][1]=H[i][1];
-            for(int j=0;j<n;++j)
+            // eliminate the same combinations with initial value (i+1)
+            for(int j=(i+1); j<n; ++j)
             {
-                if(i != j)
-                {
                     ker[1][0]=H[j][0];
                     ker[1][1]=H[j][1];
                     // pre-compute the inverse
                     ker = ker.inverseByQR();
-
+                    // the loop from A[i] to B[i];
                     for(double u: {A[i],B[i]})
                     {
                         for(double v: {A[j],B[j]})
                         {
                             // solve this intersection
                             F[0] = u;F[1] = v;
-                            lamda = ker * F;
-
-                            // check constraints
-                            if((H*lamda - A).getMinValue() >= 0 && (H*lamda - B).getMaxValue() <= 0)
-                                vertices.push_back(lamda);
+                            lambda = ker * F;
+                            inter++;
+                            // check constraints, must take into account the certain threshold
+                            if((H*lambda - A).getMinValue() >= - 0.001 && (H*lambda - B).getMaxValue() <= 0.001)
+                                 vertices.push_back(lambda);
                         }
                     }
-                }
             }
         }
-
+        cout << "the total amount of intersectioni points:" <<"  "<<inter << endl;
         // print the  satisfied vertices  number
         cout << "number of vertex:" << "  "<< vertices.size() << endl;
+        for (int i = 0; i < vertices.size(); ++i)
+           cout << "vertex " << "  "<< vertices[i].t()<<endl;
 
         vpColVector centroid(2);
-
 
         if(vertices.size())
         {
@@ -328,15 +324,15 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
             // compute actual CoG if more than 2 points
             if(vertices.size() > 2)
             {
-                // re-order according to angle to centroid
+                // re-order according to angle to centroid in clockwise order
                 std::sort(vertices.begin(),vertices.end(),[&centroid](vpColVector v1, vpColVector v2)
-                    {return atan2(v1[1]-centroid[1],v1[0]-centroid[0]) < atan2(v2[1]-centroid[1],v2[0]-centroid[0]);});
+                    {return atan2(v1[1]-centroid[1],v1[0]-centroid[0]) > atan2(v2[1]-centroid[1],v2[0]-centroid[0]);}); 
 
                 // compute CoG
                 vertices.push_back(vertices[0]);
                 double a=0,v;
                 centroid = 0;
-                for(int i=1;i<vertices.size();++i)
+                for(int i=1;i< vertices.size();++i)
                 {
                     v = vertices[i-1][0]*vertices[i][1] - vertices[i][0]*vertices[i-1][1];
                     a += v;
@@ -345,21 +341,19 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
                 }
                 centroid /= 3*a;
             }
-            cout << "the barycenter" << "  "<< centroid.t() << endl;
             x = p+ H*centroid;
+            cout << "the barycenter" << "  "<< centroid.t() << endl;
+        }
+        else 
+            cout << "there is no vertex existing"<< endl;
 
-            cout << "check constraints :" << endl;
+    }
+    else
+        cout << "No appropriate TDA " << endl;
+   cout << "check constraints :" << endl;
             for(int i=0;i<n;++i)
                 cout << "   " << -d[i+n] << " < " << tau[i] << " < " << d[i] << std::endl;
-        }
-        else
-        {
-            cout << "No appropriate TDA " << endl;
-        }
-    }
     update_d = dTau_max;
     return tau;
-
-
 }
 

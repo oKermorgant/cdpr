@@ -34,8 +34,12 @@ public:
     {
         if(control == minA )
             a = x[n];
-        else
-            a = 0;
+    }
+    // for Barycentric algorithm
+    void GetVertices(double &a)
+    {
+        if(control == Barycenter )
+            a = vertices.size();
     }
 
 
@@ -54,18 +58,18 @@ protected:
     bool reset_active;
     std::vector<bool> active;
     std::vector<vpColVector> vertices;
-    // declaration of closed form
-    int num_r;
-    double range_lim, norm_2;
-    vpColVector f_m, f_v, w_, tau_;
-    vpMatrix W_;
+
+
+     // declaration of closed form
+     vpColVector f_m, f_v, w_, tau_;
+     vpMatrix W_;
+
     // declaration of Barycenter
     double m;
-    vpColVector  lamda, F, p, v_1, v_2, v_c;
-     vpMatrix kerW, H, ker;
-     // publisher to barycenter plot
-     ros::Publisher bary_pub;
-
+    vpColVector  lambda, F, p, v_1, v_2, v_c;
+    vpMatrix kerW, H, ker;
+    // publisher to barycenter plot
+    ros::Publisher bary_pub;
 
 };
 

@@ -56,21 +56,20 @@ if __name__ == '__main__':
             H = listener.H.copy()
             A = listener.A.copy()
             B = listener.B.copy()
-            
             # get vertices
             vert = []
             for i in xrange(8):
-                for j in xrange(8):
-                    if i != j:
-                        for u in [A[i],B[i]]:
-                            for v in [A[j],B[j]]:
-                                # intersection of Ai = Hi.x and Bj = Hj.x
-                                x = pl.dot(pl.inv(H[[i,j],:]), pl.array([u,v]))
-                                
-                                # check constraints: A <= H.x <= B
-                                if pl.amin(pl.dot(H,x) - A) >= -1e-6 and pl.amax(pl.dot(H,x) - B) <= 1e-6:                                               
-                                    vert.append(x.reshape(2).copy())            
-                            
+                    for j in xrange( i+1, 8): #xrange(8):
+                        if i != j:
+                            for u in [A[i],B[i]]:
+                                for v in [A[j],B[j]]:
+                                    # intersection of Ai = Hi.x and Bj = Hj.x
+                                    x = pl.dot(pl.inv(H[[i,j],:]), pl.array([u,v]))
+                                                                     
+                                    # check constraints: A <= H.x <= B
+                                    if pl.amin(pl.dot(H,x) - A) >= -1e-6 and pl.amax(pl.dot(H,x) - B) <= 1e-6:                                               
+                                        vert.append(x.reshape(2).copy())            
+          
             # continue only if enough vertices
             if len(vert) > 2:
                 ax.clear()
@@ -106,7 +105,7 @@ if __name__ == '__main__':
                 # sort vertices counter-clockwise
                 mid = pl.mean(vert,0)
                 
-                vert.sort(key=lambda p: pl.arctan2(p[1]-mid[1],p[0]-mid[0]))
+                vert.sort(key=lambda p: pl.arctan2(p[1]-mid[1], p[0]-mid[0]))
                 
                 vert = pl.array(vert + [vert[0]])
                 pl.plot(vert[:,0],vert[:,1],'g',linewidth=2)
@@ -125,18 +124,13 @@ if __name__ == '__main__':
                 y /= 6*a
                 pl.plot([x],[y],'gD',linewidth=2)
                 
-                
-                
-                                
-                
+                            
                 pl.draw()
                 pl.pause(.0001)
             else:
                 print('Only %i vertices compatible with constraints' % len(vert))
     
-    
-    
-    rospy.sleep(1)
+    rospy.sleep(0.01)
     
 
     
