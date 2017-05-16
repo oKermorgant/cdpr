@@ -18,7 +18,7 @@ public:
     // how we perform the TDA
     typedef enum
     {
-        minA, minW, minT, noMin,  closed_form, Barycenter
+        minA, minW, minT, noMin,  closed_form, Barycenter, minG
     } minType;
 
 
@@ -28,6 +28,7 @@ public:
     void ForceContinuity(double _dTau_max) {dTau_max = _dTau_max;}
 
     vpColVector ComputeDistribution(vpMatrix &W, vpColVector &w);
+    vpColVector ComputeDistributionG(vpMatrix &W, vpColVector &ve, vpColVector &pe, vpColVector &w );
 
     // for minA
     void GetAlpha(double &a)
@@ -48,8 +49,8 @@ protected:
     int n;
     double tauMin, tauMax;
 
-    vpMatrix Q, A, C, W;
-    vpColVector r, b, d, x;
+    vpMatrix Q, A, C;
+    vpColVector r, b, d, x, wp;
     vpSubColVector tau, alpha;
 
     bool update_d;

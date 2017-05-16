@@ -72,14 +72,15 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
     }
     else if (control == minA)
     {
-        // min |tau| - alpha
-        //  st W.tau = alpha.w
+        // min |tau| - |lambda.(alpha-1)|
+        //  st W.tau = alpha.w+(1-alpha).wp
         //  st 0 < alpha < 1
         //  st t- < tau < t+
         x.resize(n+1); // x = (tau, alpha)
         Q.eye(n+1); Q *= 1./tauMax;
         r.resize(n+1);
-        Q[n][n]=r[n]=7500;
+        wp.resize(6);
+        Q[n][n]=r[n]=7000;
         // equality constraints
         A.resize(6,n+1);
         b.resize(6);
@@ -139,6 +140,32 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
             d[i+n] = - tauMin;
         }
     }
+    else if ( control == minG)
+    {
+        x.resize(n+2); // x = (tau, Kp, Kd)
+        Q.eye(n+2); 
+        r.resize(n+2);
+        // equality constraints
+        A.resize(6,n+2);
+        b.resize(6);
+        // min/max tension constraints
+        C.resize(2*(n+2), (n+2));
+        d.resize(2*(n+2));
+        for(unsigned int i=0;i<n;++i)
+        {
+            // f < fmax
+            C[i][i] = 1;
+            // -f < -fmin
+            C[i+n][i] = -1;
+            d[i] = tauMax;
+            d[i+n] = -tauMin;
+        }
+        C[2*n][n]=C[2*n+2][n+1]=1;
+        C[2*n+1][n]=C[2*n+3][n+1]= -1;
+        d[2*n] = d[2*n+2]=400;
+        d[2*n+1]= -1; d[2*n+3]= -2;
+        
+    }
     tau.init(x, 0, n);
     //alpha.init(x, n, 1);
 }
@@ -170,8 +197,10 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
     {
         A.insert(W,0,0);
         for(int i=0;i<6;++i)
-            A[i][n]= - w[i];
+            A[i][n]= - w[i]+wp[i];
+        b=wp;
         solve_qp::solveQP(Q, r, A, b, C, d, x, active);
+        wp=w;
         //      cout << "alpha = " << alpha[0] << endl;
         //      cout << "checking W.tau - a.w: " << (W*tau - alpha[0]*w).t() << endl;
     }
@@ -357,3 +386,20 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
     return tau;
 }
 
+vpColVector TDA::ComputeDistributionG(vpMatrix &W, vpColVector &ve, vpColVector &pe, vpColVector &w )
+{  
+        A.insert(W,0,0);
+        for(int i=0;i<6;++i)
+        {
+            A[i][n]= - pe[i];
+            A[i][n+1] = -ve[i];
+        }
+        b=w;
+        solve_qp::solveQP(Q, r, A, b, C, d, x, active);
+        //      cout << "checking W.tau - a.w: " << (W*tau - alpha[0]*w).t() << endl;
+        cout << "[Kp, Kd]:" << "  "<<"["<<x[8]<< x[9]<<"]"<< endl;
+        cout << "check constraints :" << endl;
+            for(int i=0;i<n;++i)
+                cout << "   " << -d[i+n] << " < " << tau[i] << " < " << d[i] << std::endl;
+    return tau;
+}

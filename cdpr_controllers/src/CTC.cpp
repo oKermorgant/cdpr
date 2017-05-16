@@ -47,7 +47,7 @@ int main(int argc, char ** argv)
 
     // get control type    
     std::string control_type = "Barycenter";
-    double dTau_max = 0.;
+    double dTau_max = 0.5;
     bool warm_start = false;
 
     if(nh_priv.hasParam("control"))
@@ -68,6 +68,8 @@ int main(int argc, char ** argv)
         control = TDA::closed_form;
     else if(control_type == "Barycenter")
         control = TDA::Barycenter;
+    else if(control_type == "minG")
+        control = TDA::minG;
     
     // get space type
     std::string space_type="Cartesian_space";
@@ -141,7 +143,7 @@ int main(int argc, char ** argv)
     if (control_type == "minA")
         logger.saveTimed(alpha, "alpha", "[\\alpha]", "alpha");
     if (control_type == "Barycenter")
-        logger.saveTimed(ver, "vertices", "[num_ver]", "The number of vertex");
+        logger.saveTimed(ver, "vertices", "[num_v]", "The number of vertex");
     
     // initialize the timekeeper 
     std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -155,20 +157,6 @@ int main(int argc, char ** argv)
     // deliver the settings to the TDA
     TDA tda(robot, nh, control);
     tda.ForceContinuity(dTau_max);
-
-/*
-    // initialize the cables tensions
-    robot.getPose(M);
-    M.extract(R);
-    for(unsigned int i=0;i<3;++i)
-        for(unsigned int j=0;j<3;++j)
-            RR[i][j] = RR[i+3][j+3] = R[i][j];
-     robot.computeW(W);
-             W=RR*W;
-     w= -g;
-    tau= W.pseudoInverse() * w;
-    robot.sendTensions(tau);*/
-
 
     cout << "CDPR control ready ----------------" << fixed << endl; 
     while(ros::ok())
@@ -223,19 +211,18 @@ int main(int argc, char ** argv)
 
              if ( space_type == "Cartesian_space")
              {             
+                // compute the velocity error
                  v_e=v_d-v;
+                 // add Butterworth filter for pose error
                  filterP.Filter(err);
 
-                // establish the external wrench 
-                w= M_inertia*(a_d+Kp*err+Kd*v_e)-g;
-                //v=v_d-v;
-                cout << "controller in task space" << endl;
-        
-                //cout << " Velocity error: " << (v_d-v).t()<< endl;
-                //cout << " Inertia matrix: " <<M_inertia<< endl;
-                //cout << " b: " << b.t()<< endl;
-                
-            }
+                 if ( control_type == "minG")
+                    w = M_inertia*a_d-g;              
+                else
+                    // establish the external wrench 
+                    w = M_inertia*(a_d+Kp*err+Kd*v_e)-g;  
+                cout << "controller in task space" << endl;              
+             }
             else if ( space_type == "Joint_space")
             {
                 J=  -W.t();
@@ -269,18 +256,21 @@ int main(int argc, char ** argv)
              
              // extract the current time
              start = std::chrono::system_clock::now();
-             tau = tda.ComputeDistribution(W, w) ;
+             // call cable tension distribution
+             if ( control_type == "minG")
+                tau = tda.ComputeDistributionG(W, v_e, err, w) ;
+            else
+                tau = tda.ComputeDistribution(W, w) ;
+
              end = std::chrono::system_clock::now();
 
              cout << "external wrench:" << "   "<< w.t() << endl;
 
-            // call cable tension distribution
-            //tau = tda.ComputeDistribution(W, w) ;
-            tau_diff= tau-tau0;
+             // compute the tension difference
+             tau_diff= tau-tau0;
 
             // send tensions
             robot.sendTensions(tau);
-            //sum[0]=sqrt(tau.sumSquare());
 
             if(control_type == "minA")
                 {
