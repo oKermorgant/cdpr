@@ -21,11 +21,12 @@ public:
         minA, minW, minT, noMin,  closed_form, Barycenter, minG
     } minType;
 
-
+   
     TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start = false);
 
     // will look for a solution in [tau +- dTau_max]
     void ForceContinuity(double _dTau_max) {dTau_max = _dTau_max;}
+     void Weighing(double lambda){ _lambda = lambda;}
 
     vpColVector ComputeDistribution(vpMatrix &W, vpColVector &w);
     vpColVector ComputeDistributionG(vpMatrix &W, vpColVector &ve, vpColVector &pe, vpColVector &w );
@@ -42,6 +43,13 @@ public:
         if(control == Barycenter )
             a = vertices.size();
     }
+    void GetGains(vpColVector &a)
+    {
+        if(control == minG)
+            a [0] = x[8]; 
+            a[1] = x[9];
+    }
+
 
 
 protected:
@@ -54,7 +62,7 @@ protected:
     vpSubColVector tau, alpha;
 
     bool update_d;
-    double dTau_max, dAlpha;
+    double dTau_max, dAlpha,  _lambda;
 
     bool reset_active;
     std::vector<bool> active;
@@ -62,12 +70,12 @@ protected:
 
 
      // declaration of closed form
-     vpColVector f_m, f_v, w_, tau_;
-     vpMatrix W_;
+     vpColVector f_m, f_v, w_;
+     
 
     // declaration of Barycenter
     double m;
-    vpColVector  lambda, F, p, v_1, v_2, v_c;
+    vpColVector  lambda, F, p;
     vpMatrix kerW, H, ker;
     // publisher to barycenter plot
     ros::Publisher bary_pub;
