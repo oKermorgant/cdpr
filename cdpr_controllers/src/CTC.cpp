@@ -47,13 +47,15 @@ int main(int argc, char ** argv)
 
     // get control type    
     std::string control_type = "Barycenter";
-    double dTau_max = 0.;
+    double dTau_max = 0.5, lambda =5000;
     bool warm_start = false;
 
     if(nh_priv.hasParam("control"))
-    nh_priv.getParam("control", control_type);
+        nh_priv.getParam("control", control_type);
     if(nh_priv.hasParam("threshold"))
-    nh_priv.getParam("threshold", dTau_max);
+        nh_priv.getParam("threshold", dTau_max);
+    if(nh_priv.hasParam("coefficient"))
+        nh_priv.getParam("coefficient", lambda);
 
 
     TDA::minType control = TDA::minA;
@@ -68,6 +70,8 @@ int main(int argc, char ** argv)
         control = TDA::closed_form;
     else if(control_type == "Barycenter")
         control = TDA::Barycenter;
+    else if(control_type == "minG")
+        control = TDA::minG;
     
     // get space type
     std::string space_type="Cartesian_space";
@@ -76,7 +80,7 @@ int main(int argc, char ** argv)
     
     // initialization of parameters in CTC 
     vpMatrix W(6, n), Wd(6,n), J(n,6), RR(6,6), RR_d(6,6),  M_inertia(6,6), Kp(6,6), Kd(6,6);
-    vpColVector g(6), tau(n), err(6),  w(6), tau0(n), tau_diff(n), pd(6);
+    vpColVector g(6), tau(n), err(6),  w(6), tau0(n), tau_diff(n), pd(6),residual(6);
     vpColVector L(n), Ld(n), Le(n),  Le_d(n);
     g[2] = - robot.mass() * 9.81;
     //vpPoseVector Pd;
@@ -93,10 +97,11 @@ int main(int argc, char ** argv)
     // set proportional and derivative gain
     //double Kp, Kd;  // tuned for Caroca
    if (space_type == "Cartesian_space")
-     {  for (int i = 0; i < 3; ++i)
+     {  
+        for (int i = 0; i < 3; ++i)
                 {
-                    Kp[i][i]=100; Kd[i][i]=20;
-                    Kp[i+3][i+3]=16; Kd[i+3][i+3]=8;
+                    Kp[i][i] = 16; Kd[i][i] = 8;
+                    Kp[i+3][i+3]=9; Kd[i+3][i+3]=6;
                 }
     }
     else if ( space_type == "Joint_space")
@@ -128,6 +133,7 @@ int main(int argc, char ** argv)
     logger.saveTimed(orientation_err, "orientation_err", "[\\theta_x,\\theta_y, \\theta_z]", "Orientation error [deg]" );
     logger.saveTimed(position_err, "position_err", "[x, y, z]", "Position error [m]");
     logger.saveTimed(tau, "tau", "\\tau_", "Tensions [N]");
+    logger.saveTimed(residual, "residual", "residual_", "wrench residual [N]");
     logger.saveTimed(tau_diff, "diff", "\\tau_d", "Tensions difference [N]");
     //logger.saveTimed(v_d, "Vel_e", "[v_x, v_y, v_z, \\theta_x, \\theta_y, \\theta_z]", "desired velocity");
     //logger.saveTimed(pd, "des_p", "[xd, yd, zd, \\theta_xd, \\theta_yd, \\theta_zd]", " desired pose");
@@ -135,11 +141,16 @@ int main(int argc, char ** argv)
         logger.saveTimed(Le, "Le", "Le_", "Length error [m]");
 
     // chrono
-    vpColVector comp_time(1), a(1), sum(1);
+    vpColVector comp_time(1), alpha(1), sum(1),ver(1), gains(2);
     logger.saveTimed(comp_time, "dt", "[\\delta t]", "Comp. time [s]");
     if (control_type == "minA")
-        logger.saveTimed(a, "alpha", "[\\alpha]", "alpha");
-    //logger.saveTimed(sum, "sum", "[sum]", "Tensions sum [N]");
+        logger.saveTimed(alpha, "alpha", "[\\alpha ]", "Alpha");
+    if (control_type == "Barycenter")
+        logger.saveTimed(ver, "vertices", "[num_v]", "The number of vertex");
+    if (control_type == "minG")
+        logger.saveTimed(gains, "gains", "[K_p, K_d]", "CTC gains");
+    
+    // initialize the timekeeper 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsed_seconds;
 
@@ -151,20 +162,7 @@ int main(int argc, char ** argv)
     // deliver the settings to the TDA
     TDA tda(robot, nh, control);
     tda.ForceContinuity(dTau_max);
-
-/*
-    // initialize the cables tensions
-    robot.getPose(M);
-    M.extract(R);
-    for(unsigned int i=0;i<3;++i)
-        for(unsigned int j=0;j<3;++j)
-            RR[i][j] = RR[i+3][j+3] = R[i][j];
-     robot.computeW(W);
-             W=RR*W;
-     w= -g;
-    tau= W.pseudoInverse() * w;
-    robot.sendTensions(tau);*/
-
+    tda.Weighing(lambda);
 
     cout << "CDPR control ready ----------------" << fixed << endl; 
     while(ros::ok())
@@ -180,8 +178,7 @@ int main(int argc, char ** argv)
         if(robot.ok())  // messages have been received
         {
             cout << "messages have been received" << endl;
-            // extract the current time
-             start = std::chrono::system_clock::now();
+
             // current poses
             robot.getPose(M);
             M.extract(R);
@@ -220,19 +217,21 @@ int main(int argc, char ** argv)
 
              if ( space_type == "Cartesian_space")
              {             
-                 v_e=v_d-v;
+                // compute the velocity error
+                 v_e= v_d - v;
+                 // add Butterworth filter for pose error
                  filterP.Filter(err);
 
-                // establish the external wrench 
-                w= M_inertia*(a_d+Kp*err+Kd*v_e)-g;
-                //v=v_d-v;
-                cout << "controller in task space" << endl;
-        
-                //cout << " Velocity error: " << (v_d-v).t()<< endl;
-                //cout << " Inertia matrix: " <<M_inertia<< endl;
-                //cout << " b: " << b.t()<< endl;
-                
-            }
+                 if ( control_type == "minG")
+                   { 
+                        w = M_inertia*a_d-g;
+                        cout << "using minG"<< endl;
+                   }              
+                else
+                    // establish the external wrench 
+                    w = M_inertia*(a_d+Kp*err+Kd*v_e)-g;  
+                cout << "controller in task space" << endl;              
+             }
             else if ( space_type == "Joint_space")
             {
                 J=  -W.t();
@@ -248,7 +247,7 @@ int main(int argc, char ** argv)
                 Wd=RR_d*Wd;
                 //robot.sendError(err);
 
-                Le_d=  -Wd.t() *v_d- J*v;
+                Le_d=  - Wd.t() *v_d- J*v;
                 Le= Ld-L;
                 filterL.Filter(Le);
 
@@ -263,41 +262,52 @@ int main(int argc, char ** argv)
                 cout << " Error: Please select the controller space type" << endl;
 
              tau0=tau;
-             tau = tda.ComputeDistribution(W, w) ;
+             
+             // extract the current time
+             start = std::chrono::system_clock::now();
+             // call cable tension distribution
+             if ( control_type == "minG")
+             {
+                v_e = M_inertia*v_e;
+                err = M_inertia*err;
+                tau = tda.ComputeDistributionG(W, v_e, err, w) ;
+            }
+            else
+                tau = tda.ComputeDistribution(W, w) ;
 
-
+             end = std::chrono::system_clock::now();
 
              cout << "external wrench:" << "   "<< w.t() << endl;
 
-            // call cable tension distribution
-            //tau = tda.ComputeDistribution(W, w) ;
-            tau_diff= tau-tau0;
+             // compute the tension difference
+             tau_diff= tau-tau0;
 
             // send tensions
             robot.sendTensions(tau);
-            //sum[0]=sqrt(tau.sumSquare());
 
-            tda.GetAlpha(a[0]);
             if(control_type == "minA")
-              cout << "coefficient number:" << "  " <<a << endl;
+                {
+                    tda.GetAlpha(alpha[0]);
+                    cout << "coefficient number:" << "  " <<alpha << endl;
+                }
+            if(control_type == "Barycenter")
+                    tda.GetVertices(ver[0]);
+            if(control_type == "minG")
+                    tda.GetGains(gains);
 
             // calculate the computation period
-            end = std::chrono::system_clock::now();
             elapsed_seconds = end-start;
             // log
             M.buildFrom( robot.getPoseError());
             pose_err.buildFrom(M.inverse());
             for (int i = 0; i < 3 ; ++i)
              {   
-                //pose_err[i]=err[i];
                 position_err[i]=pose_err[i];
                 orientation_err[i]=(pose_err[i+3]*(180/M_PI));
             }
-            //pose_err=err;
-            //M.buildFrom(robot.getPoseError(););
-            //pose_err.buildFrom(M.inverse());
+            // computation time
             comp_time[0] = elapsed_seconds.count();
-            //residual = W*tau - w;
+            residual = W*tau - w;
             logger.update();
         }
 

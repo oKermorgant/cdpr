@@ -37,6 +37,53 @@ int main(int argc, char ** argv)
         std::chrono::time_point<std::chrono::system_clock> start, end;
         std::chrono::duration<double> elapsed_seconds;
 
+/*        //////////////////////////////////////////////////////
+    vpMatrix M(6,8), E(6,6);
+    int k=0,m=0;
+    for (int i = 0; i < 6; ++i)
+    {
+        for (int j= 0; j < 8; ++j)
+        {
+            k++;
+            M[i][j]=k;
+        }
+    }
+    cout << " test matrix" << M << endl;
+
+    for (int i = 0; i < 8; ++i)
+    {     
+           for (int j = 0; j <6 ; ++j)
+         {
+            if (i==2 || i==4 )
+            {
+               M[j][i]=0;
+            }
+            else if (i==0 || i==1)
+              E[j][i]=M[j][i];
+            else if (i==3)
+              E[j][i-1]=M[j][i];
+            else if (i==5)
+              E[j][i-2]=M[j][i];
+            else if (i==6)
+              E[j][i-2]=M[j][i];
+            else if (i==7)
+              E[j][i-2]=M[j][i];
+        }
+    }
+    cout << " test matrix" << M << endl;
+    cout << " test matrixE" << E << endl;
+    
+    cout << " test pseudoInverse matrix" << M.pseudoInverse()<< endl;
+    cout << " test pseudoInverse matrixE" << E.pseudoInverse() << endl;
+
+    cout << " test Inverse matrixE" << E.inverseByLU() << endl;
+
+
+
+
+
+/////////////////////////////////////////////////////
+*/
 
         vpRowVector x_i(3), x_f(3), v_i(3), v_f(3), a_i(3), a_f(3);
         vpRowVector P, Vel, Acc;
@@ -96,9 +143,9 @@ int main(int argc, char ** argv)
               // log
               logger.update();
               cout << "Desired position:" << " "<<P <<endl;
-                 // cout << " The trajectory has been tracked" << endl;
-                 //cout << " Desired velocity" << Vel <<endl;
-                 //cout << " Desired acceleration" << Acc <<endl;
+              //cout << " The trajectory has been tracked" << endl;
+              cout << " Desired velocity" << " "<<Vel <<endl;
+              cout << " Desired acceleration" << " "<<Acc <<endl;
               inter++;
               ros::spinOnce();
               loop.sleep();
