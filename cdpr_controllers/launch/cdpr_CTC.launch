@@ -21,7 +21,7 @@
     <rosparam file="$(find trajectory_generator)/sdf/$(arg model_tra).yaml" command="load" ns="Tra"/>
    
 
-   <!--<node pkg="cdpr_controllers" type="CTC" name="CTC" output="screen">
+   <node pkg="cdpr_controllers" type="CTC" name="CTC" output="screen">
 		 
  		minW = min |W.tau - w| + constraints (never consider the feasible condtion W.tau = w)
                 minT = min |tau| with constraints (establish the effort shreshold in order to guarantee the tension continuity)  
@@ -37,7 +37,7 @@
        <param name="s_type" value="$(arg sty)"/>
        <param name="threshold" value="$(arg threshold)"/>
 
-    </node>-->
+    </node>
 
     <!-- generate trajectory -->
 
