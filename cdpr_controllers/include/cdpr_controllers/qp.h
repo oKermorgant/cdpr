@@ -133,10 +133,10 @@ void solveQP ( const vpMatrix &_Q, const vpColVector _r, vpMatrix _A, vpColVecto
             
             
             // check for infeasible program
-            if(_A.getRows() >= n && P.getMaxValue() - P.getMinValue() < thresh0)
+            if(_A.getRows() >= n && P.getMaxValue() - P.getMinValue() < 1e-6)
             {   // full rank constraints
                 vpColVector cons = _A * x - _b;
-                if(cons.getMaxValue() - cons.getMinValue() > thresh0)
+                if(cons.getMaxValue() - cons.getMinValue() > 1e-6)
                 {
                     cout << "QP seems infeasible\n";
                     x.resize(0);
