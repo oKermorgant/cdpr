@@ -2,6 +2,7 @@
 #include <trajectory_generator/trajectory.h>
 #include <log2plot/logger.h>
 #include <chrono>
+#include <visp/vpIoTools.h>
 
 /*--------------------------------------------------------------------
 *  5 order polynomial motion planning algorithm
@@ -20,7 +21,7 @@ int main(int argc, char ** argv)
         ros::NodeHandle node;
 
         Trajectory path(node);
-        std::string dir = "/home/derek/Results/cdpr/";;
+        std::string dir = "/home/" + vpIoTools::getUserName() + "/Results/cdpr/";
         // plotting 3D figures
         vpPoseVector pose;
         Logger logger(dir);
@@ -36,54 +37,6 @@ int main(int argc, char ** argv)
         logger.saveTimed(comp_time, "Tra_dt", "[\\delta t]", "Tra  comp. time [s]");
         std::chrono::time_point<std::chrono::system_clock> start, end;
         std::chrono::duration<double> elapsed_seconds;
-
-/*        //////////////////////////////////////////////////////
-    vpMatrix M(6,8), E(6,6);
-    int k=0,m=0;
-    for (int i = 0; i < 6; ++i)
-    {
-        for (int j= 0; j < 8; ++j)
-        {
-            k++;
-            M[i][j]=k;
-        }
-    }
-    cout << " test matrix" << M << endl;
-
-    for (int i = 0; i < 8; ++i)
-    {     
-           for (int j = 0; j <6 ; ++j)
-         {
-            if (i==2 || i==4 )
-            {
-               M[j][i]=0;
-            }
-            else if (i==0 || i==1)
-              E[j][i]=M[j][i];
-            else if (i==3)
-              E[j][i-1]=M[j][i];
-            else if (i==5)
-              E[j][i-2]=M[j][i];
-            else if (i==6)
-              E[j][i-2]=M[j][i];
-            else if (i==7)
-              E[j][i-2]=M[j][i];
-        }
-    }
-    cout << " test matrix" << M << endl;
-    cout << " test matrixE" << E << endl;
-    
-    cout << " test pseudoInverse matrix" << M.pseudoInverse()<< endl;
-    cout << " test pseudoInverse matrixE" << E.pseudoInverse() << endl;
-
-    cout << " test Inverse matrixE" << E.inverseByLU() << endl;
-
-
-
-
-
-/////////////////////////////////////////////////////
-*/
 
         vpRowVector x_i(3), x_f(3), v_i(3), v_f(3), a_i(3), a_f(3);
         vpRowVector P, Vel, Acc;
@@ -101,11 +54,12 @@ int main(int argc, char ** argv)
           C[0][i]=x_i[i];
           C[3][i]=x_f[i];
         }
+        cout << " C matrix:"<< "  \n"<< C<<endl;
          L=path.getLmatrix(t_f);
-
-        //A= L.pseudoInverse()*C;
-        A= L.inverseByLU()*C;
-
+         cout << " L matrix:"<< "  \n"<< L<<endl;
+         A= L.inverseByLU()*C;
+        cout << " A matrix:"<< "  \n"<< A<<endl;
+        cout << "  matrix:"<< "  \n"<<L*A<<endl;
 
         double dt = 0.01;
         ros::Rate loop(1/dt);
@@ -122,7 +76,7 @@ int main(int argc, char ** argv)
               start = std::chrono::system_clock::now();
               cout << "interation number:" <<" "<< inter <<endl;
               // Check the time period 
-              if (inter<=(num+1))
+              if (inter<= num)
               {
                 P=path.getposition(t,A);
                 Vel=path.getvelocity(t,A);
@@ -142,8 +96,9 @@ int main(int argc, char ** argv)
 
               // log
               logger.update();
-              cout << "Desired position:" << " "<<P <<endl;
-              //cout << " The trajectory has been tracked" << endl;
+
+              // print the desired parameters
+              cout << " Desired position:" << " "<<P <<endl;
               cout << " Desired velocity" << " "<<Vel <<endl;
               cout << " Desired acceleration" << " "<<Acc <<endl;
               inter++;

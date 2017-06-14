@@ -18,7 +18,7 @@ public:
     // how we perform the TDA
     typedef enum
     {
-        minA, minW, minT, noMin,  closed_form, Barycenter, minG
+        minA, minW, minT, noMin,  closed_form, Barycenter, minG, cgal
     } minType;
 
    
@@ -41,7 +41,7 @@ public:
     void GetVertices(double &a)
     {
         if(control == Barycenter )
-            a = vertices.size();
+            a =num_v;
     }
     void GetGains(vpColVector &a)
     {
@@ -50,16 +50,14 @@ public:
             a[1] = x[9];
     }
 
-
-
 protected:
     minType control;
-    int n;
+    int n,index, num_v;
     double tauMin, tauMax;
 
     vpMatrix Q, A, C;
     vpColVector r, b, d, x, wp;
-    vpSubColVector tau, alpha;
+    vpSubColVector tau;
 
     bool update_d;
     double dTau_max, dAlpha,  _lambda;
@@ -69,6 +67,7 @@ protected:
     std::vector<vpColVector> vertices;
 
 
+
      // declaration of closed form
      vpColVector f_m, f_v, w_;
      
@@ -76,7 +75,7 @@ protected:
     // declaration of Barycenter
     double m;
     vpColVector  lambda, F, p;
-    vpMatrix kerW, H, ker;
+    vpMatrix kerW, H, ker, ker_inv;
     // publisher to barycenter plot
     ros::Publisher bary_pub;
 

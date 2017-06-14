@@ -72,6 +72,8 @@ int main(int argc, char ** argv)
         control = TDA::Barycenter;
     else if(control_type == "minG")
         control = TDA::minG;
+     else if(control_type == "CGAL")
+        control = TDA::cgal;
     
     // get space type
     std::string space_type="Cartesian_space";
@@ -84,7 +86,7 @@ int main(int argc, char ** argv)
     vpColVector L(n), Ld(n), Le(n),  Le_d(n);
     g[2] = - robot.mass() * 9.81;
     //vpPoseVector Pd;
-
+    vpRxyzVector rxyz;
     // set frequency of loop
     double dt = 0.01;
     ros::Rate loop(1/dt);
@@ -100,8 +102,8 @@ int main(int argc, char ** argv)
      {  
         for (int i = 0; i < 3; ++i)
                 {
-                    Kp[i][i] = 16; Kd[i][i] = 8;
-                    Kp[i+3][i+3]=9; Kd[i+3][i+3]=6;
+                    Kp[i][i] = 100; Kd[i][i] = 20;
+                    Kp[i+3][i+3]= 100; Kd[i+3][i+3]= 20;
                 }
     }
     else if ( space_type == "Joint_space")
@@ -135,8 +137,7 @@ int main(int argc, char ** argv)
     logger.saveTimed(tau, "tau", "\\tau_", "Tensions [N]");
     logger.saveTimed(residual, "residual", "residual_", "wrench residual [N]");
     logger.saveTimed(tau_diff, "diff", "\\tau_d", "Tensions difference [N]");
-    //logger.saveTimed(v_d, "Vel_e", "[v_x, v_y, v_z, \\theta_x, \\theta_y, \\theta_z]", "desired velocity");
-    //logger.saveTimed(pd, "des_p", "[xd, yd, zd, \\theta_xd, \\theta_yd, \\theta_zd]", " desired pose");
+    logger.saveTimed(v_e, "velocity_error", "Vel_", "velocity error [N]");
     if (space_type == "Joint_space" )
         logger.saveTimed(Le, "Le", "Le_", "Length error [m]");
 
@@ -146,7 +147,7 @@ int main(int argc, char ** argv)
     if (control_type == "minA")
         logger.saveTimed(alpha, "alpha", "[\\alpha ]", "Alpha");
     if (control_type == "Barycenter")
-        logger.saveTimed(ver, "vertices", "[num_v]", "The number of vertex");
+        logger.saveTimed(ver, "vertices", "[numv]", "The number of vertex");
     if (control_type == "minG")
         logger.saveTimed(gains, "gains", "[K_p, K_d]", "CTC gains");
     
@@ -173,8 +174,7 @@ int main(int argc, char ** argv)
         t = ros::Time::now().toSec();
           robot.getPose(M);
             M.extract(T);
-            cout << "Current position:" <<"  "<<T.t() << endl;
-        
+
         if(robot.ok())  // messages have been received
         {
             cout << "messages have been received" << endl;
@@ -182,11 +182,26 @@ int main(int argc, char ** argv)
             // current poses
             robot.getPose(M);
             M.extract(R);
+
             // desired poses
             robot.getDesiredPose(Md);
             Md.extract(Rd);
             pd=vpPoseVector(Md);
-            //pd=Pd;
+            vpQuaternionVector Qd,Q;
+            vpThetaUVector Theta_c;
+            Md.extract(Qd);
+            M.extract(Theta_c);
+            cout<<" the  angle-axis angle"<< "  "<< Theta_c.t()<< endl;
+            //cout<<"the desired quaternion angle"<< "  "<< Qd.t()<< endl;
+            M.extract(Q);
+            cout<<" the  quaternion angle"<< "  "<< Q.t()<< endl;
+
+
+            // get the desired parameters from trajectory generator
+            robot.getVelocity(v);
+            robot.getDesiredVelocity(v_d);
+            robot.getDesiredAcceleration(a_d);
+            rxyz.buildFrom(R);
 
             // position error in platform frame
             err = robot.getPoseError();
@@ -195,22 +210,23 @@ int main(int argc, char ** argv)
                 for(unsigned int j=0;j<3;++j)
                     RR[i][j] = RR[i+3][j+3] = R[i][j];
             // transform to reference frame
-            err = RR* err;
+            err=RR*err;
+            rxyz= -1*rxyz;
+            err.insert(3, rxyz);
+            cout << " Pose error:" <<"  "<<err.t() << endl;
 
             // create transformation matrix
             for(unsigned int i=0;i<3;++i)
                 for(unsigned int j=0;j<3;++j)
                     RR_d[i][j] = RR_d[i+3][j+3] = Rd[i][j];
 
-            // get the desired parameters from trajectory generator
-            robot.getVelocity(v);
-            robot.getDesiredVelocity(v_d);
-            robot.getDesiredAcceleration(a_d);
 
-             //cout << "Desired acc: " << a_d.t() << fixed << endl;
+            cout << " Current position:" <<"  "<<T.t() << endl;
+            cout << " Current velocity: " << "  "<<v.t()<< endl;
 
-             //M_inertia.insert(robot.inertia(),3,3);
-             M_inertia.insert((R*robot.inertia()*R.t()),3,3); 
+             // transform the inertia matrix to reference frame
+             M_inertia.insert((R*robot.inertia()*R.t()),3,3);
+             cout << " Inertia matrix: " << "  \n"<<R*robot.inertia()*R.t()<< endl;
              // build W matrix depending on current attach points
              robot.computeW(W);
              W=RR*W;
@@ -222,11 +238,8 @@ int main(int argc, char ** argv)
                  // add Butterworth filter for pose error
                  filterP.Filter(err);
 
-                 if ( control_type == "minG")
-                   { 
-                        w = M_inertia*a_d-g;
-                        cout << "using minG"<< endl;
-                   }              
+                 if ( control_type == "minG") 
+                        w = M_inertia*a_d-g;            
                 else
                     // establish the external wrench 
                     w = M_inertia*(a_d+Kp*err+Kd*v_e)-g;  

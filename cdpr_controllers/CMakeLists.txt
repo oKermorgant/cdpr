@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(VISP REQUIRED)
 
+
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES cdpr_controllers
@@ -32,6 +33,7 @@ include_directories(
     include
   ${catkin_INCLUDE_DIRS}
   ${VISP_INCLUDE_DIRS}
+
 )
 
 add_library(${PROJECT_NAME}
@@ -57,6 +59,6 @@ add_executable( CTC
  	 	src/CTC.cpp
 	 	include/cdpr_controllers/qp.h	
 		)   
-target_link_libraries( CTC ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${PROJECT_NAME})
+target_link_libraries( CTC ${catkin_LIBRARIES} ${VISP_LIBRARIES}  ${PROJECT_NAME})
 
  

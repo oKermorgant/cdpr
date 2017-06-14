@@ -69,12 +69,6 @@ CDPR::CDPR(ros::NodeHandle &_nh)
     // publisher to cable tensions
     tensions_pub = _nh.advertise<sensor_msgs::JointState>("cable_command", 1);
 
-    // publishe the poses error
-   // error_pub = _nh.advertise<geometry_msgs::Twist>("error",1);
-
-       // publishe the length error
-   // errorL_pub = _nh.advertise<sensor_msgs::JointState>("errorL",1);
-
     char cable_name[256];
     for(unsigned int i=0;i<n_cable;++i)
     {

@@ -15,9 +15,10 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
     // forces min / max
     robot.tensionMinMax(tauMin, tauMax);
 
-    control = _control;
+    // indicator of number of interaton which has infeasible  tension
+    index=0;
 
-    dAlpha= 0.001;
+    control = _control;
     update_d = false;
 
     x.resize(n);
@@ -30,7 +31,7 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
     if(control == minT)
     {
         // min |tau|
-        //  st W.tau = w        // assumes the given wrench is feasible
+        //  st W.tau = w        // assume the given wrench is feasible dependent on the gains
         //  st t- < tau < tau+
 
         // min tau
@@ -73,7 +74,7 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
     }
     else if (control == minA)
     {
-        // min |tau| - |lambda.(alpha-1)|
+        // min |tau| - |lambda.(1-alpha)|
         //  st W.tau = alpha.w+(1-alpha).wp
         //  st 0 < alpha < 1
         //  st t- < tau < t+
@@ -107,7 +108,6 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
         // tau=f_m+f_v
         //  f_m=(tauMax+tauMin)/2
         //  f=f_m- (W^+)(w+W*f_m)
-        // min ||f||2
 
         f_m.resize(n);
         f_v.resize(n);
@@ -124,7 +124,8 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
     {
         // publisher to plot
         bary_pub = _nh.advertise<std_msgs::Float32MultiArray>("barycenter", 1);
-
+        // initialize the matrix
+        std::vector<double>::size_type num_v;
         H.resize(n , n-6);
         d.resize(2*n);
         lambda.resize(2);
@@ -132,6 +133,7 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
         // particular solution from the pseudo Inverse
         p.resize(n);
         ker.resize(n-6,n-6);
+        ker_inv.resize(n-6,n-6);
         for (unsigned int i = 0; i <n; ++i)
         {
             d[i] =tauMax;
@@ -140,17 +142,18 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
     }
     else if ( control == minG)
     {
-        // min |tau| +|lambda.(Kp-1)|+|lambda.(Kd-2)|
-        //  st W.tau =Ip.xdd+Kd.v_e+Kp.p_e+wg
+        // min |tau| +|lambda.(Kp-alpha1)|+|lambda.(Kd-alpha2)|
+        //  st W.tau =Ip(xdd+Kd.v_e+Kp.p_e)-wg
         //  st 1< Kp < 100
-        //  st 2 <kd <100
+        //  st 1 <kd <100
         //  st t- < tau < t+
-        x.resize(n+2); // x = (tau, Kp, Kd, Kp, Kd)
+
+        x.resize(n+2);  // x = (tau, Kp, Kd)
         r.resize(n+2);
         Q.eye(n+2);  Q *= 1./tauMax;
         // gains for position
-        Q[n][n]=1000; r[n] = 16*1000;
-        Q[n+1][n+1] = 1000; r[n+1]=8*1000;
+        Q[n][n]=1; r[n] =0;// 16*100;
+        Q[n+1][n+1] = 1; r[n+1]=0;//8*100;
 /*        // gains for orientation
         Q[n+2][n+2]=1; r[n+2] = 9;
         Q[n+3][n+3] = 1; r[n+3]= 6;*/
@@ -180,11 +183,13 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
         }
         C[2*n][n]=C[2*n+1][n+1]=1;//C[2*n+2][n+2]=C[2*n+3][n+3]=1;
         C[2*n+2][n]=C[2*n+3][n+1]=-1;//C[2*n+6][n+2]=C[2*n+7][n+3]= -1;
-        d[2*n] = d[2*n+1]=1000.0;
+        d[2*n] = d[2*n+1]=100.0;
         d[2*n+2]= d[2*n+3]= -0.001;//d[2*n+6]= d[2*n+7]=- 1.0;      
     }
+    else if ( control == cgal)
+        Q.eye(n);
+
     tau.init(x, 0, n);
-    //alpha.init(x, n, 1);
 }
 
 
@@ -206,7 +211,7 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
 
     if(control == noMin)
         x = W.pseudoInverse() * w;
-    else if(control == minT)
+    else if(control == minT)     
         solve_qp::solveQP(Q, r, W, w, C, d, x, active);
     else if(control == minW)
         solve_qp::solveQPi(W, w, C, d, x, active);
@@ -218,9 +223,11 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
             A[i][n]= - w[i]+wp[i];
         b=wp;
         solve_qp::solveQP(Q, r, A, b, C, d, x, active);
-        wp=w;
-        //      cout << "alpha = " << alpha[0] << endl;
-        //      cout << "checking W.tau - a.w: " << (W*tau - alpha[0]*w).t() << endl;
+        wp=x[n]*w+(1-x[n])*wp;
+         if ( (C*x-d).getMaxValue() < 0.01)
+             cout << " satisfy the inequality constraint" << endl;
+        else
+              index++;
     }
 
     else if( control == closed_form)
@@ -290,60 +297,8 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
                         // initialize the index in order to inspect from the first electment
                         i = 0;
                     }
-
- /*                       if ( num_r == 1)
-                        { 
-                            //compute the tensions again without unsatisfied component
-                            x = fm + W_.pseudoInverse()*(w_- (W_*fm));
-                            index = i;
-                             x = tau_+ x;
-                            cout << "tensions" << x.t() << endl;
-                            cout << "index" << index << endl;
-                        }
-                        else if ( num_r == 0)
-                        {   
-                            int m = 0;
-                            vpMatrix M(6,6);
-                            vpColVector f_m_(6), tau_i(6);
-                            // extract the submatrix from structure matrix
-                            for (int j = 0; j < 8; ++j)
-                            {
-                                if (W_[0][j] != 0)
-                                {
-                                    for (int o= 0; o < 6; ++o)
-                                        M[o][m] = W_[o][j];
-                                    m++;
-                                }
-                            }
-                            cout << " The matrix" << W_ << endl;
-                            cout << " The new matrix" << M<< endl;
-                            for (int j = 0; j < 6; ++j)
-                               f_m_[j]=(tauMax+tauMin)/2;
-
-                             tau_i= f_m_ + M.inverseByLU()*(w_- (M*f_m_));
-
-                             cout << "new tension"<< tau_i.t()<< endl;
-                             int k=0;
-                             // re-construct the torque matrix
-                             for (int j = 0; j <8 ; ++j)
-                             {
-                                 if ( j == index || j == i )
-                                     x[j]=tauMin;
-                                 else 
-                                {
-                                    x[j] = tau_i[k];
-                                    k++;
-                                }                     
-                             }
-                             cout << " tension"<< x.t()<< endl;
-                               
-                             if (x[6] == 0 || x[7] ==0)
-                                 x[6]= x[7] = tauMin;
-                         }       
-                        // compute the force limit
-                        f_v = x - f_m;
-                        norm_2 = sqrt(f_v.sumSquare());
-                    }*/
+                    else if(num_r <0)
+                        cout << "no feasible redundancy existing" << endl;
               }
         else
             cout << "no feasible tension distribution" << endl;
@@ -397,7 +352,7 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
                     ker[1][0]=H[j][0];
                     ker[1][1]=H[j][1];
                     // pre-compute the inverse
-                    ker = ker.inverseByQR();
+                    ker_inv = ker.inverseByLU();
                     // the loop from A[i] to B[i];
                     for(double u: {A[i],B[i]})
                     {
@@ -405,10 +360,10 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
                         {
                             // solve this intersection
                             F[0] = u;F[1] = v;
-                            lambda = ker * F;
+                            lambda = ker_inv * F;
                             inter++;
                             // check constraints, must take into account the certain threshold
-                            if((H*lambda - A).getMinValue() >= - 0.01 && (H*lambda - B).getMaxValue() <= 0.01)
+                            if((H*lambda - A).getMinValue() >= - 1e-6 && (H*lambda - B).getMaxValue() <= 1e-6)
                                  vertices.push_back(lambda);
                         }
                     }
@@ -416,9 +371,11 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
         }
         cout << "the total amount of intersectioni points:" <<"  "<<inter << endl;
         // print the  satisfied vertices  number
-        cout << "number of vertex:" << "  "<< vertices.size() << endl;
+        num_v = vertices.size();
+        cout << "number of vertex:" << "  "<<num_v<< endl;
         for (int i = 0; i < vertices.size(); ++i)
            cout << "vertex " << "  "<< vertices[i].t()<<endl;
+
 
         vpColVector centroid(2);
         vpColVector ver(2), CoG(2);
@@ -437,7 +394,7 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
                 std::sort(vertices.begin(),vertices.end(),[&centroid](vpColVector v1, vpColVector v2)
                     {return atan2(v1[1]-centroid[1],v1[0]-centroid[0]) > atan2(v2[1]-centroid[1],v2[0]-centroid[0]);}); 
 
-                // compute CoG with trianglation alogorithm
+/*                // compute CoG with trianglation alogorithm
                 double a=0,v;
                 centroid = 0; CoG=0; 
                 for (int j= 1; j < (vertices.size()-1) ; ++j)
@@ -449,9 +406,9 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
                     CoG+=ver*v;
                     a+=v;
                 }
-                centroid= CoG/a;
+                centroid= CoG/a;*/
 
-/*           // compute CoG directly from convex polygon
+           // compute CoG directly from convex polygon
                 vertices.push_back(vertices[0]);
                 double a=0,v;
                 centroid = 0;
@@ -462,14 +419,13 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
                     centroid[0] += v*(vertices[i-1][0] + vertices[i][0]);
                     centroid[1] += v*(vertices[i-1][1] + vertices[i][1]);
                 }
-                centroid /= 3*a;*/
+                centroid /= 3*a;
             }
             x = p+ H*centroid;
             cout << "the barycenter" << "  "<< centroid.t() << endl;
         }
         else 
             cout << "there is no vertex existing"<< endl;
-
     }
     else
         cout << "No appropriate TDA " << endl;

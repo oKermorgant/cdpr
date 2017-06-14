@@ -138,7 +138,7 @@ void solveQP ( const vpMatrix &_Q, const vpColVector _r, vpMatrix _A, vpColVecto
                 vpColVector cons = _A * x - _b;
                 if(cons.getMaxValue() - cons.getMinValue() > 1e-6)
                 {
-                    cout << "QP seems infeasible\n";
+                    cout << "--------------------------------------------------QP seems infeasible----------------------------------------------------\n";
                     x.resize(0);
                     return;
                 }

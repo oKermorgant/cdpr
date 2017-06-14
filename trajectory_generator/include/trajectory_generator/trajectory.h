@@ -78,7 +78,7 @@ public:
     { 
         vpRowVector l;
         l.resize(6);
-         l[0]=5*t*t*t*t; l[1]=4*t*t*t; l[2]=3*t*t; l[3]=2*t; l[4]=1; 
+        l[0]=5*t*t*t*t; l[1]=4*t*t*t; l[2]=3*t*t; l[3]=2*t; l[4]=1; 
         vpRowVector vel=l*a;
         return vel;
     }
