@@ -6,6 +6,19 @@
 #include <cmath>
 #include <std_msgs/Float32MultiArray.h>
 #include <ros/publisher.h>
+//%%%%%%%%%%%%%%%%%%%%%
+/*#include <CGAL/basic.h>
+#include <CGAL/QP_models.h>
+#include <CGAL/QP_functions.h>
+// choose exact integral type
+#ifdef CGAL_USE_GMP
+#include <CGAL/Gmpz.h>
+typedef CGAL::Gmpz ET;
+#else
+#include <CGAL/MP_Float.h>
+typedef CGAL::MP_Float ET;
+#endif*/
+//%%%%%%%%%%%%%%%%%%%%%%
 
 // this class implements all candidates for TDA's
 // this way we do not have the same code in all sources
@@ -65,19 +78,31 @@ protected:
     bool reset_active;
     std::vector<bool> active;
     std::vector<vpColVector> vertices;
-
-
-
+    
      // declaration of closed form
      vpColVector f_m, f_v, w_;
      
-
     // declaration of Barycenter
     double m;
     vpColVector  lambda, F, p;
     vpMatrix kerW, H, ker, ker_inv;
     // publisher to barycenter plot
     ros::Publisher bary_pub;
+
+/*    //declaration for cigal external library
+    // definition of the cigal parameter
+    typedef CGAL::Quadratic_program_from_iterators
+    <double**,                                                // for A
+     double*,                                                 // for b
+     CGAL::Const_oneset_iterator<CGAL::Comparison_result>, // for r
+     bool*,                                                // for fl
+     double*,                                                 // for l
+     bool*,                                                // for fu
+     double*,                                                 // for u
+     double**,                                                // for D
+     double*>                                                 // for c 
+     Program;
+     typedef CGAL::Quadratic_program_solution<ET> Solution;*/
 
 };
 

@@ -10,15 +10,32 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   log2plot
 )
+ 
+#set(CGAL_DIR /home/derek/External_library/CGAL-4.10) 
 
 find_package(VISP REQUIRED)
+#find_package(CGAL REQUIRED COMPONENTS)
 
+# include helper file
+#include( ${CGAL_USE_FILE} )
+#find_package( Boost REQUIRED )
 
+#if ( NOT CGAL_FOUND )
+
+  #message(STATUS "This project requires the CGAL library, and will not be compiled.")
+  #return()  
+
+#endif()
+
+###################################
+## catkin specific configuration ##
+###################################
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include 
 #  LIBRARIES cdpr_controllers
   CATKIN_DEPENDS cdpr roscpp log2plot
 #  DEPENDS system_lib
+#DEPENDS cgal gmp
 )
 
 
@@ -33,7 +50,6 @@ include_directories(
     include
   ${catkin_INCLUDE_DIRS}
   ${VISP_INCLUDE_DIRS}
-
 )
 
 add_library(${PROJECT_NAME}
@@ -59,6 +75,7 @@ add_executable( CTC
  	 	src/CTC.cpp
 	 	include/cdpr_controllers/qp.h	
 		)   
-target_link_libraries( CTC ${catkin_LIBRARIES} ${VISP_LIBRARIES}  ${PROJECT_NAME})
+target_link_libraries( CTC ${catkin_LIBRARIES} ${VISP_LIBRARIES}  ${PROJECT_NAME} )
+#${CGAL_3RD_PARTY_LIBRARIES} ${CGAL_LIBRARIES} 
 
  

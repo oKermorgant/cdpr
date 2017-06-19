@@ -1,4 +1,4 @@
-
+ 
 #include <trajectory_generator/trajectory.h>
 #include <log2plot/logger.h>
 #include <chrono>

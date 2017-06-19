@@ -72,7 +72,7 @@ int main(int argc, char ** argv)
         control = TDA::Barycenter;
     else if(control_type == "minG")
         control = TDA::minG;
-     else if(control_type == "CGAL")
+    else if(control_type == "cgal")
         control = TDA::cgal;
     
     // get space type
@@ -102,8 +102,8 @@ int main(int argc, char ** argv)
      {  
         for (int i = 0; i < 3; ++i)
                 {
-                    Kp[i][i] = 100; Kd[i][i] = 20;
-                    Kp[i+3][i+3]= 100; Kd[i+3][i+3]= 20;
+                    Kp[i][i] = 16; Kd[i][i] = 8;
+                    Kp[i+3][i+3]= 16; Kd[i+3][i+3]= 8;
                 }
     }
     else if ( space_type == "Joint_space")

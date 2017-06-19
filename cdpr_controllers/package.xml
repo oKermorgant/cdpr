@@ -12,5 +12,6 @@
   <depend>cdpr</depend>
   <depend>roscpp</depend>
   <depend>log2plot</depend>
+   <depend>cgal</depend> 
 
 </package>

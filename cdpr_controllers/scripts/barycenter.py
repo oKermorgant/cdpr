@@ -42,7 +42,7 @@ if __name__ == '__main__':
     
     listener = Listener()
     
-    
+    inter=0
     pl.ion()
     pl.close('all')
     
@@ -70,11 +70,12 @@ if __name__ == '__main__':
                                 # check constraints: A <= H.x <= B
                                 if pl.amin(pl.dot(H,x) - A) >= -1e-6 and pl.amax(pl.dot(H,x) - B) <= 1e-6:                                               
                                     vert.append(x.reshape(2).copy()) 
+            print('the number of vertices', len(vert))
           
             # continue only if enough vertices
             if len(vert) > 2:
                 ax.clear()
-                                
+                inter=inter+1                
                 vert_uns = pl.array(vert + [vert[0]])
                 
                 xm,xM,ym,yM = pl.amin(vert_uns[:,0]),pl.amax(vert_uns[:,0]),pl.amin(vert_uns[:,1]),pl.amax(vert_uns[:,1])
@@ -130,5 +131,5 @@ if __name__ == '__main__':
                 pl.pause(.0001)
             else:
                 print('Only %i vertices compatible with constraints' % len(vert))
-    
-rospy.sleep(0.01)
+    print ('the time',inter)
+rospy.sleep(0.001)
