@@ -1,9 +1,24 @@
 #include <cdpr_controllers/tda.h>
 #include <visp/vpIoTools.h>
 
+#include "../cvxgen/solver.h"
+// the namespaces is  quite important
+
+#include "../cvxgen/solver.c"
+#include "../cvxgen/matrix_support.c"
+#include "../cvxgen/util.c"
+#include "../cvxgen/ldl.c"
+
+Vars vars;
+Params params;
+Workspace work;
+Settings settings;
+
+
 using std::cout;
 using std::endl;
 using std::vector;
+
 
 TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
 {
@@ -80,17 +95,17 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
         //  st 0 < alpha < 1
         //  st t- < tau < t+
 
-        x.resize(n+1); // x = (tau, alpha)
-        Q.eye(n+1); Q *= 1./tauMax;
-        r.resize(n+1);
+        x.resize(n+6); // x = (tau, alpha)
+        Q.eye(n+6); Q *= 1./(tauMax*tauMax);
+        r.resize(n+6);
         wp.resize(6);
-        Q[n][n]=r[n]=7000;
+        Q[n][n]=Q[n+1][n+1]=Q[n+2][n+2]=Q[n+3][n+3]=Q[n+4][n+4]=Q[n+5][n+5]=1;
         // equality constraints
-        A.resize(6,n+1);
+        A.resize(6,n+6);
         b.resize(6);
         // min/max tension constraints
-        C.resize(2*(n+1), (n+1));
-        d.resize(2*(n+1));
+        C.resize(2*(n+6), (n+6));
+        d.resize(2*(n+6));
         for(unsigned int i=0;i<n;++i)
         {
             // f < fmax
@@ -100,10 +115,43 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
             d[i] = tauMax;
             d[i+n] = -tauMin;
         }
-        C[2*n][n]=1;
-        C[2*n+1][n]=-1;
-        d[2*n] = 1;
-        d[2*n+1]= 0;
+
+        for(unsigned int i=8;i<(n+6);++i)
+        {
+            C[i+n][i]=1;
+            C[i+n+6][i]=-1;
+            d[i+n] = 0;
+            d[i+n+6]= 1;
+         }
+         d[24]= 0;
+         cout << "Q matrix"<<"  \n"<< Q <<endl;
+         cout << "C matrix"<<"  \n"<< C <<endl;
+         cout << "d matrix"<<"  \n"<< d <<endl;
+    }
+    else if (control == slack_v)
+    {
+        x.resize(n+6); 
+        Q.eye(n+6); Q *= 1./(tauMax*tauMax);
+        r.resize(n+6);
+        wp.resize(6);
+        Q[n][n]=Q[n+1][n+1]=Q[n+2][n+2]=Q[n+3][n+3]=Q[n+4][n+4]=Q[n+5][n+5]=1;
+        // equality constraints
+        A.resize(6,n+6);
+        b.resize(6);
+        // min/max tension constraints
+        C.resize(2*(n+6), (n+6));
+        d.resize(2*(n+6));
+        for(unsigned int i=0;i<n;++i)
+        {
+            // f < fmax
+            C[i][i] = 1;
+            // -f < -fmin
+            C[i+n][i] = -1;
+            d[i] = tauMax;
+            d[i+n] = -tauMin;
+        }
+/*        cout << "C matrix"<<"  \n"<< C <<endl;
+         cout << "d matrix"<<"  \n"<< d <<endl;*/
     }
     else if ( control == closed_form)
     {
@@ -160,7 +208,7 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
 
         x.resize(n+2);  // x = (tau, Kp, Kd)
         r.resize(n+2);
-        Q.eye(n+2);  Q *= 1./tauMax;
+        Q.eye(n+2);  Q *= 1./(tauMax*tauMax);
         // gains for position
         Q[n][n]=100; r[n] =16*100;
         Q[n+1][n+1] = 100; r[n+1]=8*100;
@@ -192,19 +240,12 @@ TDA::TDA(CDPR &robot, ros::NodeHandle &_nh, minType _control, bool warm_start)
         d[2*n] = d[2*n+1]=100.0;
         d[2*n+2]= d[2*n+3]= -0.001;//d[2*n+6]= d[2*n+7]=- 1.0;      
     }
-    else if(control == cgal)
+    else if(control == cvxgen)
     {   
-           // min tau
-        Q.eye(n);
-        r.resize(n);
-        // min/max tension constraints
-        C.resize(2*n,n);
         d.resize(2*n);
         for(int i=0;i<n;++i)
         {
-            C[i][i] = 1;
             d[i] = tauMax;
-            C[i+n][i] = -1;
             d[i+n] = -tauMin;
         }
     }
@@ -234,21 +275,46 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
         solve_qp::solveQP(Q, r, W, w, C, d, x, active);
     else if(control == minW)
         solve_qp::solveQPi(W, w, C, d, x, active);
-    else if(control== minA)  // control = minA
+    // multiplier matrix
+    else if(control== minA) 
     {
         cout << "Using multiplier" << endl;
-        A.insert(W,0,0);
-        for(int i=0;i<6;++i)
-            A[i][n]= - w[i]+wp[i];
-        b=wp;
-        solve_qp::solveQP(Q, r, A, b, C, d, x, active);
-        wp=x[n]*w+(1-x[n])*wp;
-         if ( (C*x-d).getMaxValue() < 0.01)
-             cout << " satisfy the inequality constraint" << endl;
-        else
-              index++;
-    }
+        vpMatrix w_s(6,6);
+        //vpColVector tau_star(8), w_star(6) ;
+        for (int i = 0; i < 6; ++i)
+               w_s[i][i] = -w[i];
 
+        A.insert(W,0,0);
+        A.insert(w_s,0,8);
+        b= w;
+        solve_qp::solveQP(Q, r, A, b, C, d, x, active);
+        for (int i = 8; i < 14; ++i)
+            cout << "multiplier:" << "  "<< x[i]+1<< ","<<endl;
+
+    }
+    // slack variable
+    else if(control== slack_v)  
+    {
+        cout << "Using slack variable s" << endl;
+        vpMatrix I_s;
+        vpColVector tau_star(8), w_star(6) ;
+        I_s.eye(6);
+        for (int i = 0; i < 8; ++i)
+                tau_star[i] = tauMin;
+
+        w_star = W*tau_star;
+        cout << "wrench star" << w_star.t() << endl;
+        A.insert(W,0,0);
+        A.insert(I_s,0,8);
+        //cout << "A matrix"<<"  \n" << A <<endl;
+        b= w - w_star;
+        solve_qp::solveQP(Q, r, A, b, C, d, x, active);
+        for (int i = 0; i < 8; ++i)
+            x[i]+=tauMin;
+        for (int i = 8; i < 14; ++i)
+            cout << "slack variables" << x[i]<< ",";
+    }
+    // closed form
     else if( control == closed_form)
     {   
         // declaration 
@@ -332,6 +398,7 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
         W.kernel(kerW);
         // obtain the particular solution of tensions
         p=W.pseudoInverse() * w;
+        
         // lower and upper bound
         vpColVector A = -p, B = -p;
         for(int i=0;i<8;++i)
@@ -441,67 +508,97 @@ vpColVector TDA::ComputeDistribution(vpMatrix &W, vpColVector &w)
                 centroid /= 3*a;
             }
             x = p+ H*centroid;
+            cout << "the kernel "<< "  "<<(W*(H*centroid)).t()<<endl;
+             //cout << "the residual "<< "  "<<(W*x-w).t()<<endl;
             cout << "the barycenter" << "  "<< centroid.t() << endl;
         }
         else 
             cout << "there is no vertex existing"<< endl;
     }
-/*    else if (control == cgal)
-        {   
-            cout<< "using cgal"<< endl;
-             solve_qp::solveQP(Q, r, W, w, C, d, x, active);
-             // initialize the Q matrix
-            double H1[] = {1,0,0,0,0,0,0,0};
-            double H2[] = {0,1,0,0,0,0,0,0};    
-            double H3[] = {0,0,1,0,0,0,0,0} ;    
-            double H4[] = {0,0,0,1,0,0,0,0};
-            double H5[] = {0,0,0,0,1,0,0,0} ;    
-            double H6[] = {0,0,0,0,0,1,0,0} ; 
-            double H7[] = {0,0,0,0,0,0,1,0};
-            double H8[] = {0,0,0,0,0,0,0,1} ;    
-            double*  H[] = {H1, H2, H3, H4, H5, H6, H7, H8}; 
+    else if ( control == cvxgen)
+    {
+            cout<< "quadratic programming using CVXGEN "<<endl;
+            vpColVector tau_star(8), w_star(6) ;
+            int num_iters;
+            // slack variables algorithm
+            // Make this a diagonal PSD matrix, even though it's not diagonal. 
+            for (int i = 0; i < 8; ++i)
+                tau_star[i] = (tauMin+tauMax)/2;
+            cout << "torque " << tau_star.t() << endl;
+            w_star = W*tau_star;
+            for (int i = 0; i < 196; ++i)
+            {   
+                if (  i < 106)
+                {   // D matrix for tau solution
+                    if ( i%15 == 0)
+                        params.Q[i] = 1./(tauMax*tauMax);
+                    else
+                        params.Q[i] = 0.0; 
+                }
+                else 
+                {    // D matrix for slack variable
+                    if ( i%15 == 0)
+                        params.Q[i] = 1.0;
+                    else
+                        params.Q[i] = 0.0; 
+                }   
+            }
 
-            double A1[] = {W[0][0], W[1][0],W[2][0],W[3][0],W[4][0],W[5][0]};
-            double A2[] = {W[0][1], W[1][1],W[2][1],W[3][1],W[4][1],W[5][1]};
-            double A3[] = {W[0][2], W[1][2],W[2][2],W[3][2],W[4][2],W[5][2]};
-            double A4[] = {W[0][3], W[1][3],W[2][3],W[3][3],W[4][3],W[5][3]};
-            double A5[] = {W[0][4], W[1][4],W[2][4],W[3][4],W[4][4],W[5][4]};
-            double A6[] = {W[0][5], W[1][5],W[2][5],W[3][5],W[4][5],W[5][5]};
-            double A7[] = {W[0][6], W[1][6],W[2][6],W[3][6],W[4][6],W[5][6]};
-            double A8[] = {W[0][7], W[1][7],W[2][7],W[3][7],W[4][7],W[5][7]};
+            for (int i = 0; i < 14; ++i)
+                params.c[i]=0;
+            
+            int k=0;
+            // A matrix A=[ W I]  6x14  and b
+            for (int i = 0; i <6; ++i)
+            {   
+                for (int j = 0; j < 14; ++j)
+                {   
+                    if (j < 8)
+                        params.A[k]=W[i][j];
+                    else if ( (j - i) == 8)
+                        params.A[k] = 1.0;
+                    else 
+                        params.A[k] = 0.0;
+                    k++;
+                }
+                params.b[i] = w[i] - w_star[i];
+            }
+            // for the minimize tension
+                /*            for (int i = 0; i < 64; ++i)
+            {
+                if (i%9 == 0)
+                    params.Q[i] = 1.0;
+                else
+                    params.Q[i] = 0.0; 
 
-            double*  A[] = {A1, A2, A3, A4, A5, A6, A7, A8}; 
-            double   b[] = {w[0], w[1],w[2],w[3],w[4],w[5]}; 
-
-            bool fl[] = {true, true, true, true, true, true, true, true};
-            bool fu[] = {true, true, true, true, true, true, true, true}; 
-
-            CGAL::Const_oneset_iterator<CGAL::Comparison_result>  r(CGAL::EQUAL); 
-
-            double lb[] = {tauMin,tauMin,tauMin,tauMin,tauMin,tauMin,tauMin,tauMin};
-            double ub[] = {tauMax,tauMax,tauMax,tauMax,tauMax,tauMax,tauMax,tauMax};
-
-            double c[] = {0,0,0,0,0,0,0,0};
-            double  c0   = 0;  
-
-            // now construct the quadratic program; the first two parameters are
-             // the number of variables and the number of constraints (rows of A)
-             Program qp (8, 6, A, b, r, fl, lb, fu, ub, H, c, c0);
-             Solution SOL = CGAL::solve_quadratic_program(qp, ET());
-
-            Solution::Variable_value_iterator it = SOL.variable_values_begin();
-            Solution::Variable_value_iterator end = SOL.variable_values_end();
-
-             int index=0;
-             for (; it != end; ++it) 
-            {    
-                 x[index] = *it.to_double();
-                 index++;
-             }
-
-            //cout<< "the solution"<< x.t()<<endl;
-            cout<< "the return solution:\n"<<"  "<<SOL<<endl;
-        }*/
+            }
+            for (int i = 0; i < 8; ++i)
+                params.c[i]=0;
+            
+            int k=0;
+            // A matrix and b
+            for (int i = 0; i <6; ++i)
+            {   
+                for (int j = 0; j < 8; ++j)
+                {
+                    params.A[k]=W[i][j];
+                    k++;
+                }
+                params.b[i]=w[i];
+            }*/
+           set_defaults();
+           setup_indexing();
+           //#ifndef ZERO_LIBRARY_MODE
+             // Solve problem instance for the record. 
+           settings.verbose = 1;
+           num_iters = solve();
+           for (int i = 0; i < n; i++)
+             {
+                printf("  %9.4f\n", vars.x[i]);
+                tau[i]=vars.x[i]+(tauMin+tauMax)/2;
+            }
+            cout<<"difference"<< (W*tau-w).t()<<endl;
+    }
     else
         cout << "No appropriate TDA " << endl;
    cout << "check constraints :" << endl;
@@ -542,16 +639,17 @@ vpColVector TDA::ComputeDistributionG(vpMatrix &W, vpColVector &ve, vpColVector 
         b = w;
         solve_qp::solveQP(Q, r, A, b, C, d, x, active);
         cout<<"the difference:"<< "  "<<(A*x-b).t()<< endl;
-
+/*
         vpMatrix::saveMatrixYAML("/home/" + vpIoTools::getUserName() + "/Results/matrices/Q_matrix", Q);
         vpMatrix::saveMatrixYAML("/home/" + vpIoTools::getUserName() + "/Results/matrices/A_matrix", A);
         vpMatrix::saveMatrixYAML("/home/" + vpIoTools::getUserName() + "/Results/matrices/r_matrix", r);
         vpMatrix::saveMatrixYAML("/home/" + vpIoTools::getUserName() + "/Results/matrices/b_matrix", b);
-        vpMatrix::saveMatrixYAML("/home/" + vpIoTools::getUserName() + "/Results/matrices/d_matrix", d);
+        vpMatrix::saveMatrixYAML("/home/" + vpIoTools::getUserName() + "/Results/matrices/d_matrix", d);*/
+
         //cout<<"the rank of A:"<< "  "<<rank_A<< endl;
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
          // compute the kernel of matrix W
-        W.kernel(kerW);
+/*        W.kernel(kerW);
         // obtain the particular solution of tensions
         p=W.pseudoInverse() * w;
         // lower and upper bound
@@ -573,7 +671,23 @@ vpColVector TDA::ComputeDistributionG(vpMatrix &W, vpColVector &ve, vpColVector 
             msg.data[4*i+2] = A[i];
             msg.data[4*i+3] = B[i];
         }
-        bary_pub.publish(msg);
+        bary_pub.publish(msg);*/
+        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/*        std_msgs::Float32MultiArray msg;
+        msg.data.resize(54);
+        for(int i=0; i<6 ;++i)
+        {
+            msg.data[9*i] = W[i][0];
+            msg.data[9*i+1] = W[i][1];
+            msg.data[9*i+2] = W[i][2];
+            msg.data[9*i+3] = W[i][3];
+            msg.data[9*i+4] = W[i][4];
+            msg.data[9*i+5] = W[i][5];
+            msg.data[9*i+6] = W[i][6];
+            msg.data[9*i+7] = W[i][7];
+            msg.data[9*i+8] = w[i];
+        }
+        bary_pub.publish(msg);*/
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         //     cout << "checking W.tau - a.w: " << (W*tau - alpha[0]*w).t() << endl;
@@ -584,3 +698,4 @@ vpColVector TDA::ComputeDistributionG(vpMatrix &W, vpColVector &ve, vpColVector 
     update_d = dTau_max;
     return tau;
 }
+

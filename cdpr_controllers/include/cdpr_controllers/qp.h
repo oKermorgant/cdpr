@@ -131,9 +131,11 @@ void solveQP ( const vpMatrix &_Q, const vpColVector _r, vpMatrix _A, vpColVecto
           //  cout << "P" << endl << P << endl;
             x += P*(_Q*P).pseudoInverse() * (_r - _Q*x);
 
+            //cout << "QP matrix:"<<"  \n"<<(_Q*P)<<endl;
+/*
              vpColVector cons_out = _A * x - _b;
              cout<< "the P in QP:"<<"    \n"<< P.t() << endl;
-             cout<< "the difference in QP:"<<"    "<< cons_out.t() << endl;
+             cout<< "the difference in QP:"<<"    "<< cons_out.t() << endl;*/
 
 
             // check for infeasible program

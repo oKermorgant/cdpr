@@ -72,8 +72,10 @@ int main(int argc, char ** argv)
         control = TDA::Barycenter;
     else if(control_type == "minG")
         control = TDA::minG;
-    else if(control_type == "cgal")
-        control = TDA::cgal;
+    else if(control_type == "slack_v")
+        control = TDA::slack_v;
+    else if(control_type == "cvxgen")
+        control = TDA::cvxgen;
     
     // get space type
     std::string space_type="Cartesian_space";
@@ -81,7 +83,7 @@ int main(int argc, char ** argv)
          nh_priv.getParam("s_type", space_type);
     
     // initialization of parameters in CTC 
-    vpMatrix W(6, n), Wd(6,n), J(n,6), RR(6,6), RR_d(6,6),  M_inertia(6,6), Kp(6,6), Kd(6,6);
+    vpMatrix W(6, n), Wd(6,n), J(n,6), R_R(6,6), RR_d(6,6),  M_inertia(6,6), Kp(6,6), Kd(6,6), omega(3,3),c(3,3),Co(6,6);
     vpColVector g(6), tau(n), err(6),  w(6), tau0(n), tau_diff(n), pd(6),residual(6);
     vpColVector L(n), Ld(n), Le(n),  Le_d(n);
     g[2] = - robot.mass() * 9.81;
@@ -102,8 +104,8 @@ int main(int argc, char ** argv)
      {  
         for (int i = 0; i < 3; ++i)
                 {
-                    Kp[i][i] = 16; Kd[i][i] = 8;
-                    Kp[i+3][i+3]= 16; Kd[i+3][i+3]= 8;
+                    Kp[i][i] = 0; Kd[i][i] = 0;
+                    Kp[i+3][i+3]= 0; Kd[i+3][i+3]= 0;
                 }
     }
     else if ( space_type == "Joint_space")
@@ -208,9 +210,9 @@ int main(int argc, char ** argv)
             //cout << "Position error in platform frame: " << err.t() << fixed << endl;
             for(unsigned int i=0;i<3;++i)
                 for(unsigned int j=0;j<3;++j)
-                    RR[i][j] = RR[i+3][j+3] = R[i][j];
+                    R_R[i][j] = R_R[i+3][j+3] = R[i][j];
             // transform to reference frame
-            err=RR*err;
+            err=R_R*err;
             rxyz= -1*rxyz;
             err.insert(3, rxyz);
             cout << " Pose error:" <<"  "<<err.t() << endl;
@@ -226,11 +228,20 @@ int main(int argc, char ** argv)
 
              // transform the inertia matrix to reference frame
              M_inertia.insert((R*robot.inertia()*R.t()),3,3);
-             cout << " Inertia matrix: " << "  \n"<<R*robot.inertia()*R.t()<< endl;
+             cout << " Inertia matrix: " << "  \n"<<M_inertia<< endl;
              // build W matrix depending on current attach points
              robot.computeW(W);
-             W=RR*W;
+             W=R_R*W;
 
+             //construct the skew matrix
+             omega[1][0]= v[5];omega[0][1]=-v[5];
+             omega[2][0]=-v[4];omega[0][2]=v[4];
+             omega[2][1]= v[3];omega[1][2]=-v[3];
+             // Coriolis vector
+             c = omega*(R*robot.inertia()*R.t());
+             Co.insert( c ,3,3);
+
+             cout << " the Coriolis part:" <<"  "<<(Co*v).t()<< endl;
              if ( space_type == "Cartesian_space")
              {             
                 // compute the velocity error
@@ -239,10 +250,16 @@ int main(int argc, char ** argv)
                  filterP.Filter(err);
 
                  if ( control_type == "minG") 
-                        w = M_inertia*a_d-g;            
+                        w = M_inertia*a_d + Co*v - g;            
                 else
                     // establish the external wrench 
-                    w = M_inertia*(a_d+Kp*err+Kd*v_e)-g;  
+                    w = M_inertia*(a_d+Kp*err+Kd*v_e) - g + Co*v;  
+
+
+                cout << "external accleration:" << "   "<< (M_inertia*a_d).t() << endl;
+                cout << "external position:" << "   "<< (Kp*M_inertia*err).t() << endl;
+                cout << "external velocity:" << "   "<< (Kd*M_inertia*v_e).t() << endl;
+                cout << "external wrench:" << "   "<< w.t() << endl;
                 cout << "controller in task space" << endl;              
              }
             else if ( space_type == "Joint_space")
@@ -294,15 +311,18 @@ int main(int argc, char ** argv)
 
              // compute the tension difference
              tau_diff= tau-tau0;
+/*
+            for (int i = 0; i < 8; ++i)
+                tau[i]=300;*/
 
             // send tensions
             robot.sendTensions(tau);
 
-            if(control_type == "minA")
+/*            if(control_type == "minA")
                 {
                     tda.GetAlpha(alpha[0]);
                     cout << "coefficient number:" << "  " <<alpha << endl;
-                }
+                }*/
             if(control_type == "Barycenter")
                     tda.GetVertices(ver[0]);
             if(control_type == "minG")
@@ -321,6 +341,8 @@ int main(int argc, char ** argv)
             // computation time
             comp_time[0] = elapsed_seconds.count();
             residual = W*tau - w;
+            
+            cout << "the residual "<< "  "<<residual.t()<<endl;
             logger.update();
         }
 

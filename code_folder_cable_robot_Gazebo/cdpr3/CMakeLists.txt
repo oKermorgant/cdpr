@@ -43,7 +43,7 @@ find_library(GMP_LIBRARY gmp /usr/lib)
 ## catkin specific configuration ##
 ###################################
 catkin_package(
-INCLUDE_DIRS include ${VISP_INCLUDE_DIRS}${qpOASES_INCLUDE_DIRS} ${CGAL_INCLUDE_DIRS} ${GMP_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}
+INCLUDE_DIRS include ${VISP_INCLUDE_DIRS} ${qpOASES_INCLUDE_DIRS} ${CGAL_INCLUDE_DIRS} ${GMP_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}
 LIBRARIES ${PROJECT_NAME} ${VISP_LIBRARIES} ${GAZEBO_LIBRARIES} cdpr3 qpOASES ${CGAL_LIBRARIES} ${GMP_LIBRARIES} ${EIGEN3_LIBRARIES}
 CATKIN_DEPENDS roscpp roslib gazebo_ros sensor_msgs geometry_msgs qpOASES 
  DEPENDS cgal gmp

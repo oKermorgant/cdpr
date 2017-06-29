@@ -73,7 +73,7 @@ int main(int argc, char ** argv)
 
     vpColVector g(6), err, err_i(6), err0(6), v(6), d_err(6), w(6);
     g[2] = - robot.mass() * 9.81;
-    vpMatrix RR(6,6), W(6,n);
+    vpMatrix R_R(6,6), W(6,n);
 
     double dt = 0.01;
     ros::Rate loop(1/dt);
@@ -138,10 +138,10 @@ int main(int argc, char ** argv)
         //    cout << "Position error in platform frame: " << err.t() << fixed << endl;
             for(unsigned int i=0;i<3;++i)
                 for(unsigned int j=0;j<3;++j)
-                    RR[i][j] = RR[i+3][j+3] = R[i][j];
+                    R_R[i][j] = R_R[i+3][j+3] = R[i][j];
 
             // position error in fixed frame
-            err = RR * err;
+            err = R_R * err;
           //  cout << "Position error in world frame: " << err.t() << fixed << endl;
             //robot.sendError(err);
             // I term to wrench in fixed frame
@@ -165,7 +165,7 @@ int main(int argc, char ** argv)
 
        //     cout << "Desired wrench in fixed frame: " << w.t() << fixed << endl;
             // remove gravity + to platform frame
-            w = RR.t()*(w-g);
+            w = R_R.t()*(w-g);
         //   cout << "Desired wrench in platform frame: " << w.t() << fixed << endl;
 
             // build W matrix depending on current attach points
