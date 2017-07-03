@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2017-06-27 09:46:58 -0400.  */
+/* Produced by CVXGEN, 2017-07-03 11:35:08 -0400.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -45,10 +45,6 @@ int main(int argc, char **argv) {
   }
 #endif
 #endif
-	int i;
-    for ( i = 0; i < 14; i++)
-  printf("  %9.4f\n", vars.x[i]);
-  printf("  %d\n", num_iters);
   return 0;
 }
 void load_default_data(void) {

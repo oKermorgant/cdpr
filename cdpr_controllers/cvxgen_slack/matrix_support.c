@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2017-06-27 09:46:58 -0400.  */
+/* Produced by CVXGEN, 2017-07-03 04:28:34 -0400.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -100,22 +100,22 @@ void fillq(void) {
   work.q[13] = params.c[13];
 }
 void fillh(void) {
-  work.h[0] = -50;
-  work.h[1] = -50;
-  work.h[2] = -50;
-  work.h[3] = -50;
-  work.h[4] = -50;
-  work.h[5] = -50;
-  work.h[6] = -50;
-  work.h[7] = -50;
-  work.h[8] = 10000;
-  work.h[9] = 10000;
-  work.h[10] = 10000;
-  work.h[11] = 10000;
-  work.h[12] = 10000;
-  work.h[13] = 10000;
-  work.h[14] = 10000;
-  work.h[15] = 10000;
+  work.h[0] = 4975;
+  work.h[1] = 4975;
+  work.h[2] = 4975;
+  work.h[3] = 4975;
+  work.h[4] = 4975;
+  work.h[5] = 4975;
+  work.h[6] = 4975;
+  work.h[7] = 4975;
+  work.h[8] = 4975;
+  work.h[9] = 4975;
+  work.h[10] = 4975;
+  work.h[11] = 4975;
+  work.h[12] = 4975;
+  work.h[13] = 4975;
+  work.h[14] = 4975;
+  work.h[15] = 4975;
 }
 void fillb(void) {
   work.b[0] = params.b[0];

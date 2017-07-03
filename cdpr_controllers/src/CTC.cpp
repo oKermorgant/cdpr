@@ -74,8 +74,12 @@ int main(int argc, char ** argv)
         control = TDA::minG;
     else if(control_type == "slack_v")
         control = TDA::slack_v;
-    else if(control_type == "cvxgen")
-        control = TDA::cvxgen;
+    else if(control_type == "cvxgen_slack")
+        control = TDA::cvxgen_slack;
+    else if(control_type == "cvxgen_minT")
+        control = TDA::cvxgen_minT;
+    else if(control_type == "cvxgen_multiplier")
+        control = TDA::cvxgen_multiplier;
     
     // get space type
     std::string space_type="Cartesian_space";
@@ -104,8 +108,8 @@ int main(int argc, char ** argv)
      {  
         for (int i = 0; i < 3; ++i)
                 {
-                    Kp[i][i] = 0; Kd[i][i] = 0;
-                    Kp[i+3][i+3]= 0; Kd[i+3][i+3]= 0;
+                    Kp[i][i] = 16; Kd[i][i] = 8;
+                    Kp[i+3][i+3]= 16; Kd[i+3][i+3]= 8;
                 }
     }
     else if ( space_type == "Joint_space")
@@ -228,7 +232,7 @@ int main(int argc, char ** argv)
 
              // transform the inertia matrix to reference frame
              M_inertia.insert((R*robot.inertia()*R.t()),3,3);
-             cout << " Inertia matrix: " << "  \n"<<M_inertia<< endl;
+
              // build W matrix depending on current attach points
              robot.computeW(W);
              W=R_R*W;
@@ -311,18 +315,17 @@ int main(int argc, char ** argv)
 
              // compute the tension difference
              tau_diff= tau-tau0;
-/*
-            for (int i = 0; i < 8; ++i)
-                tau[i]=300;*/
 
             // send tensions
             robot.sendTensions(tau);
 
-/*            if(control_type == "minA")
-                {
-                    tda.GetAlpha(alpha[0]);
-                    cout << "coefficient number:" << "  " <<alpha << endl;
-                }*/
+            /*            
+            if(control_type == "minA")
+            {
+                tda.GetAlpha(alpha[0]);
+                cout << "coefficient number:" << "  " <<alpha << endl;
+            }
+            */
             if(control_type == "Barycenter")
                     tda.GetVertices(ver[0]);
             if(control_type == "minG")

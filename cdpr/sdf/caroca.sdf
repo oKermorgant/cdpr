@@ -295,7 +295,7 @@
     <!--Definition of the robot cables-->
     <!--Definition of the robot platform-->
     <link name="platform">
-      <pose>0.000000 0.000000 0.200000 0.000000 0.000000 0.000000</pose>
+      <pose>0.900000 0.900000 0.200000 0.000000 0.000000 0.000000</pose>
       <visual name="visualpf">
         <geometry>
           <box>
@@ -329,7 +329,7 @@
       </inertial>
     </link>
     <link name="cable0">
-      <pose>-2.584747 -1.620505 2.718686 -2.689439 0.811545 -2.158486</pose>
+      <pose>-1.809183 -1.120775 2.316428 -2.502679 0.853663 -1.883915</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
@@ -368,14 +368,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-3.500000 -2.000000 3.500000 -2.689439 0.811545 -2.158486</pose>
+      <pose>-3.500000 -2.000000 3.500000 -2.502679 0.853663 -1.883915</pose>
     </link>
     <joint name="rev_X0" type="revolute">
-      <pose>0 0 0 -2.689439 0.811545 -2.158486</pose>
+      <pose>0 0 0 -2.502679 0.853663 -1.883915</pose>
       <parent>frame</parent>
       <child>virt_X0</child>
       <axis>
-        <xyz>-0.381665 -0.572885 -0.725351</xyz>
+        <xyz>-0.202444 -0.625271 -0.753693</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -397,14 +397,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-3.500000 -2.000000 3.500000 -2.689439 0.811545 -2.158486</pose>
+      <pose>-3.500000 -2.000000 3.500000 -2.502679 0.853663 -1.883915</pose>
     </link>
     <joint name="rev_Y0" type="revolute">
-      <pose>0 0 0 -2.689439 0.811545 -2.158486</pose>
+      <pose>0 0 0 -2.502679 0.853663 -1.883915</pose>
       <parent>virt_X0</parent>
       <child>virt_Y0</child>
       <axis>
-        <xyz>-0.572885 0.762462 -0.300755</xyz>
+        <xyz>-0.625271 0.674859 -0.391920</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -415,11 +415,11 @@
       </axis>
     </joint>
     <joint name="cable0" type="prismatic">
-      <pose>0 0 -0.980130 -2.689439 0.811545 -2.158486</pose>
+      <pose>0 0 -1.484749 -2.502679 0.853663 -1.883915</pose>
       <parent>virt_Y0</parent>
       <child>cable0</child>
       <axis>
-        <xyz>-0.725351 -0.300755 0.619202</xyz>
+        <xyz>-0.753693 -0.391920 0.527585</xyz>
         <limit>
           <lower>-4.390626379</lower>
           <upper>4.390626379</upper>
@@ -443,10 +443,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>0.600000 -0.300000 0.000000 -2.689439 0.811545 -2.158486</pose>
+      <pose>1.500000 0.600000 0.000000 -2.502679 0.853663 -1.883915</pose>
     </link>
     <joint name="rev_Xpf0" type="revolute">
-      <pose>0 0 0 -2.689439 0.811545 -2.158486</pose>
+      <pose>0 0 0 -2.502679 0.853663 -1.883915</pose>
       <parent>platform</parent>
       <child>virt_Xpf0</child>
       <axis>
@@ -472,10 +472,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>0.600000 -0.300000 0.000000 -2.689439 0.811545 -2.158486</pose>
+      <pose>1.500000 0.600000 0.000000 -2.502679 0.853663 -1.883915</pose>
     </link>
     <joint name="rev_Ypf0" type="revolute">
-      <pose>0 0 0 -2.689439 0.811545 -2.158486</pose>
+      <pose>0 0 0 -2.502679 0.853663 -1.883915</pose>
       <parent>virt_Xpf0</parent>
       <child>virt_Ypf0</child>
       <axis>
@@ -490,7 +490,7 @@
       </axis>
     </joint>
     <joint name="rev_Zpf0" type="revolute">
-      <pose>0 0 0 -2.689439 0.811545 -2.158486</pose>
+      <pose>0 0 0 -2.502679 0.853663 -1.883915</pose>
       <child>virt_Ypf0</child>
       <parent>cable0</parent>
       <axis>
@@ -505,7 +505,7 @@
       </axis>
     </joint>
     <link name="cable1">
-      <pose>-3.237262 -1.791622 3.219143 -2.503273 0.644323 -1.580831</pose>
+      <pose>-2.549222 -1.199345 2.724366 -2.340323 0.706181 -1.432126</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
@@ -544,14 +544,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-3.500000 -2.000000 3.500000 -2.503273 0.644323 -1.580831</pose>
+      <pose>-3.500000 -2.000000 3.500000 -2.340323 0.706181 -1.432126</pose>
     </link>
     <joint name="rev_X1" type="revolute">
-      <pose>0 0 0 -2.503273 0.644323 -1.580831</pose>
+      <pose>0 0 0 -2.340323 0.706181 -1.432126</pose>
       <parent>frame</parent>
       <child>virt_X1</child>
       <axis>
-        <xyz>-0.008023 -0.799466 -0.600657</xyz>
+        <xyz>0.105169 -0.753542 -0.648933</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -573,14 +573,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-3.500000 -2.000000 3.500000 -2.503273 0.644323 -1.580831</pose>
+      <pose>-3.500000 -2.000000 3.500000 -2.340323 0.706181 -1.432126</pose>
     </link>
     <joint name="rev_Y1" type="revolute">
-      <pose>0 0 0 -2.503273 0.644323 -1.580831</pose>
+      <pose>0 0 0 -2.340323 0.706181 -1.432126</pose>
       <parent>virt_X1</parent>
       <child>virt_Y1</child>
       <axis>
-        <xyz>-0.799466 0.365941 -0.476383</xyz>
+        <xyz>-0.753542 0.365438 -0.546470</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -591,11 +591,11 @@
       </axis>
     </joint>
     <joint name="cable1" type="prismatic">
-      <pose>0 0 -0.397787 -2.503273 0.644323 -1.580831</pose>
+      <pose>0 0 -1.098555 -2.340323 0.706181 -1.432126</pose>
       <parent>virt_Y1</parent>
       <child>cable1</child>
       <axis>
-        <xyz>-0.600657 -0.476383 0.642082</xyz>
+        <xyz>-0.648933 -0.546470 0.529393</xyz>
         <limit>
           <lower>-4.390626379</lower>
           <upper>4.390626379</upper>
@@ -619,10 +619,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-0.600000 0.300000 0.400000 -2.503273 0.644323 -1.580831</pose>
+      <pose>0.300000 1.200000 0.400000 -2.340323 0.706181 -1.432126</pose>
     </link>
     <joint name="rev_Xpf1" type="revolute">
-      <pose>0 0 0 -2.503273 0.644323 -1.580831</pose>
+      <pose>0 0 0 -2.340323 0.706181 -1.432126</pose>
       <parent>platform</parent>
       <child>virt_Xpf1</child>
       <axis>
@@ -648,10 +648,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-0.600000 0.300000 0.400000 -2.503273 0.644323 -1.580831</pose>
+      <pose>0.300000 1.200000 0.400000 -2.340323 0.706181 -1.432126</pose>
     </link>
     <joint name="rev_Ypf1" type="revolute">
-      <pose>0 0 0 -2.503273 0.644323 -1.580831</pose>
+      <pose>0 0 0 -2.340323 0.706181 -1.432126</pose>
       <parent>virt_Xpf1</parent>
       <child>virt_Ypf1</child>
       <axis>
@@ -666,7 +666,7 @@
       </axis>
     </joint>
     <joint name="rev_Zpf1" type="revolute">
-      <pose>0 0 0 -2.503273 0.644323 -1.580831</pose>
+      <pose>0 0 0 -2.340323 0.706181 -1.432126</pose>
       <child>virt_Ypf1</child>
       <parent>cable1</parent>
       <axis>
@@ -681,7 +681,7 @@
       </axis>
     </joint>
     <link name="cable2">
-      <pose>2.725083 -1.678693 2.914087 -2.639989 -0.859190 2.121803</pose>
+      <pose>3.023667 -1.612980 3.038552 -2.443690 -0.669172 1.525312</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
@@ -720,14 +720,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>3.500000 -2.000000 3.500000 -2.639989 -0.859190 2.121803</pose>
+      <pose>3.500000 -2.000000 3.500000 -2.443690 -0.669172 1.525312</pose>
     </link>
     <joint name="rev_X2" type="revolute">
-      <pose>0 0 0 -2.639989 -0.859190 2.121803</pose>
+      <pose>0 0 0 -2.443690 -0.669172 1.525312</pose>
       <parent>frame</parent>
       <child>virt_X2</child>
       <axis>
-        <xyz>-0.341902 0.556398 0.757314</xyz>
+        <xyz>0.035662 0.783524 0.620337</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -749,14 +749,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>3.500000 -2.000000 3.500000 -2.639989 -0.859190 2.121803</pose>
+      <pose>3.500000 -2.000000 3.500000 -2.443690 -0.669172 1.525312</pose>
     </link>
     <joint name="rev_Y2" type="revolute">
-      <pose>0 0 0 -2.639989 -0.859190 2.121803</pose>
+      <pose>0 0 0 -2.443690 -0.669172 1.525312</pose>
       <parent>virt_X2</parent>
       <child>virt_Y2</child>
       <axis>
-        <xyz>0.556398 0.769298 -0.314008</xyz>
+        <xyz>0.783524 0.363386 -0.504024</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -767,11 +767,11 @@
       </axis>
     </joint>
     <joint name="cable2" type="prismatic">
-      <pose>0 0 -0.829847 -2.639989 -0.859190 2.121803</pose>
+      <pose>0 0 -0.653562 -2.443690 -0.669172 1.525312</pose>
       <parent>virt_Y2</parent>
       <child>cable2</child>
       <axis>
-        <xyz>0.757314 -0.314008 0.572603</xyz>
+        <xyz>0.620337 -0.504024 0.600951</xyz>
         <limit>
           <lower>-4.390626379</lower>
           <upper>4.390626379</upper>
@@ -795,10 +795,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-0.600000 -0.300000 0.400000 -2.639989 -0.859190 2.121803</pose>
+      <pose>0.300000 0.600000 0.400000 -2.443690 -0.669172 1.525312</pose>
     </link>
     <joint name="rev_Xpf2" type="revolute">
-      <pose>0 0 0 -2.639989 -0.859190 2.121803</pose>
+      <pose>0 0 0 -2.443690 -0.669172 1.525312</pose>
       <parent>platform</parent>
       <child>virt_Xpf2</child>
       <axis>
@@ -824,10 +824,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-0.600000 -0.300000 0.400000 -2.639989 -0.859190 2.121803</pose>
+      <pose>0.300000 0.600000 0.400000 -2.443690 -0.669172 1.525312</pose>
     </link>
     <joint name="rev_Ypf2" type="revolute">
-      <pose>0 0 0 -2.639989 -0.859190 2.121803</pose>
+      <pose>0 0 0 -2.443690 -0.669172 1.525312</pose>
       <parent>virt_Xpf2</parent>
       <child>virt_Ypf2</child>
       <axis>
@@ -842,7 +842,7 @@
       </axis>
     </joint>
     <joint name="rev_Zpf2" type="revolute">
-      <pose>0 0 0 -2.639989 -0.859190 2.121803</pose>
+      <pose>0 0 0 -2.443690 -0.669172 1.525312</pose>
       <child>virt_Ypf2</child>
       <parent>cable2</parent>
       <axis>
@@ -857,7 +857,7 @@
       </axis>
     </joint>
     <link name="cable3">
-      <pose>3.099515 -1.682374 3.016656 -2.560212 -0.605635 1.614157</pose>
+      <pose>3.206143 -1.529829 2.985751 -2.400941 -0.399098 0.960485</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
@@ -896,14 +896,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>3.500000 -2.000000 3.500000 -2.560212 -0.605635 1.614157</pose>
+      <pose>3.500000 -2.000000 3.500000 -2.400941 -0.399098 0.960485</pose>
     </link>
     <joint name="rev_X3" type="revolute">
-      <pose>0 0 0 -2.560212 -0.605635 1.614157</pose>
+      <pose>0 0 0 -2.400941 -0.399098 0.960485</pose>
       <parent>frame</parent>
       <child>virt_X3</child>
       <axis>
-        <xyz>-0.035638 0.821368 0.569284</xyz>
+        <xyz>0.528082 0.755069 0.388588</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -925,14 +925,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>3.500000 -2.000000 3.500000 -2.560212 -0.605635 1.614157</pose>
+      <pose>3.500000 -2.000000 3.500000 -2.400941 -0.399098 0.960485</pose>
     </link>
     <joint name="rev_Y3" type="revolute">
-      <pose>0 0 0 -2.560212 -0.605635 1.614157</pose>
+      <pose>0 0 0 -2.400941 -0.399098 0.960485</pose>
       <parent>virt_X3</parent>
       <child>virt_Y3</child>
       <axis>
-        <xyz>0.821368 0.348570 -0.451501</xyz>
+        <xyz>0.755069 -0.208110 -0.621740</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -943,11 +943,11 @@
       </axis>
     </joint>
     <joint name="cable3" type="prismatic">
-      <pose>0 0 -0.606337 -2.560212 -0.605635 1.614157</pose>
+      <pose>0 0 -0.645108 -2.400941 -0.399098 0.960485</pose>
       <parent>virt_Y3</parent>
       <child>cable3</child>
       <axis>
-        <xyz>0.569284 -0.451501 0.687067</xyz>
+        <xyz>0.388588 -0.621740 0.680028</xyz>
         <limit>
           <lower>-4.390626379</lower>
           <upper>4.390626379</upper>
@@ -971,10 +971,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>0.600000 0.300000 0.000000 -2.560212 -0.605635 1.614157</pose>
+      <pose>1.500000 1.200000 0.000000 -2.400941 -0.399098 0.960485</pose>
     </link>
     <joint name="rev_Xpf3" type="revolute">
-      <pose>0 0 0 -2.560212 -0.605635 1.614157</pose>
+      <pose>0 0 0 -2.400941 -0.399098 0.960485</pose>
       <parent>platform</parent>
       <child>virt_Xpf3</child>
       <axis>
@@ -1000,10 +1000,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>0.600000 0.300000 0.000000 -2.560212 -0.605635 1.614157</pose>
+      <pose>1.500000 1.200000 0.000000 -2.400941 -0.399098 0.960485</pose>
     </link>
     <joint name="rev_Ypf3" type="revolute">
-      <pose>0 0 0 -2.560212 -0.605635 1.614157</pose>
+      <pose>0 0 0 -2.400941 -0.399098 0.960485</pose>
       <parent>virt_Xpf3</parent>
       <child>virt_Ypf3</child>
       <axis>
@@ -1018,7 +1018,7 @@
       </axis>
     </joint>
     <joint name="rev_Zpf3" type="revolute">
-      <pose>0 0 0 -2.560212 -0.605635 1.614157</pose>
+      <pose>0 0 0 -2.400941 -0.399098 0.960485</pose>
       <child>virt_Ypf3</child>
       <parent>cable3</parent>
       <axis>
@@ -1033,7 +1033,7 @@
       </axis>
     </joint>
     <link name="cable4">
-      <pose>-3.099515 1.682374 3.016656 2.560212 0.605635 1.614157</pose>
+      <pose>-2.817079 1.748397 2.870994 2.761086 0.789412 2.275508</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
@@ -1072,14 +1072,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-3.500000 2.000000 3.500000 2.560212 0.605635 1.614157</pose>
+      <pose>-3.500000 2.000000 3.500000 2.761086 0.789412 2.275508</pose>
     </link>
     <joint name="rev_X4" type="revolute">
-      <pose>0 0 0 2.560212 0.605635 1.614157</pose>
+      <pose>0 0 0 2.761086 0.789412 2.275508</pose>
       <parent>frame</parent>
       <child>virt_X4</child>
       <axis>
-        <xyz>-0.035638 0.821368 -0.569284</xyz>
+        <xyz>-0.456231 0.536506 -0.709939</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -1101,14 +1101,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-3.500000 2.000000 3.500000 2.560212 0.605635 1.614157</pose>
+      <pose>-3.500000 2.000000 3.500000 2.761086 0.789412 2.275508</pose>
     </link>
     <joint name="rev_Y4" type="revolute">
-      <pose>0 0 0 2.560212 0.605635 1.614157</pose>
+      <pose>0 0 0 2.761086 0.789412 2.275508</pose>
       <parent>virt_X4</parent>
       <child>virt_Y4</child>
       <axis>
-        <xyz>0.821368 0.348570 0.451501</xyz>
+        <xyz>0.536506 0.802340 0.261557</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -1119,11 +1119,11 @@
       </axis>
     </joint>
     <joint name="cable4" type="prismatic">
-      <pose>0 0 -0.606337 2.560212 0.605635 1.614157</pose>
+      <pose>0 0 -0.789066 2.761086 0.789412 2.275508</pose>
       <parent>virt_Y4</parent>
       <child>cable4</child>
       <axis>
-        <xyz>-0.569284 0.451501 0.687067</xyz>
+        <xyz>-0.709939 0.261557 0.653892</xyz>
         <limit>
           <lower>-4.390626379</lower>
           <upper>4.390626379</upper>
@@ -1147,10 +1147,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-0.600000 -0.300000 0.000000 2.560212 0.605635 1.614157</pose>
+      <pose>0.300000 0.600000 0.000000 2.761086 0.789412 2.275508</pose>
     </link>
     <joint name="rev_Xpf4" type="revolute">
-      <pose>0 0 0 2.560212 0.605635 1.614157</pose>
+      <pose>0 0 0 2.761086 0.789412 2.275508</pose>
       <parent>platform</parent>
       <child>virt_Xpf4</child>
       <axis>
@@ -1176,10 +1176,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-0.600000 -0.300000 0.000000 2.560212 0.605635 1.614157</pose>
+      <pose>0.300000 0.600000 0.000000 2.761086 0.789412 2.275508</pose>
     </link>
     <joint name="rev_Ypf4" type="revolute">
-      <pose>0 0 0 2.560212 0.605635 1.614157</pose>
+      <pose>0 0 0 2.761086 0.789412 2.275508</pose>
       <parent>virt_Xpf4</parent>
       <child>virt_Ypf4</child>
       <axis>
@@ -1194,7 +1194,7 @@
       </axis>
     </joint>
     <joint name="rev_Zpf4" type="revolute">
-      <pose>0 0 0 2.560212 0.605635 1.614157</pose>
+      <pose>0 0 0 2.761086 0.789412 2.275508</pose>
       <child>virt_Ypf4</child>
       <parent>cable4</parent>
       <axis>
@@ -1209,7 +1209,7 @@
       </axis>
     </joint>
     <link name="cable5">
-      <pose>-2.725083 1.678693 2.914087 2.639989 0.859190 2.121803</pose>
+      <pose>-2.197574 1.791612 2.692496 2.889038 1.001262 2.685588</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
@@ -1248,14 +1248,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-3.500000 2.000000 3.500000 2.639989 0.859190 2.121803</pose>
+      <pose>-3.500000 2.000000 3.500000 2.889038 1.001262 2.685588</pose>
     </link>
     <joint name="rev_X5" type="revolute">
-      <pose>0 0 0 2.639989 0.859190 2.121803</pose>
+      <pose>0 0 0 2.889038 1.001262 2.685588</pose>
       <parent>frame</parent>
       <child>virt_X5</child>
       <axis>
-        <xyz>-0.341902 0.556398 -0.757314</xyz>
+        <xyz>-0.484140 0.237462 -0.842152</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -1277,14 +1277,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-3.500000 2.000000 3.500000 2.639989 0.859190 2.121803</pose>
+      <pose>-3.500000 2.000000 3.500000 2.889038 1.001262 2.685588</pose>
     </link>
     <joint name="rev_Y5" type="revolute">
-      <pose>0 0 0 2.639989 0.859190 2.121803</pose>
+      <pose>0 0 0 2.889038 1.001262 2.685588</pose>
       <parent>virt_X5</parent>
       <child>virt_Y5</child>
       <axis>
-        <xyz>0.556398 0.769298 0.314008</xyz>
+        <xyz>0.237462 0.962006 0.134744</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -1295,11 +1295,11 @@
       </axis>
     </joint>
     <joint name="cable5" type="prismatic">
-      <pose>0 0 -0.829847 2.639989 0.859190 2.121803</pose>
+      <pose>0 0 -1.143693 2.889038 1.001262 2.685588</pose>
       <parent>virt_Y5</parent>
       <child>cable5</child>
       <axis>
-        <xyz>-0.757314 0.314008 0.572603</xyz>
+        <xyz>-0.842152 0.134744 0.522134</xyz>
         <limit>
           <lower>-4.390626379</lower>
           <upper>4.390626379</upper>
@@ -1323,10 +1323,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>0.600000 0.300000 0.400000 2.639989 0.859190 2.121803</pose>
+      <pose>1.500000 1.200000 0.400000 2.889038 1.001262 2.685588</pose>
     </link>
     <joint name="rev_Xpf5" type="revolute">
-      <pose>0 0 0 2.639989 0.859190 2.121803</pose>
+      <pose>0 0 0 2.889038 1.001262 2.685588</pose>
       <parent>platform</parent>
       <child>virt_Xpf5</child>
       <axis>
@@ -1352,10 +1352,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>0.600000 0.300000 0.400000 2.639989 0.859190 2.121803</pose>
+      <pose>1.500000 1.200000 0.400000 2.889038 1.001262 2.685588</pose>
     </link>
     <joint name="rev_Ypf5" type="revolute">
-      <pose>0 0 0 2.639989 0.859190 2.121803</pose>
+      <pose>0 0 0 2.889038 1.001262 2.685588</pose>
       <parent>virt_Xpf5</parent>
       <child>virt_Ypf5</child>
       <axis>
@@ -1370,7 +1370,7 @@
       </axis>
     </joint>
     <joint name="rev_Zpf5" type="revolute">
-      <pose>0 0 0 2.639989 0.859190 2.121803</pose>
+      <pose>0 0 0 2.889038 1.001262 2.685588</pose>
       <child>virt_Ypf5</child>
       <parent>cable5</parent>
       <axis>
@@ -1385,7 +1385,7 @@
       </axis>
     </joint>
     <link name="cable6">
-      <pose>3.237262 1.791622 3.219143 2.503273 -0.644323 -1.580831</pose>
+      <pose>3.725421 2.157795 3.849402 2.717398 -0.531535 -1.803043</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
@@ -1424,14 +1424,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>3.500000 2.000000 3.500000 2.503273 -0.644323 -1.580831</pose>
+      <pose>3.500000 2.000000 3.500000 2.717398 -0.531535 -1.803043</pose>
     </link>
     <joint name="rev_X6" type="revolute">
-      <pose>0 0 0 2.503273 -0.644323 -1.580831</pose>
+      <pose>0 0 0 2.717398 -0.531535 -1.803043</pose>
       <parent>frame</parent>
       <child>virt_X6</child>
       <axis>
-        <xyz>-0.008023 -0.799466 0.600657</xyz>
+        <xyz>-0.198409 -0.838886 0.506857</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -1453,14 +1453,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>3.500000 2.000000 3.500000 2.503273 -0.644323 -1.580831</pose>
+      <pose>3.500000 2.000000 3.500000 2.717398 -0.531535 -1.803043</pose>
     </link>
     <joint name="rev_Y6" type="revolute">
-      <pose>0 0 0 2.503273 -0.644323 -1.580831</pose>
+      <pose>0 0 0 2.717398 -0.531535 -1.803043</pose>
       <parent>virt_X6</parent>
       <child>virt_Y6</child>
       <axis>
-        <xyz>-0.799466 0.365941 0.476383</xyz>
+        <xyz>-0.838886 0.412780 0.354800</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -1471,11 +1471,11 @@
       </axis>
     </joint>
     <joint name="cable6" type="prismatic">
-      <pose>0 0 -0.397787 2.503273 -0.644323 -1.580831</pose>
+      <pose>0 0 0.494870 2.717398 -0.531535 -1.803043</pose>
       <parent>virt_Y6</parent>
       <child>cable6</child>
       <axis>
-        <xyz>0.600657 0.476383 0.642082</xyz>
+        <xyz>0.506857 0.354800 0.785629</xyz>
         <limit>
           <lower>-4.390626379</lower>
           <upper>4.390626379</upper>
@@ -1499,10 +1499,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>0.600000 -0.300000 0.400000 2.503273 -0.644323 -1.580831</pose>
+      <pose>1.500000 0.600000 0.400000 2.717398 -0.531535 -1.803043</pose>
     </link>
     <joint name="rev_Xpf6" type="revolute">
-      <pose>0 0 0 2.503273 -0.644323 -1.580831</pose>
+      <pose>0 0 0 2.717398 -0.531535 -1.803043</pose>
       <parent>platform</parent>
       <child>virt_Xpf6</child>
       <axis>
@@ -1528,10 +1528,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>0.600000 -0.300000 0.400000 2.503273 -0.644323 -1.580831</pose>
+      <pose>1.500000 0.600000 0.400000 2.717398 -0.531535 -1.803043</pose>
     </link>
     <joint name="rev_Ypf6" type="revolute">
-      <pose>0 0 0 2.503273 -0.644323 -1.580831</pose>
+      <pose>0 0 0 2.717398 -0.531535 -1.803043</pose>
       <parent>virt_Xpf6</parent>
       <child>virt_Ypf6</child>
       <axis>
@@ -1546,7 +1546,7 @@
       </axis>
     </joint>
     <joint name="rev_Zpf6" type="revolute">
-      <pose>0 0 0 2.503273 -0.644323 -1.580831</pose>
+      <pose>0 0 0 2.717398 -0.531535 -1.803043</pose>
       <child>virt_Ypf6</child>
       <parent>cable6</parent>
       <axis>
@@ -1561,7 +1561,7 @@
       </axis>
     </joint>
     <link name="cable7">
-      <pose>2.584747 1.620505 2.718686 2.689439 -0.811545 -2.158486</pose>
+      <pose>3.221384 1.930346 3.195264 2.916881 -0.727987 -2.565718</pose>
       <visual name="visual">
         <geometry>
           <cylinder>
@@ -1600,14 +1600,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>3.500000 2.000000 3.500000 2.689439 -0.811545 -2.158486</pose>
+      <pose>3.500000 2.000000 3.500000 2.916881 -0.727987 -2.565718</pose>
     </link>
     <joint name="rev_X7" type="revolute">
-      <pose>0 0 0 2.689439 -0.811545 -2.158486</pose>
+      <pose>0 0 0 2.916881 -0.727987 -2.565718</pose>
       <parent>frame</parent>
       <child>virt_X7</child>
       <axis>
-        <xyz>-0.381665 -0.572885 0.725351</xyz>
+        <xyz>-0.626115 -0.406529 0.665368</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -1629,14 +1629,14 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>3.500000 2.000000 3.500000 2.689439 -0.811545 -2.158486</pose>
+      <pose>3.500000 2.000000 3.500000 2.916881 -0.727987 -2.565718</pose>
     </link>
     <joint name="rev_Y7" type="revolute">
-      <pose>0 0 0 2.689439 -0.811545 -2.158486</pose>
+      <pose>0 0 0 2.916881 -0.727987 -2.565718</pose>
       <parent>virt_X7</parent>
       <child>virt_Y7</child>
       <axis>
-        <xyz>-0.572885 0.762462 0.300755</xyz>
+        <xyz>-0.406529 0.898368 0.166342</xyz>
         <limit>
           <effort>1000</effort>
           <velocity>10</velocity>
@@ -1647,11 +1647,11 @@
       </axis>
     </joint>
     <joint name="cable7" type="prismatic">
-      <pose>0 0 -0.980130 2.689439 -0.811545 -2.158486</pose>
+      <pose>0 0 -0.382281 2.916881 -0.727987 -2.565718</pose>
       <parent>virt_Y7</parent>
       <child>cable7</child>
       <axis>
-        <xyz>0.725351 0.300755 0.619202</xyz>
+        <xyz>0.665368 0.166342 0.727747</xyz>
         <limit>
           <lower>-4.390626379</lower>
           <upper>4.390626379</upper>
@@ -1675,10 +1675,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-0.600000 0.300000 0.000000 2.689439 -0.811545 -2.158486</pose>
+      <pose>0.300000 1.200000 0.000000 2.916881 -0.727987 -2.565718</pose>
     </link>
     <joint name="rev_Xpf7" type="revolute">
-      <pose>0 0 0 2.689439 -0.811545 -2.158486</pose>
+      <pose>0 0 0 2.916881 -0.727987 -2.565718</pose>
       <parent>platform</parent>
       <child>virt_Xpf7</child>
       <axis>
@@ -1704,10 +1704,10 @@
         </inertia>
         <mass>0.001</mass>
       </inertial>
-      <pose>-0.600000 0.300000 0.000000 2.689439 -0.811545 -2.158486</pose>
+      <pose>0.300000 1.200000 0.000000 2.916881 -0.727987 -2.565718</pose>
     </link>
     <joint name="rev_Ypf7" type="revolute">
-      <pose>0 0 0 2.689439 -0.811545 -2.158486</pose>
+      <pose>0 0 0 2.916881 -0.727987 -2.565718</pose>
       <parent>virt_Xpf7</parent>
       <child>virt_Ypf7</child>
       <axis>
@@ -1722,7 +1722,7 @@
       </axis>
     </joint>
     <joint name="rev_Zpf7" type="revolute">
-      <pose>0 0 0 2.689439 -0.811545 -2.158486</pose>
+      <pose>0 0 0 2.916881 -0.727987 -2.565718</pose>
       <child>virt_Ypf7</child>
       <parent>cable7</parent>
       <axis>

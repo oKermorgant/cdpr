@@ -23,6 +23,18 @@
 %     x(6) <= 10000
 %     x(7) <= 10000
 %     x(8) <= 10000
+%     -1 <= x(9)
+%     -1 <= x(10)
+%     -1 <= x(11)
+%     -1 <= x(12)
+%     -1 <= x(13)
+%     -1 <= x(14)
+%     x(9) <= 0
+%     x(10) <= 0
+%     x(11) <= 0
+%     x(12) <= 0
+%     x(13) <= 0
+%     x(14) <= 0
 %
 % with variables
 %        x  14 x 1
@@ -42,7 +54,7 @@
 %
 % Specify params.A, ..., params.c, then run
 %   [vars, status] = csolve(params, settings)
-% Produced by CVXGEN, 2017-06-27 09:46:57 -0400.
+% Produced by CVXGEN, 2017-07-03 11:35:07 -0400.
 % CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
 % The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
 % CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial

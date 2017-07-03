@@ -3,7 +3,7 @@
     <arg name="paused" default="true"/>
     <arg name="model" default="caroca"/>
     <arg name="model_tra" default="trajectory"/>
-    <arg name="ctl" default="Barycenter"/>
+    <arg name="ctl" default="cvxgen_minT"/>
     <arg name="sty" default="Cartesian_space"/>
     <arg name="threshold" default="0.0"/>
     <arg name="coefficient" default="7000"/>
@@ -32,6 +32,9 @@
                 noMin = no constraints 
 		Barycenter
 		minG CTC+TDA select gain
+        cvxgen_minT
+        cvxgen_slack
+        cvxgen_multiplier
     		 
  		Cartesian_space : controller is implemented in task space
 		Joint_space : cotroller in joint space

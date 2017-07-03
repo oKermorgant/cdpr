@@ -20,7 +20,7 @@ public:
     // how we perform the TDA
     typedef enum
     {
-        minA, minW, minT, noMin,  closed_form, Barycenter, slack_v, minG, cvxgen
+        minA, minW, minT, noMin, closed_form, Barycenter, slack_v, minG, cvxgen_slack, cvxgen_minT, cvxgen_multiplier
     } minType;
 
    
@@ -43,12 +43,12 @@ public:
     void GetVertices(double &a)
     {
         if(control == Barycenter )
-            a =num_v;
+            a = num_v;
     }
     void GetGains(vpColVector &a)
     {
         if(control == minG)
-            a [0] = x[8]; 
+            a[0] = x[8]; 
             a[1] = x[9];
     }
 
