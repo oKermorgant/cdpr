@@ -13,12 +13,13 @@ using namespace std;
 /*
  * Computed torque controller to show input/output of the CDPR class
  *
- *  minW does not consider the feasible wrench at the initial phase, namely probably not fulfill the equlity constraint 
+ * minW does not consider the feasible wrench at the initial phase, namely probably
+ * not fulfill the equlity constraint 
  * Minimize the difference between the desired wrench and the computed wrench
  *
  * minT satisfies equality condition with feasible tensions
  *
- * minA new TDA 
+ * mini
  *
  */
 
@@ -88,7 +89,7 @@ int main(int argc, char ** argv)
     
     // initialization of parameters in CTC 
     vpMatrix W(6, n), Wd(6,n), J(n,6), R_R(6,6), RR_d(6,6),  M_inertia(6,6), Kp(6,6), Kd(6,6), omega(3,3),c(3,3),Co(6,6);
-    vpColVector g(6), tau(n), err(6),  w(6), tau0(n), tau_diff(n), pd(6),residual(6);
+    vpColVector g(6), tau(n), err(6),  w(6), tau0(n), tau_diff(n), pd(6),residual_p(3), residual_o(3);
     vpColVector L(n), Ld(n), Le(n),  Le_d(n);
     g[2] = - robot.mass() * 9.81;
     //vpPoseVector Pd;
@@ -105,13 +106,12 @@ int main(int argc, char ** argv)
     // set proportional and derivative gain
     //double Kp, Kd;  // tuned for Caroca
    if (space_type == "Cartesian_space")
-     {  
         for (int i = 0; i < 3; ++i)
-                {
-                    Kp[i][i] = 16; Kd[i][i] = 8;
-                    Kp[i+3][i+3]= 16; Kd[i+3][i+3]= 8;
-                }
-    }
+        {
+            Kp[i][i] = 100; Kd[i][i] = 20;
+            Kp[i+3][i+3]= 100; Kd[i+3][i+3]= 20;
+        }
+
     else if ( space_type == "Joint_space")
         Kp=Kd=1000;
     else 
@@ -138,20 +138,21 @@ int main(int argc, char ** argv)
     vpThetaUVector orientation_err;
     vpTranslationVector position_err;
     // logger.saveTimed(pose_err, "pose_err", "[x,y,z,\\theta_x,\\theta_y,\\theta_z]", "Pose error");
-    logger.saveTimed(orientation_err, "orientation_err", "[\\theta_x,\\theta_y, \\theta_z]", "Orientation error [deg]" );
-    logger.saveTimed(position_err, "position_err", "[x, y, z]", "Position error [m]");
+    logger.saveTimed(orientation_err, "Orientation_err", "[\\theta_x,\\theta_y, \\theta_z]", "Orientation error [deg]" );
+    logger.saveTimed(position_err, "Position_err", "[x, y, z]", "Position error [m]");
     logger.saveTimed(tau, "tau", "\\tau_", "Tensions [N]");
-    logger.saveTimed(residual, "residual", "residual_", "wrench residual [N]");
+    logger.saveTimed(residual_p, "residualP", "residual P_", "Force residual [N]");
+    logger.saveTimed(residual_o, "residualO", "residual O_", "Moment residual [Nm]");
     logger.saveTimed(tau_diff, "diff", "\\tau_d", "Tensions difference [N]");
-    logger.saveTimed(v_e, "velocity_error", "Vel_", "velocity error [N]");
+    logger.saveTimed(v_e, "velocity_error", "Vel_", "velocity error [m/s]");
     if (space_type == "Joint_space" )
         logger.saveTimed(Le, "Le", "Le_", "Length error [m]");
 
     // chrono
-    vpColVector comp_time(1), alpha(1), sum(1),ver(1), gains(2);
-    logger.saveTimed(comp_time, "dt", "[\\delta t]", "Comp. time [s]");
-    if (control_type == "minA")
-        logger.saveTimed(alpha, "alpha", "[\\alpha ]", "Alpha");
+    vpColVector comp_time(1), alpha(6), sum(1),ver(1), gains(2);
+    logger.saveTimed(comp_time, "dt", "[minT t]", "Comp. time [s]");
+    if (control_type == "cvxgen_multiplier"||control_type == "slack_v"||control_type == "cvxgen_slack")
+        logger.saveTimed(alpha, "alpha", "[\\alpha_ ]", "Alpha");
     if (control_type == "Barycenter")
         logger.saveTimed(ver, "vertices", "[numv]", "The number of vertex");
     if (control_type == "minG")
@@ -178,8 +179,10 @@ int main(int argc, char ** argv)
         //nh.getParam("Kp", Kp);
         //nh.getParam("Kd", Kd);
         t = ros::Time::now().toSec();
-          robot.getPose(M);
-            M.extract(T);
+        robot.getPose(M);
+        M.extract(T);
+
+        //start = std::chrono::system_clock::now();
 
         if(robot.ok())  // messages have been received
         {
@@ -297,55 +300,60 @@ int main(int argc, char ** argv)
 
              tau0=tau;
              
-             // extract the current time
-             start = std::chrono::system_clock::now();
-             // call cable tension distribution
-             if ( control_type == "minG")
-             {
+            // extract the current time
+            start = std::chrono::system_clock::now();
+            // call cable tension distribution
+            if ( control_type == "minG")
+            {
                 v_e = M_inertia*v_e;
                 err = M_inertia*err;
-                tau = tda.ComputeDistributionG(W, v_e, err, w) ;
+                tau = tda.ComputeDistributionG(W, v_e, err, w);
             }
             else
                 tau = tda.ComputeDistribution(W, w) ;
 
-             end = std::chrono::system_clock::now();
+            end = std::chrono::system_clock::now();
 
-             cout << "external wrench:" << "   "<< w.t() << endl;
+            cout << "external wrench:" << "   "<< w.t() << endl;
 
-             // compute the tension difference
-             tau_diff= tau-tau0;
+            // compute the tension difference
+            tau_diff= tau-tau0;
 
             // send tensions
             robot.sendTensions(tau);
+            //end = std::chrono::system_clock::now();
 
-            /*            
-            if(control_type == "minA")
-            {
-                tda.GetAlpha(alpha[0]);
-                cout << "coefficient number:" << "  " <<alpha << endl;
-            }
-            */
+                        
+            if(control_type == "cvxgen_multiplier")
+                tda.GetAlpha(alpha);
             if(control_type == "Barycenter")
-                    tda.GetVertices(ver[0]);
+                tda.GetVertices(ver[0]);
             if(control_type == "minG")
-                    tda.GetGains(gains);
+                tda.GetGains(gains);
 
             // calculate the computation period
             elapsed_seconds = end-start;
             // log
             M.buildFrom( robot.getPoseError());
             pose_err.buildFrom(M.inverse());
+            // transfer pose error to meter and degree
             for (int i = 0; i < 3 ; ++i)
-             {   
+            {   
                 position_err[i]=pose_err[i];
                 orientation_err[i]=(pose_err[i+3]*(180/M_PI));
             }
             // computation time
             comp_time[0] = elapsed_seconds.count();
-            residual = W*tau - w;
-            
-            cout << "the residual "<< "  "<<residual.t()<<endl;
+            if ( control_type== "minG")
+                tda.Getresidual(residual_p,residual_o);
+            else
+            {
+                // record the wrench difference
+                residual_p[0] = (W*tau - w)[0];residual_p[1] = (W*tau - w)[1];residual_p[2] = (W*tau - w)[2];
+                residual_o[0] = (W*tau - w)[3];residual_o[1] = (W*tau - w)[4];residual_o[2] = (W*tau - w)[5];
+            }
+         
+            // update plotting vector
             logger.update();
         }
 

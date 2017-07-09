@@ -12,7 +12,6 @@
 // this way we do not have the same code in all sources
 
 
-
 class TDA
 {
 public:
@@ -34,16 +33,19 @@ public:
     vpColVector ComputeDistributionG(vpMatrix &W, vpColVector &ve, vpColVector &pe, vpColVector &w );
 
     // for minA
-    void GetAlpha(double &a)
+    void GetAlpha(vpColVector &a)
     {
-        if(control == minA )
-            a = x[n];
+        if(control == cvxgen_multiplier ||control == slack_v || control== cvxgen_slack)
+        {
+            a[0] = x[8]; a[1] = x[9]; a[2] = x[10]; 
+            a[3] = x[11]; a[4] = x[12]; a[5] = x[13];
+        }
     }
     // for Barycentric algorithm
     void GetVertices(double &a)
     {
         if(control == Barycenter )
-            a = num_v;
+            a = 1.0*num_v;
     }
     void GetGains(vpColVector &a)
     {
@@ -51,14 +53,23 @@ public:
             a[0] = x[8]; 
             a[1] = x[9];
     }
+    void Getresidual(vpColVector &a,vpColVector &e)
+    {
+        if(control == minG)
+        {
+            a[0]=w_d[0];a[1]=w_d[1];a[2]=w_d[2];
+            e[0]=w_d[3];e[1]=w_d[4];e[2]=w_d[5];
+        }   
+    }
+
 
 protected:
     minType control;
-    int n,index, num_v;
+    int n,index, num_v,iter=0;
     double tauMin, tauMax;
 
     vpMatrix Q, A, C;
-    vpColVector r, b, d, x, wp;
+    vpColVector r, b, d, x, w_d,wp;
     vpSubColVector tau;
 
     bool update_d;

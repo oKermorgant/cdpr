@@ -23,25 +23,23 @@
 %     x(6) <= 10000
 %     x(7) <= 10000
 %     x(8) <= 10000
-%     -1 <= x(9)
-%     -1 <= x(10)
-%     x(9) <= 0
-%     x(10) <= 0
-%     0 <= x(11)
-%     x(11) <= 0
-%     -1 <= x(12)
-%     -1 <= x(13)
-%     x(12) <= 0
-%     x(13) <= 0
+%     -0.01 <= x(9)
+%     -0.01 <= x(10)
+%     -0.01 <= x(11)
+%     -0.01 <= x(12)
+%     x(9) <= 0.01
+%     x(10) <= 0.01
+%     x(11) <= 0.01
+%     x(12) <= 0.01
 %
 % with variables
-%        x  14 x 1
+%        x  12 x 1
 %
 % and parameters
-%        A   6 x 14
-%        Q  14 x 14   PSD
+%        A   6 x 12
+%        Q  12 x 12   PSD
 %        b   6 x 1
-%        c  14 x 1
+%        c  12 x 1
 %
 % Note:
 %   - Check status.converged, which will be 1 if optimization succeeded.
@@ -52,9 +50,9 @@
 %
 % Specify params.A, ..., params.c, then run
 %   [vars, status] = csolve(params, settings)
-% Produced by CVXGEN, 2017-07-04 04:05:51 -0400.
-% CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
-% The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
+% Produced by CVXGEN, 2017-07-06 05:35:12 -0400.
+% CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+% The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
 % CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
 % applications without prior written permission from Jacob Mattingley.
 

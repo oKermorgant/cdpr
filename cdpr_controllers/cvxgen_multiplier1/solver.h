@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2017-07-04 04:05:52 -0400.  */
+/* Produced by CVXGEN, 2017-07-03 11:35:08 -0400.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -37,25 +37,25 @@ typedef struct Vars_t {
   double *x; /* 14 rows. */
 } Vars;
 typedef struct Workspace_t {
-  double h[26];
-  double s_inv[26];
-  double s_inv_z[26];
+  double h[28];
+  double s_inv[28];
+  double s_inv_z[28];
   double b[6];
   double q[14];
-  double rhs[72];
-  double x[72];
+  double rhs[76];
+  double x[76];
   double *s;
   double *z;
   double *y;
-  double lhs_aff[72];
-  double lhs_cc[72];
-  double buffer[72];
-  double buffer2[72];
-  double KKT[293];
-  double L[227];
-  double d[72];
-  double v[72];
-  double d_inv[72];
+  double lhs_aff[76];
+  double lhs_cc[76];
+  double buffer[76];
+  double buffer2[76];
+  double KKT[301];
+  double L[231];
+  double d[76];
+  double v[76];
+  double d_inv[76];
   double gap;
   double optval;
   double ineq_resid_squared;

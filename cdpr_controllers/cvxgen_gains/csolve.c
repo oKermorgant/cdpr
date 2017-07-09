@@ -1,6 +1,6 @@
-/* Produced by CVXGEN, 2017-07-04 04:05:51 -0400.  */
-/* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
-/* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
+/* Produced by CVXGEN, 2017-07-06 05:35:12 -0400.  */
+/* CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com. */
+/* The code in this file is Copyright (C) 2006-2017 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
 /* applications without prior written permission from Jacob Mattingley. */
 
@@ -74,8 +74,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (xm == NULL) {
     printf("could not find params.A.\n");
   } else {
-    if (!((mxGetM(xm) == 6) && (mxGetN(xm) == 14))) {
-      printf("A must be size (6,14), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+    if (!((mxGetM(xm) == 6) && (mxGetN(xm) == 12))) {
+      printf("A must be size (6,12), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
       this_var_errors++;
     }
     if (mxIsComplex(xm)) {
@@ -93,7 +93,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (this_var_errors == 0) {
       dest = params.A;
       src = mxGetPr(xm);
-      for (i = 0; i < 84; i++)
+      for (i = 0; i < 72; i++)
         *dest++ = *src++;
       valid_vars++;
     }
@@ -103,8 +103,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (xm == NULL) {
     printf("could not find params.Q.\n");
   } else {
-    if (!((mxGetM(xm) == 14) && (mxGetN(xm) == 14))) {
-      printf("Q must be size (14,14), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+    if (!((mxGetM(xm) == 12) && (mxGetN(xm) == 12))) {
+      printf("Q must be size (12,12), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
       this_var_errors++;
     }
     if (mxIsComplex(xm)) {
@@ -122,7 +122,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (this_var_errors == 0) {
       dest = params.Q;
       src = mxGetPr(xm);
-      for (i = 0; i < 196; i++)
+      for (i = 0; i < 144; i++)
         *dest++ = *src++;
       valid_vars++;
     }
@@ -161,8 +161,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (xm == NULL) {
     printf("could not find params.c.\n");
   } else {
-    if (!((mxGetM(xm) == 14) && (mxGetN(xm) == 1))) {
-      printf("c must be size (14,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
+    if (!((mxGetM(xm) == 12) && (mxGetN(xm) == 1))) {
+      printf("c must be size (12,1), not (%d,%d).\n", mxGetM(xm), mxGetN(xm));
       this_var_errors++;
     }
     if (mxIsComplex(xm)) {
@@ -180,7 +180,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (this_var_errors == 0) {
       dest = params.c;
       src = mxGetPr(xm);
-      for (i = 0; i < 14; i++)
+      for (i = 0; i < 12; i++)
         *dest++ = *src++;
       valid_vars++;
     }
@@ -191,11 +191,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   }
   if (prepare_for_c) {
     printf("settings.prepare_for_c == 1. thus, outputting for C.\n");
-    for (i = 0; i < 196; i++)
+    for (i = 0; i < 144; i++)
       printf("  params.Q[%d] = %.6g;\n", i, params.Q[i]);
-    for (i = 0; i < 14; i++)
+    for (i = 0; i < 12; i++)
       printf("  params.c[%d] = %.6g;\n", i, params.c[i]);
-    for (i = 0; i < 84; i++)
+    for (i = 0; i < 72; i++)
       printf("  params.A[%d] = %.6g;\n", i, params.A[i]);
     for (i = 0; i < 6; i++)
       printf("  params.b[%d] = %.6g;\n", i, params.b[i]);
@@ -222,11 +222,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   *mxGetPr(xm) = work.converged;
   /* Extract variable values. */
   plhs[0] = mxCreateStructArray(1, dims1x1of1, num_var_names, var_names);
-  xm = mxCreateDoubleMatrix(14, 1, mxREAL);
+  xm = mxCreateDoubleMatrix(12, 1, mxREAL);
   mxSetField(plhs[0], 0, "x", xm);
   dest = mxGetPr(xm);
   src = vars.x;
-  for (i = 0; i < 14; i++) {
+  for (i = 0; i < 12; i++) {
     *dest++ = *src++;
   }
 }

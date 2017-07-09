@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2017-07-04 04:05:52 -0400.  */
+/* Produced by CVXGEN, 2017-07-03 11:35:08 -0400.  */
 /* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -50,14 +50,16 @@ void multbymG(double *lhs, double *rhs) {
   lhs[15] = -rhs[7]*(1);
   lhs[16] = -rhs[8]*(-1);
   lhs[17] = -rhs[9]*(-1);
-  lhs[18] = -rhs[8]*(1);
-  lhs[19] = -rhs[9]*(1);
-  lhs[20] = -rhs[10]*(-1);
-  lhs[21] = -rhs[10]*(1);
-  lhs[22] = -rhs[11]*(-1);
-  lhs[23] = -rhs[12]*(-1);
-  lhs[24] = -rhs[11]*(1);
-  lhs[25] = -rhs[12]*(1);
+  lhs[18] = -rhs[10]*(-1);
+  lhs[19] = -rhs[11]*(-1);
+  lhs[20] = -rhs[12]*(-1);
+  lhs[21] = -rhs[13]*(-1);
+  lhs[22] = -rhs[8]*(1);
+  lhs[23] = -rhs[9]*(1);
+  lhs[24] = -rhs[10]*(1);
+  lhs[25] = -rhs[11]*(1);
+  lhs[26] = -rhs[12]*(1);
+  lhs[27] = -rhs[13]*(1);
 }
 void multbymGT(double *lhs, double *rhs) {
   lhs[0] = -rhs[0]*(-1)-rhs[8]*(1);
@@ -68,12 +70,12 @@ void multbymGT(double *lhs, double *rhs) {
   lhs[5] = -rhs[5]*(-1)-rhs[13]*(1);
   lhs[6] = -rhs[6]*(-1)-rhs[14]*(1);
   lhs[7] = -rhs[7]*(-1)-rhs[15]*(1);
-  lhs[8] = -rhs[16]*(-1)-rhs[18]*(1);
-  lhs[9] = -rhs[17]*(-1)-rhs[19]*(1);
-  lhs[10] = -rhs[20]*(-1)-rhs[21]*(1);
-  lhs[11] = -rhs[22]*(-1)-rhs[24]*(1);
-  lhs[12] = -rhs[23]*(-1)-rhs[25]*(1);
-  lhs[13] = 0;
+  lhs[8] = -rhs[16]*(-1)-rhs[22]*(1);
+  lhs[9] = -rhs[17]*(-1)-rhs[23]*(1);
+  lhs[10] = -rhs[18]*(-1)-rhs[24]*(1);
+  lhs[11] = -rhs[19]*(-1)-rhs[25]*(1);
+  lhs[12] = -rhs[20]*(-1)-rhs[26]*(1);
+  lhs[13] = -rhs[21]*(-1)-rhs[27]*(1);
 }
 void multbyP(double *lhs, double *rhs) {
   /* TODO use the fact that P is symmetric? */
@@ -128,14 +130,16 @@ void fillh(void) {
   work.h[15] = 10000;
   work.h[16] = 1;
   work.h[17] = 1;
-  work.h[18] = 0;
-  work.h[19] = 0;
-  work.h[20] = 0;
-  work.h[21] = 0;
-  work.h[22] = 1;
-  work.h[23] = 1;
+  work.h[18] = 1;
+  work.h[19] = 1;
+  work.h[20] = 1;
+  work.h[21] = 1;
+  work.h[22] = 0;
+  work.h[23] = 0;
   work.h[24] = 0;
   work.h[25] = 0;
+  work.h[26] = 0;
+  work.h[27] = 0;
 }
 void fillb(void) {
   work.b[0] = params.b[0];

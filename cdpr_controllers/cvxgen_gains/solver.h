@@ -1,6 +1,6 @@
-/* Produced by CVXGEN, 2017-07-04 04:05:52 -0400.  */
-/* CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com. */
-/* The code in this file is Copyright (C) 2006-2012 Jacob Mattingley. */
+/* Produced by CVXGEN, 2017-07-06 05:35:13 -0400.  */
+/* CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com. */
+/* The code in this file is Copyright (C) 2006-2017 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
 /* applications without prior written permission from Jacob Mattingley. */
 
@@ -28,34 +28,34 @@
 #define pm(A, m, n) printmatrix(#A, A, m, n, 1)
 #endif
 typedef struct Params_t {
-  double Q[196];
-  double c[14];
-  double A[84];
+  double Q[144];
+  double c[12];
+  double A[72];
   double b[6];
 } Params;
 typedef struct Vars_t {
-  double *x; /* 14 rows. */
+  double *x; /* 12 rows. */
 } Vars;
 typedef struct Workspace_t {
-  double h[26];
-  double s_inv[26];
-  double s_inv_z[26];
+  double h[24];
+  double s_inv[24];
+  double s_inv_z[24];
   double b[6];
-  double q[14];
-  double rhs[72];
-  double x[72];
+  double q[12];
+  double rhs[66];
+  double x[66];
   double *s;
   double *z;
   double *y;
-  double lhs_aff[72];
-  double lhs_cc[72];
-  double buffer[72];
-  double buffer2[72];
-  double KKT[293];
-  double L[227];
-  double d[72];
-  double v[72];
-  double d_inv[72];
+  double lhs_aff[66];
+  double lhs_cc[66];
+  double buffer[66];
+  double buffer2[66];
+  double KKT[246];
+  double L[186];
+  double d[66];
+  double v[66];
+  double d_inv[66];
   double gap;
   double optval;
   double ineq_resid_squared;
