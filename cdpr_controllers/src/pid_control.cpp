@@ -52,7 +52,7 @@ int main(int argc, char ** argv)
 
     if(nh_priv.hasParam("control"))
     nh_priv.getParam("control", control_type);
-    TDA::minType control = TDA::minA;
+    TDA::minType control = TDA::minT;
     if(control_type == "noMin")
         control = TDA::noMin;
     else if(control_type == "minT")
@@ -96,13 +96,6 @@ int main(int argc, char ** argv)
     logger.saveTimed(tau, "tau", "\\tau_", "Tensions");
     vpColVector residual(6);
     logger.saveTimed(residual, "res", "[f_x,f_y,f_z,m_x,m_y,m_z]", "Residuals");
-
-    std::vector<double> alpha(1,0);
-    if(control == TDA::minA)
-    {
-        logger.saveTimed(alpha, "a", "[\\alpha]", "Alpha");
-    }
-
 
     // chrono
     vpColVector comp_time(1);

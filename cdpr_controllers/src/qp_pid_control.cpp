@@ -10,7 +10,6 @@ using namespace std;
  *
  * Does not consider positive-only cable tensions and assumes it is more or less a UPS parallel robot
  *
- *
  */
 
 

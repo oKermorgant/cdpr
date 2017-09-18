@@ -1,4 +1,4 @@
-% Produced by CVXGEN, 2017-07-06 05:35:12 -0400.
+% Produced by CVXGEN, 2017-07-18 05:19:58 -0400.
 % CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
 % The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
 % CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
@@ -34,14 +34,14 @@ cvx_begin
     x(6) <= 10000;
     x(7) <= 10000;
     x(8) <= 10000;
-    -0.01 <= x(9);
-    -0.01 <= x(10);
-    -0.01 <= x(11);
-    -0.01 <= x(12);
-    x(9) <= 0.01;
-    x(10) <= 0.01;
-    x(11) <= 0.01;
-    x(12) <= 0.01;
+    -10 <= x(9);
+    -10 <= x(10);
+    -10 <= x(11);
+    -10 <= x(12);
+    x(9) <= 10;
+    x(10) <= 10;
+    x(11) <= 10;
+    x(12) <= 10;
 cvx_end
 vars.x = x;
 status.cvx_status = cvx_status;

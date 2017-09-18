@@ -1,4 +1,4 @@
-/* Produced by CVXGEN, 2017-07-06 05:35:13 -0400.  */
+/* Produced by CVXGEN, 2017-07-18 05:19:59 -0400.  */
 /* CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com. */
 /* The code in this file is Copyright (C) 2006-2017 Jacob Mattingley. */
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
@@ -116,14 +116,14 @@ void fillh(void) {
   work.h[13] = 10000;
   work.h[14] = 10000;
   work.h[15] = 10000;
-  work.h[16] = 0.01;
-  work.h[17] = 0.01;
-  work.h[18] = 0.01;
-  work.h[19] = 0.01;
-  work.h[20] = 0.01;
-  work.h[21] = 0.01;
-  work.h[22] = 0.01;
-  work.h[23] = 0.01;
+  work.h[16] = 10;
+  work.h[17] = 10;
+  work.h[18] = 10;
+  work.h[19] = 10;
+  work.h[20] = 10;
+  work.h[21] = 10;
+  work.h[22] = 10;
+  work.h[23] = 10;
 }
 void fillb(void) {
   work.b[0] = params.b[0];

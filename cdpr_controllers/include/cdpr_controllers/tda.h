@@ -19,7 +19,7 @@ public:
     // how we perform the TDA
     typedef enum
     {
-        minA, minW, minT, noMin, closed_form, Barycenter, slack_v, minG, cvxgen_slack, cvxgen_minT, cvxgen_multiplier
+        minW, minT, noMin, closed_form, Barycenter, slack_v, adaptive_gains, cvxgen_slack, cvxgen_minT
     } minType;
 
    
@@ -35,27 +35,25 @@ public:
     // for minA
     void GetAlpha(vpColVector &a)
     {
-        if(control == cvxgen_multiplier ||control == slack_v || control== cvxgen_slack)
+        if(control == slack_v || control== cvxgen_slack)
         {
             a[0] = x[8]; a[1] = x[9]; a[2] = x[10]; 
             a[3] = x[11]; a[4] = x[12]; a[5] = x[13];
         }
     }
-    // for Barycentric algorithm
-    void GetVertices(double &a)
-    {
-        if(control == Barycenter )
-            a = 1.0*num_v;
-    }
     void GetGains(vpColVector &a)
     {
-        if(control == minG)
+        if(control == adaptive_gains)
+       {
             a[0] = x[8]; 
             a[1] = x[9];
+            a[2] = x[10]; 
+            a[3] = x[11];
+        }
     }
     void Getresidual(vpColVector &a,vpColVector &e)
     {
-        if(control == minG)
+        if(control == adaptive_gains)
         {
             a[0]=w_d[0];a[1]=w_d[1];a[2]=w_d[2];
             e[0]=w_d[3];e[1]=w_d[4];e[2]=w_d[5];

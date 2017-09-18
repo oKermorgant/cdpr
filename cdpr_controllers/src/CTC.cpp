@@ -18,9 +18,6 @@ using namespace std;
  * Minimize the difference between the desired wrench and the computed wrench
  *
  * minT satisfies equality condition with feasible tensions
- *
- * mini
- *
  */
 
 void Param(ros::NodeHandle &nh, const string &key, double &val)
@@ -48,18 +45,16 @@ int main(int argc, char ** argv)
 
     // get control type    
     std::string control_type = "Barycenter";
-    double dTau_max = 0.5, lambda =5000;
+    double dTau_max = 0.5;
     bool warm_start = false;
 
     if(nh_priv.hasParam("control"))
         nh_priv.getParam("control", control_type);
     if(nh_priv.hasParam("threshold"))
         nh_priv.getParam("threshold", dTau_max);
-    if(nh_priv.hasParam("coefficient"))
-        nh_priv.getParam("coefficient", lambda);
 
 
-    TDA::minType control = TDA::minA;
+    TDA::minType control = TDA::minT;
 
     if(control_type == "noMin")
         control = TDA::noMin;
@@ -71,16 +66,15 @@ int main(int argc, char ** argv)
         control = TDA::closed_form;
     else if(control_type == "Barycenter")
         control = TDA::Barycenter;
-    else if(control_type == "minG")
-        control = TDA::minG;
+    else if(control_type == "adaptive_gains")
+        control = TDA::adaptive_gains;
     else if(control_type == "slack_v")
         control = TDA::slack_v;
     else if(control_type == "cvxgen_slack")
         control = TDA::cvxgen_slack;
     else if(control_type == "cvxgen_minT")
         control = TDA::cvxgen_minT;
-    else if(control_type == "cvxgen_multiplier")
-        control = TDA::cvxgen_multiplier;
+
     
     // get space type
     std::string space_type="Cartesian_space";
@@ -90,7 +84,7 @@ int main(int argc, char ** argv)
     // initialization of parameters in CTC 
     vpMatrix W(6, n), Wd(6,n), J(n,6), R_R(6,6), RR_d(6,6),  M_inertia(6,6), Kp(6,6), Kd(6,6), omega(3,3),c(3,3),Co(6,6);
     vpColVector g(6), tau(n), err(6),  w(6), tau0(n), tau_diff(n), pd(6),residual_p(3), residual_o(3);
-    vpColVector L(n), Ld(n), Le(n),  Le_d(n);
+    vpColVector L(n), Ld(n), Le(n),  Le_d(n), Lp(n);
     g[2] = - robot.mass() * 9.81;
     //vpPoseVector Pd;
     vpRxyzVector rxyz;
@@ -108,8 +102,8 @@ int main(int argc, char ** argv)
    if (space_type == "Cartesian_space")
         for (int i = 0; i < 3; ++i)
         {
-            Kp[i][i] = 100; Kd[i][i] = 20;
-            Kp[i+3][i+3]= 100; Kd[i+3][i+3]= 20;
+            Kp[i][i] = 20; Kd[i][i] = 10;
+            Kp[i+3][i+3] = 20; Kd[i+3][i+3]=10;
         }
 
     else if ( space_type == "Joint_space")
@@ -132,31 +126,28 @@ int main(int argc, char ** argv)
 
      // variables to log
     log2plot::Logger logger(path);
-    double t;
+    double t, sumE;
     logger.setTime(t);
     vpPoseVector pose_err;
     vpThetaUVector orientation_err;
     vpTranslationVector position_err;
     // logger.saveTimed(pose_err, "pose_err", "[x,y,z,\\theta_x,\\theta_y,\\theta_z]", "Pose error");
-    logger.saveTimed(orientation_err, "Orientation_err", "[\\theta_x,\\theta_y, \\theta_z]", "Orientation error [deg]" );
-    logger.saveTimed(position_err, "Position_err", "[x, y, z]", "Position error [m]");
-    logger.saveTimed(tau, "tau", "\\tau_", "Tensions [N]");
-    logger.saveTimed(residual_p, "residualP", "residual P_", "Force residual [N]");
-    logger.saveTimed(residual_o, "residualO", "residual O_", "Moment residual [Nm]");
-    logger.saveTimed(tau_diff, "diff", "\\tau_d", "Tensions difference [N]");
+    logger.saveTimed(orientation_err, "Orientation_err", "[\\theta_x,\\theta_y, \\theta_z]", "orientation error [deg]" );
+    logger.saveTimed(position_err, "Position_err", "[x, y, z]", "position error [m]");
+    logger.saveTimed(tau, "tau", "\\tau_", "cable tensions [N]");
+    logger.saveTimed(residual_p, "residualP", "residual P_", "force residual [N]");
+    logger.saveTimed(residual_o, "residualO", "residual O_", "moment residual [Nm]");
+    logger.saveTimed(tau_diff, "diff", "\\tau_d", "tensions difference [N]");
     logger.saveTimed(v_e, "velocity_error", "Vel_", "velocity error [m/s]");
     if (space_type == "Joint_space" )
-        logger.saveTimed(Le, "Le", "Le_", "Length error [m]");
+        logger.saveTimed(Le, "Le", "Le_", "length error [m]");
 
     // chrono
-    vpColVector comp_time(1), alpha(6), sum(1),ver(1), gains(2);
-    logger.saveTimed(comp_time, "dt", "[minT t]", "Comp. time [s]");
-    if (control_type == "cvxgen_multiplier"||control_type == "slack_v"||control_type == "cvxgen_slack")
-        logger.saveTimed(alpha, "alpha", "[\\alpha_ ]", "Alpha");
-    if (control_type == "Barycenter")
-        logger.saveTimed(ver, "vertices", "[numv]", "The number of vertex");
-    if (control_type == "minG")
-        logger.saveTimed(gains, "gains", "[K_p, K_d]", "CTC gains");
+    vpColVector comp_time(1),energy(1), gains(4);
+    logger.saveTimed(comp_time, "dt", "[slack_v]", "solve time [s]");
+    logger.saveTimed(energy, "energy", "[slack_v]", "energy consumption [J]");
+    if (control_type == "adaptive_gains")
+        logger.saveTimed(gains, "gains", "[Kp_p, Kd_p,Kp_o, Kd_o]", "adaptive gains");
     
     // initialize the timekeeper 
     std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -170,7 +161,9 @@ int main(int argc, char ** argv)
     // deliver the settings to the TDA
     TDA tda(robot, nh, control);
     tda.ForceContinuity(dTau_max);
-    tda.Weighing(lambda);
+
+    robot.computeLength(L);
+    Lp=L;
 
     cout << "CDPR control ready ----------------" << fixed << endl; 
     while(ros::ok())
@@ -256,17 +249,12 @@ int main(int argc, char ** argv)
                  // add Butterworth filter for pose error
                  filterP.Filter(err);
 
-                 if ( control_type == "minG") 
+                 if ( control_type == "adaptive_gains") 
                         w = M_inertia*a_d + Co*v - g;            
                 else
                     // establish the external wrench 
                     w = M_inertia*(a_d+Kp*err+Kd*v_e) - g + Co*v;  
 
-
-                cout << "external accleration:" << "   "<< (M_inertia*a_d).t() << endl;
-                cout << "external position:" << "   "<< (Kp*M_inertia*err).t() << endl;
-                cout << "external velocity:" << "   "<< (Kd*M_inertia*v_e).t() << endl;
-                cout << "external wrench:" << "   "<< w.t() << endl;
                 cout << "controller in task space" << endl;              
              }
             else if ( space_type == "Joint_space")
@@ -298,12 +286,10 @@ int main(int argc, char ** argv)
             else
                 cout << " Error: Please select the controller space type" << endl;
 
-             tau0=tau;
-             
             // extract the current time
             start = std::chrono::system_clock::now();
             // call cable tension distribution
-            if ( control_type == "minG")
+            if ( control_type == "adaptive_gains")
             {
                 v_e = M_inertia*v_e;
                 err = M_inertia*err;
@@ -316,19 +302,28 @@ int main(int argc, char ** argv)
 
             cout << "external wrench:" << "   "<< w.t() << endl;
 
-            // compute the tension difference
-            tau_diff= tau-tau0;
-
-            // send tensions
+             // send tensions
             robot.sendTensions(tau);
-            //end = std::chrono::system_clock::now();
 
-                        
-            if(control_type == "cvxgen_multiplier")
-                tda.GetAlpha(alpha);
-            if(control_type == "Barycenter")
-                tda.GetVertices(ver[0]);
-            if(control_type == "minG")
+            if ( t < 0.06)
+            {
+                tau0=tau;
+                tau_diff= tau-tau0;
+                energy[0]=0.0;
+            }
+           else
+           {
+                // compute the tension difference
+                tau_diff= tau-tau0;
+                tau0=tau;
+                robot.computeLength(L);
+                energy[0] = -tau.t()*(L-Lp);
+                sumE+=tau.t()*(L-Lp);
+                Lp=L;
+                cout << "the total consumption energy J" << sumE<<endl;
+           }
+
+            if(control_type == "adaptive_gains")
                 tda.GetGains(gains);
 
             // calculate the computation period
@@ -344,7 +339,7 @@ int main(int argc, char ** argv)
             }
             // computation time
             comp_time[0] = elapsed_seconds.count();
-            if ( control_type== "minG")
+            if ( control_type== "adaptive_gains")
                 tda.Getresidual(residual_p,residual_o);
             else
             {
