@@ -35,4 +35,4 @@ points:
   platform: [0.6, -0.3, 0.2]
 - frame: [3.5, 2.0, 3.5]
   platform: [-0.6, 0.3, -0.2]
-sim_cables: true
+sim_cables: false

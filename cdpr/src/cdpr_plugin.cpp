@@ -8,7 +8,7 @@
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/PhysicsEngine.hh>
 #include <gazebo/math/Pose.hh>
-
+#include <ros/node_handle.h>
 #include <cdpr/cdpr_plugin.h>
 
 using std::cout;
@@ -29,16 +29,18 @@ void CDPRPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
     // *** JOINT CONTROL
     joints_.clear();
+    tension_command_.clear();
+    rosnode_.param("/model/sim_cables", sim_cables_, false);
 
-    if(model_->GetJointCount() != 0)
+    if(model_->GetJointCount() != 0 && sim_cables_)
     {
         // initialize subscriber to joint commands
         ros::SubscribeOptions ops = ros::SubscribeOptions::create<sensor_msgs::JointState>(
                     "cable_command", 1,
                     boost::bind(&CDPRPlugin::JointCommandCallBack, this, _1),
                     ros::VoidPtr(), &callback_queue_);
-        joint_command_subscriber_ = rosnode_.subscribe(ops);
-        joint_command_received_ = false;
+        command_subscriber_ = rosnode_.subscribe(ops);
+        command_received_ = false;
 
         // setup joint states
         std::vector<std::string> joint_names;
@@ -67,6 +69,35 @@ void CDPRPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         joint_states_.velocity.resize(joints_.size());
         joint_states_.effort.resize(joints_.size());
     }
+    else
+    {
+        // read attach points from param
+        XmlRpc::XmlRpcValue p;
+        rosnode_.getParam("/model/points", p);
+        Tension t;
+        for(int i = 0; i < p.size(); ++i)
+        {
+            for(auto elem: p[i])
+            {
+                std::stringstream ss;
+                ss << "cable" << i;
+                t.name = ss.str();
+                t.point.x = elem.second[0];
+                t.point.y = elem.second[1];
+                t.point.z = elem.second[2];
+            }
+            tension_command_.push_back(t);
+        }
+
+        // init subscriber
+        ros::SubscribeOptions ops = ros::SubscribeOptions::create<cdpr::Tensions>(
+                    "cable_command", 1,
+                    boost::bind(&CDPRPlugin::TensionCallBack, this, _1),
+                    ros::VoidPtr(), &callback_queue_);
+        command_subscriber_ = rosnode_.subscribe(ops);
+        command_received_ = false;
+    }
+
     // *** END JOINT CONTROL
 
     // get frame and platform links
@@ -102,19 +133,30 @@ void CDPRPlugin::Update()
     callback_queue_.callAvailable();
 
     // deal with joint control
-    if(joint_command_received_)
+    if(command_received_)
     {
-        physics::JointPtr joint;
-        unsigned int idx;
-        for(unsigned int i=0;i<joint_command_.name.size();++i)
+        if(sim_cables_)
         {
-            // find corresponding model joint
-            idx = std::distance(joint_states_.name.begin(), std::find(joint_states_.name.begin(), joint_states_.name.end(), joint_command_.name[i]));
-            joint = joints_[idx];
-            // only apply positive tensions
-            if(joint_command_.effort[i] > 0)
-                joint->SetForce(0,std::min(joint_command_.effort[i], f_max));
+            physics::JointPtr joint;
+            unsigned int idx;
+            for(unsigned int i=0;i<joint_command_.name.size();++i)
+            {
+                // find corresponding model joint
+                idx = std::distance(joint_states_.name.begin(), std::find(joint_states_.name.begin(), joint_states_.name.end(), joint_command_.name[i]));
+                joint = joints_[idx];
+                // only apply positive tensions
+                if(joint_command_.effort[i] > 0)
+                    joint->SetForce(0,std::min(joint_command_.effort[i], f_max));
+            }
         }
+        else
+        {
+            auto rot = platform_link_->GetWorldPose().rot;
+            //rot.Invert(); ?? to check
+            for(const auto &t: tension_command_)
+                platform_link_->AddForceAtRelativePosition(rot*t.force, t.point);
+        }
+
     }
 
     // publish joint states

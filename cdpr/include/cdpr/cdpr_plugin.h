@@ -6,12 +6,21 @@
 #include <ros/callback_queue.h>
 #include <sensor_msgs/JointState.h>
 #include <gazebo_msgs/LinkState.h>
+#include <cdpr/Tensions.h>
+#include <gazebo/math/Vector3.hh>
 
 namespace gazebo
 {
 
 class CDPRPlugin : public ModelPlugin
 {
+    struct Tension
+    {
+        gazebo::math::Vector3 force;
+        gazebo::math::Vector3 point;
+        std::string name;
+    };
+
 public:
     CDPRPlugin() {}
     ~CDPRPlugin()
@@ -31,7 +40,34 @@ private:
     {
         // store received joint state
         joint_command_ = *_msg;
-        joint_command_received_ = true;
+        command_received_ = true;
+    }
+
+    // full cable tensions
+    void TensionCallBack(const cdpr::TensionsConstPtr &msg)
+    {
+        if(msg->names.size() != msg->direction.size() ||
+           msg->names.size() != msg->tensions.size())
+        {
+            ROS_WARN("Received inconsistent tension dimensions");
+            return;
+        }
+        command_received_ = true;
+        for(int i = 0; i < msg->names.size(); ++i)
+        {
+            // look for corresponding cable in command
+            auto cable = std::find_if(tension_command_.begin(),
+                                      tension_command_.end(),
+                                      [&](Tension &t){return t.name == msg->names[i];});
+            if(cable != tension_command_.end())
+            {
+                cable->force.x = msg->direction[i].x;
+                cable->force.y = msg->direction[i].y;
+                cable->force.z = msg->direction[i].z;
+                cable->force.Normalize();
+                cable->force *= std::max<double>(0, msg->tensions[i]);
+            }
+        }
     }
 
 private:
@@ -48,9 +84,12 @@ private:
     double f_max;
 
     // subscriber
-    ros::Subscriber joint_command_subscriber_;
+    bool sim_cables_;
+    ros::Subscriber command_subscriber_;
     sensor_msgs::JointState joint_command_;
-    bool joint_command_received_;
+    std::vector<Tension> tension_command_;
+    bool command_received_;
+
 
     // -- publishers ----------------------------------------
 

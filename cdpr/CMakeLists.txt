@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   sensor_msgs
   geometry_msgs
+  message_generation
 )
 
 find_package(VISP REQUIRED)
@@ -17,13 +18,23 @@ find_package(VISP REQUIRED)
 ## System dependencies are found with CMake's conventions
 find_package(gazebo REQUIRED)
 
+add_message_files(
+  FILES
+  Tensions.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
+)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
 catkin_package(
 INCLUDE_DIRS include ${VISP_INCLUDE_DIRS}
 LIBRARIES ${PROJECT_NAME}
-CATKIN_DEPENDS roscpp roslib gazebo_ros sensor_msgs geometry_msgs
+CATKIN_DEPENDS roscpp roslib gazebo_ros sensor_msgs geometry_msgs message_runtime
 DEPENDS ${VISP_LIBRARIES}
 )
 
@@ -44,3 +55,6 @@ target_link_libraries(cdpr_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 # CDPR class to interface with Gazebo
 add_library(cdpr src/cdpr.cpp include/cdpr/cdpr.h)
 target_link_libraries(cdpr ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+
+add_executable(param src/param.cpp)
+target_link_libraries(param ${catkin_LIBRARIES} ${VISP_LIBRARIES})
