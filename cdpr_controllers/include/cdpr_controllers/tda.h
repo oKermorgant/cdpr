@@ -7,6 +7,7 @@
 #include <std_msgs/Float32MultiArray.h>
 #include <ros/publisher.h>
 
+
 // this class implements all candidates for TDA's
 // this way we do not have the same code in all sources
 
@@ -18,7 +19,7 @@ public:
     // how we perform the TDA
     typedef enum
     {
-        minA, minW, minT, noMin,  closed_form, Barycenter, minG
+        minW, minT, noMin, closed_form, Barycenter, slack_v, adaptive_gains, cvxgen_slack, cvxgen_minT
     } minType;
 
    
@@ -32,34 +33,42 @@ public:
     vpColVector ComputeDistributionG(vpMatrix &W, vpColVector &ve, vpColVector &pe, vpColVector &w );
 
     // for minA
-    void GetAlpha(double &a)
+    void GetAlpha(vpColVector &a)
     {
-        if(control == minA )
-            a = x[n];
-    }
-    // for Barycentric algorithm
-    void GetVertices(double &a)
-    {
-        if(control == Barycenter )
-            a = vertices.size();
+        if(control == slack_v || control== cvxgen_slack)
+        {
+            a[0] = x[8]; a[1] = x[9]; a[2] = x[10]; 
+            a[3] = x[11]; a[4] = x[12]; a[5] = x[13];
+        }
     }
     void GetGains(vpColVector &a)
     {
-        if(control == minG)
-            a [0] = x[8]; 
+        if(control == adaptive_gains)
+       {
+            a[0] = x[8]; 
             a[1] = x[9];
+            a[2] = x[10]; 
+            a[3] = x[11];
+        }
     }
-
+    void Getresidual(vpColVector &a,vpColVector &e)
+    {
+        if(control == adaptive_gains)
+        {
+            a[0]=w_d[0];a[1]=w_d[1];a[2]=w_d[2];
+            e[0]=w_d[3];e[1]=w_d[4];e[2]=w_d[5];
+        }   
+    }
 
 
 protected:
     minType control;
-    int n;
+    int n,index, num_v,iter=0;
     double tauMin, tauMax;
 
     vpMatrix Q, A, C;
-    vpColVector r, b, d, x, wp;
-    vpSubColVector tau, alpha;
+    vpColVector r, b, d, x, w_d,wp;
+    vpSubColVector tau;
 
     bool update_d;
     double dTau_max, dAlpha,  _lambda;
@@ -67,19 +76,16 @@ protected:
     bool reset_active;
     std::vector<bool> active;
     std::vector<vpColVector> vertices;
-
-
+    
      // declaration of closed form
      vpColVector f_m, f_v, w_;
      
-
     // declaration of Barycenter
     double m;
     vpColVector  lambda, F, p;
-    vpMatrix kerW, H, ker;
+    vpMatrix kerW, H, ker, ker_inv;
     // publisher to barycenter plot
     ros::Publisher bary_pub;
-
 };
 
 #endif // TDA_H

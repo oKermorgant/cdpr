@@ -42,11 +42,12 @@ if __name__ == '__main__':
     
     listener = Listener()
     
-    
+    inter=0
     pl.ion()
     pl.close('all')
     
     F = pl.figure()
+    " the window of figure"
     ax = pl.gca()    
     
     while not rospy.is_shutdown():
@@ -56,24 +57,25 @@ if __name__ == '__main__':
             H = listener.H.copy()
             A = listener.A.copy()
             B = listener.B.copy()
+
             # get vertices
             vert = []
-            for i in xrange(8):
+            for i in xrange(7):
                     for j in xrange( i+1, 8): #xrange(8):
-                        if i != j:
-                            for u in [A[i],B[i]]:
-                                for v in [A[j],B[j]]:
-                                    # intersection of Ai = Hi.x and Bj = Hj.x
-                                    x = pl.dot(pl.inv(H[[i,j],:]), pl.array([u,v]))
-                                                                     
-                                    # check constraints: A <= H.x <= B
-                                    if pl.amin(pl.dot(H,x) - A) >= -1e-6 and pl.amax(pl.dot(H,x) - B) <= 1e-6:                                               
-                                        vert.append(x.reshape(2).copy())            
+                        #if i != j:
+                        for u in [A[i],B[i]]:
+                            for v in [A[j],B[j]]:
+                                # intersection of Ai = Hi.x and Bj = Hj.x
+                                x = pl.dot(pl.inv(H[[i,j],:]), pl.array([u,v]))
+                                # check constraints: A <= H.x <= B
+                                if pl.amin(pl.dot(H,x) - A) >= -1e-6 and pl.amax(pl.dot(H,x) - B) <= 1e-6:                                               
+                                    vert.append(x.reshape(2).copy()) 
+            print('the number of vertices', len(vert))
           
             # continue only if enough vertices
             if len(vert) > 2:
                 ax.clear()
-                                
+                inter=inter+1                
                 vert_uns = pl.array(vert + [vert[0]])
                 
                 xm,xM,ym,yM = pl.amin(vert_uns[:,0]),pl.amax(vert_uns[:,0]),pl.amin(vert_uns[:,1]),pl.amax(vert_uns[:,1])
@@ -129,5 +131,5 @@ if __name__ == '__main__':
                 pl.pause(.0001)
             else:
                 print('Only %i vertices compatible with constraints' % len(vert))
-    
-rospy.sleep(0.01)
+    print ('the time',inter)
+rospy.sleep(0.001)

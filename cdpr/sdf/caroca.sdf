@@ -318,9 +318,9 @@
       </collision>
       <inertial>
         <inertia>
-          <ixx>100.0</ixx>
-          <iyy>100.0</iyy>
-          <izz>100.0</izz>
+          <ixx>6.5</ixx>
+          <iyy>20.0</iyy>
+          <izz>22.5</izz>
           <ixy>0.0</ixy>
           <ixz>0.0</ixz>
           <iyz>0.0</iyz>

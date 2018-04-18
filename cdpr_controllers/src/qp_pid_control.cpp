@@ -10,7 +10,6 @@ using namespace std;
  *
  * Does not consider positive-only cable tensions and assumes it is more or less a UPS parallel robot
  *
- *
  */
 
 
@@ -37,7 +36,7 @@ int main(int argc, char ** argv)
     vpMatrix W(6, n);   // tau = W.u + g
     vpColVector g(6), tau(6), err, f, err_i(6), err0(6);
     g[2] = - robot.mass() * 9.81;
-    vpMatrix RR(6,6);
+    vpMatrix R_R(6,6);
 
     double dt = 0.01;
     ros::Rate loop(1/dt);
@@ -90,10 +89,10 @@ int main(int argc, char ** argv)
             cout << "Position error in platform frame: " << err.t() << fixed << endl;
             for(unsigned int i=0;i<3;++i)
                 for(unsigned int j=0;j<3;++j)
-                    RR[i][j] = RR[i+3][j+3] = R[i][j];
+                    R_R[i][j] = R_R[i+3][j+3] = R[i][j];
 
             // position error in fixed frame
-            err = RR * err;
+            err = R_R * err;
             // I term to wrench in fixed frame
             for(unsigned int i=0;i<6;++i)
                 if(tau[i] < robot.mass()*9.81)
@@ -105,7 +104,7 @@ int main(int argc, char ** argv)
             if(err0.infinityNorm())
                tau += Kp * Kd * (err - err0)/dt;
             err0 = err;
-            cout << "Desired wrench in platform frame: " << (RR.transpose()*(tau - g)).t() << fixed << endl;
+            cout << "Desired wrench in platform frame: " << (R_R.transpose()*(tau - g)).t() << fixed << endl;
 
             // build W matrix depending on current attach points
             robot.computeW(W);
@@ -113,7 +112,7 @@ int main(int argc, char ** argv)
             // solve with QP
             // min ||W.f + g - tau||
             // st fmin < f < fmax
-           solve_qp::solveQPi(W, RR.t()*(tau-g), C, d, f, active);
+           solve_qp::solveQPi(W, R_R.t()*(tau-g), C, d, f, active);
 
             //f = W.pseudoInverse() * RR.transpose()* (tau - g);
             cout << "Checking W.f+g in platform frame: " << (W*f).t() << fixed << endl;

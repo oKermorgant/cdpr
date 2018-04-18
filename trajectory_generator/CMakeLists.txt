@@ -42,11 +42,11 @@ include_directories(
 
 )
 
-add_executable( trajectory
- 	 	src/trajectory.cpp
-	 	include/trajectory_generator/trajectory.h	
+add_executable( straight_line
+ 	 	src/straight_line.cpp
+	 	include/trajectory_generator/straight_line.h	
 		)   
-target_link_libraries(trajectory ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+target_link_libraries(straight_line ${catkin_LIBRARIES} ${VISP_LIBRARIES})
 
 add_executable( s_curve
  	 	src/s_curve.cpp
@@ -54,4 +54,11 @@ add_executable( s_curve
 
 		)   
 target_link_libraries(s_curve ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+
+add_executable( spin_tra
+ 	 	src/spin_tra.cpp
+	 	include/trajectory_generator/spin_tra.h
+
+		)   
+target_link_libraries(spin_tra ${catkin_LIBRARIES} ${VISP_LIBRARIES})
 

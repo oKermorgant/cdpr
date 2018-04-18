@@ -129,15 +129,15 @@ void solveQP ( const vpMatrix &_Q, const vpColVector _r, vpMatrix _A, vpColVecto
                     if(P[i][j] < 1e-6)
                         P[i][j] = 0;
           //  cout << "P" << endl << P << endl;
-            x += P*(_Q*P).pseudoInverse() * (_r - _Q*x);            
-            
+            x += P*(_Q*P).pseudoInverse() * (_r - _Q*x);  
             // check for infeasible program
             if(_A.getRows() >= n && P.getMaxValue() - P.getMinValue() < 1e-6)
             {   // full rank constraints
                 vpColVector cons = _A * x - _b;
+                //cout<< "the difference in QP:"<<"    "<< cons << endl;
                 if(cons.getMaxValue() - cons.getMinValue() > 1e-6)
                 {
-                    cout << "QP seems infeasible\n";
+                    cout << "--------------------------------------------------QP seems infeasible----------------------------------------------------\n";
                     x.resize(0);
                     return;
                 }

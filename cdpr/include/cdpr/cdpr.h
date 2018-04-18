@@ -66,7 +66,6 @@ protected:
     unsigned int n_cable;
 
 
-    // callbacks
     // callback for platform state
     void PFState_cb(const gazebo_msgs::LinkStateConstPtr &_msg)
     {
