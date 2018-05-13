@@ -82,9 +82,9 @@ void CDPRPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
                 std::stringstream ss;
                 ss << "cable" << i;
                 t.name = ss.str();
-                t.point.x = elem.second[0];
-                t.point.y = elem.second[1];
-                t.point.z = elem.second[2];
+                t.point.X() = elem.second[0];
+                t.point.Y() = elem.second[1];
+                t.point.Z() = elem.second[2];
             }
             tension_command_.push_back(t);
         }

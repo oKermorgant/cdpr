@@ -16,8 +16,8 @@ class CDPRPlugin : public ModelPlugin
 {
     struct Tension
     {
-        gazebo::math::Vector3 force;
-        gazebo::math::Vector3 point;
+        ignition::math::Vector3d force;
+        ignition::math::Vector3d point;
         std::string name;
     };
 
@@ -61,9 +61,9 @@ private:
                                       [&](Tension &t){return t.name == msg->names[i];});
             if(cable != tension_command_.end())
             {
-                cable->force.x = msg->direction[i].x;
-                cable->force.y = msg->direction[i].y;
-                cable->force.z = msg->direction[i].z;
+                cable->force.X() = msg->direction[i].x;
+                cable->force.Y() = msg->direction[i].y;
+                cable->force.Z() = msg->direction[i].z;
                 cable->force.Normalize();
                 cable->force *= std::max<double>(0, msg->tensions[i]);
             }
