@@ -51,6 +51,7 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${VISP
 # small model plugin subscribes to joint efforts and applies them in Gazebo
 add_library(cdpr_plugin src/cdpr_plugin.cpp include/cdpr/cdpr_plugin.h)
 target_link_libraries(cdpr_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_dependencies(cdpr_plugin ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 # CDPR class to interface with Gazebo
 add_library(cdpr src/cdpr.cpp include/cdpr/cdpr.h)

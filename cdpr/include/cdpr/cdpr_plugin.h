@@ -7,7 +7,6 @@
 #include <sensor_msgs/JointState.h>
 #include <gazebo_msgs/LinkState.h>
 #include <cdpr/Tensions.h>
-#include <gazebo/math/Vector3.hh>
 
 namespace gazebo
 {
@@ -25,7 +24,6 @@ public:
     CDPRPlugin() {}
     ~CDPRPlugin()
     {
-        event::Events::DisconnectWorldUpdateBegin(this->update_event_);
         rosnode_.shutdown();
         //    delete rosnode_;
     }

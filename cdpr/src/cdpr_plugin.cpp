@@ -7,7 +7,6 @@
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/PhysicsEngine.hh>
-#include <gazebo/math/Pose.hh>
 #include <ros/node_handle.h>
 #include <cdpr/cdpr_plugin.h>
 
@@ -153,7 +152,11 @@ void CDPRPlugin::Update()
         }
         else
         {
+#if GAZEBO_MAJOR_VERSION < 9
             auto rot = platform_link_->GetWorldPose().rot;
+#else
+            auto rot = platform_link_->WorldPose().Rot();
+#endif
             //rot.Invert(); ?? to check
             for(const auto &t: tension_command_)
                 platform_link_->AddForceAtRelativePosition(rot*t.force, t.point);
@@ -169,7 +172,11 @@ void CDPRPlugin::Update()
 
         for(unsigned int i=0;i<joints_.size();++i)
         {
+#if GAZEBO_MAJOR_VERSION < 9
             joint_states_.position[i] = joints_[i]->GetAngle(0).Radian();
+#else
+            joint_states_.position[i] = joints_[i]->Position();
+#endif
             joint_states_.velocity[i] = joints_[i]->GetVelocity(0);
             joint_states_.effort[i] = joints_[i]->GetForce(0);
         }
@@ -195,7 +202,22 @@ void CDPRPlugin::Update()
     pf_state_.twist.angular.y = vel.y;
     pf_state_.twist.angular.z = vel.z;
 #else
-
+    auto pf_pose = platform_link_->WorldPose() - frame_link_->WorldPose();
+    pf_state_.pose.position.x = pf_pose.Pos().X();
+    pf_state_.pose.position.y = pf_pose.Pos().Y();
+    pf_state_.pose.position.z = pf_pose.Pos().Z();
+    pf_state_.pose.orientation.x = pf_pose.Rot().X();
+    pf_state_.pose.orientation.y = pf_pose.Rot().Y();
+    pf_state_.pose.orientation.z = pf_pose.Rot().Z();
+    pf_state_.pose.orientation.w = pf_pose.Rot().W();
+    auto vel = pf_pose.Rot().RotateVector(platform_link_->RelativeLinearVel());
+    pf_state_.twist.linear.x = vel.X();
+    pf_state_.twist.linear.y = vel.Y();
+    pf_state_.twist.linear.z = vel.Z();
+    vel = pf_pose.Rot().RotateVector(platform_link_->RelativeAngularVel());
+    pf_state_.twist.angular.x = vel.X();
+    pf_state_.twist.angular.y = vel.Y();
+    pf_state_.twist.angular.z = vel.Z();
 #endif
 
 
