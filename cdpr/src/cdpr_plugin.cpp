@@ -142,7 +142,9 @@ void CDPRPlugin::Update()
             for(unsigned int i=0;i<joint_command_.name.size();++i)
             {
                 // find corresponding model joint
-                idx = std::distance(joint_states_.name.begin(), std::find(joint_states_.name.begin(), joint_states_.name.end(), joint_command_.name[i]));
+                idx = 0;
+                while(joint_states_.name[idx] != joint_command_.name[i])
+                    idx++;
                 joint = joints_[idx];
                 // only apply positive tensions
                 if(joint_command_.effort[i] > 0)
@@ -156,7 +158,6 @@ void CDPRPlugin::Update()
             for(const auto &t: tension_command_)
                 platform_link_->AddForceAtRelativePosition(rot*t.force, t.point);
         }
-
     }
 
     // publish joint states
@@ -176,6 +177,7 @@ void CDPRPlugin::Update()
     }
 
     // publish pf state
+#if GAZEBO_MAJOR_VERSION < 9
     math::Pose pf_pose = platform_link_->GetWorldPose() - frame_link_->GetWorldPose();
     pf_state_.pose.position.x = pf_pose.pos.x;
     pf_state_.pose.position.y = pf_pose.pos.y;
@@ -192,6 +194,12 @@ void CDPRPlugin::Update()
     pf_state_.twist.angular.x = vel.x;
     pf_state_.twist.angular.y = vel.y;
     pf_state_.twist.angular.z = vel.z;
+#else
+
+#endif
+
+
+
     pf_publisher_.publish(pf_state_);
     ros::spinOnce();
 }
