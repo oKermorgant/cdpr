@@ -23,3 +23,8 @@ The SDF file is loaded by the launch file directly when using `roslaunch` comman
 
 The 5 orders polynomial is implemented to generate one trajectory with updating time 0.01. It is set the same initial pose with initialization of cdpr, and the desired position is [2,2,1].
 
+## References
+
+Please use the following reference when citing this work:
+
+[Franklin Okoli, Yuchuan Lang, Olivier Kermorgant, Stéphane Caro, "Cable-Driven Parallel Robot simulation using Gazebo and ROS", The 22nd CISM IFToMM Symposium on Robot Design, Dynamics and Control, Jun 2018, Rennes, France ](https://hal.archives-ouvertes.fr/hal-01757531v1)
