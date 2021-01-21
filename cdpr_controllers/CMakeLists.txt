@@ -11,9 +11,10 @@ add_definitions(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   cdpr
   roscpp
-  log2plot
 )
- 
+
+find_library(LOG2PLOT_LIBRARY log2plot REQUIRED)
+
 #set(CGAL_DIR /home/derek/External_library/CGAL-4.10) 
 #set(qpOASES_LIBRARY_DIRS /home/derek/ros_ws/src/cdpr/qpOASES/libs)
 #set(qpOASES_DIR /home/derek/ros_ws/src/cdpr/qpOASES)
@@ -38,7 +39,7 @@ catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES
   # packages that need to be present to build/run this package
-  CATKIN_DEPENDS cdpr roscpp log2plot
+  CATKIN_DEPENDS cdpr roscpp
   #DEPENDS system_lib
 )
 
@@ -70,19 +71,19 @@ add_library(${PROJECT_NAME}
 # PID controller to try CTD's (Olivier's code)
 add_executable(	pid_control 
     src/pid_control.cpp)
-target_link_libraries(pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES} ${PROJECT_NAME})
+target_link_libraries(pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES} ${LOG2PLOT_LIBRARY} ${PROJECT_NAME})
 
 # basic PID controller + QP for platform control to give an example
 add_executable(	qp_pid_control 
 	       	src/qp_pid_control.cpp 
 		include/cdpr_controllers/qp.h)
-target_link_libraries(qp_pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES})
+target_link_libraries(qp_pid_control ${catkin_LIBRARIES}  ${VISP_LIBRARIES} ${LOG2PLOT_LIBRARY} )
 
 # Feekback linearization controller(CTC) in Cartesian space for platform control to give an example
 add_executable( CTC
  	 	src/CTC.cpp
 	 	include/cdpr_controllers/qp.h
 		)   
-target_link_libraries( CTC ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${PROJECT_NAME})
+target_link_libraries( CTC ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${LOG2PLOT_LIBRARY} ${PROJECT_NAME})
 
  

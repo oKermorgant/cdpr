@@ -9,13 +9,13 @@ add_definitions(-std=c++11)
 
 
 find_package(catkin REQUIRED COMPONENTS
-  log2plot
   roscpp
   rospy
   std_msgs
   cdpr
-  
 )
+
+find_library(LOG2PLOT_LIBRARY log2plot REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -23,7 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES trajectory_generator
-  CATKIN_DEPENDS cdpr log2plot roscpp
+  CATKIN_DEPENDS cdpr roscpp
 #  DEPENDS system_lib
 )
 
@@ -46,19 +46,19 @@ add_executable( straight_line
  	 	src/straight_line.cpp
 	 	include/trajectory_generator/straight_line.h	
 		)   
-target_link_libraries(straight_line ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+target_link_libraries(straight_line ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${LOG2PLOT_LIBRARY})
 
 add_executable( s_curve
  	 	src/s_curve.cpp
 	 	include/trajectory_generator/s_curve.h
 
 		)   
-target_link_libraries(s_curve ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+target_link_libraries(s_curve ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${LOG2PLOT_LIBRARY})
 
 add_executable( spin_tra
  	 	src/spin_tra.cpp
 	 	include/trajectory_generator/spin_tra.h
 
 		)   
-target_link_libraries(spin_tra ${catkin_LIBRARIES} ${VISP_LIBRARIES})
+target_link_libraries(spin_tra ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${LOG2PLOT_LIBRARY})
 
