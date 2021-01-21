@@ -6,7 +6,7 @@
     <arg name="ctl" default="cvxgen_minT"/>
     <arg name="sty" default="Cartesian_space"/>
     <arg name="threshold" default="0.0"/>
-
+    <arg name="coefficient" default="1.0"/>
     
     <!-- Launch Gazebo with empty world-->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -15,7 +15,7 @@
     </include >
     
     <!-- spawn robot -->
-    <node name="robot_sp" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model $(arg model) -file $(find cdpr)/sdf/$(arg model).sdf -x 0 -y -0. -z 0 -R 0 -P 0 -Y 0.0"/>    
+    <node name="robot_sp" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-sdf -model $(arg model) -file $(find cdpr)/sdf/$(arg model).sdf -x 0 -y -0 -z 0 -R 0 -P 0 -Y 0.0"/>    
     
     <!-- load model description -->
     <rosparam file="$(find cdpr)/sdf/$(arg model).yaml" command="load" ns="model"/>
@@ -45,7 +45,7 @@
 
     <!-- generate staright line trajectory -->
 
-    <node pkg="trajectory_generator" type="trajectory" name="trajectory_generator" output="screen">
+    <node pkg="trajectory_generator" type="straight_line" name="trajectory_generator" output="screen">
     </node>
 
     <!-- generate  multiple points trajectory -->
