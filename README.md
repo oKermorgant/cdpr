@@ -24,19 +24,19 @@ _tested with ROS 1 noetic under Ubuntu 20.04_
 
 [Log2plot] (https://github.com/oKermorgant/log2plot) and [ViSP] (https://visp.inria.fr) should be installed for these packages to work.
 
-### building from source in a catkin workspace
+### Building from source in a catkin workspace
 
 ```
-$ mkdir catkin_ws
-$ cd catkin_ws
-$ git clone https://github.com/remipannequin/cdpr.git src
-$ source /opt/ros/noetic/setup.bash
-$ catkin_make
-$ source devel/setup.bash
+mkdir catkin_ws
+cd catkin_ws
+git clone https://github.com/remipannequin/cdpr.git src
+source /opt/ros/noetic/setup.bash
+catkin_make
+source devel/setup.bash
 ```
 
 
-### some works
+### Some works
 The improvement with using CTC control algorithm and trajectory generator
 
 The control algorithm is CTC which integrates the quadratic programming optimization method in order to get the feasible tension in cables.
