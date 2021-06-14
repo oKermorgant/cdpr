@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(trajectory_generator)
 
-add_definitions(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -31,6 +30,8 @@ find_package(VISP REQUIRED)
 ###########
 ## Build ##
 ###########
+
+set(CMAKE_CXX_STANDARD 14)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
