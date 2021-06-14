@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(cdpr_controllers)
-add_definitions(-std=c++11)
 
 #set(qpOASES_DIR /home/derek/ros_ws/src/cdpr/qpOASES)
 #find_package(qpoases REQUIRED )
@@ -29,6 +28,8 @@ find_package(VISP REQUIRED)
 # include helper file
 #include( ${CGAL_USE_FILE} )
 find_package( Boost REQUIRED )
+
+set(CMAKE_CXX_STANDARD 14)
 
 
 ###################################
